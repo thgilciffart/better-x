@@ -346,7 +346,7 @@
 
   function scan(request) {
     if (active !== request) return
-    if (request.menu && (!request.menu.isConnected || (request.last.isConnected && !visible(request.last)))) {
+    if (request.menu?.isConnected && request.last.isConnected && !visible(request.last)) {
       clear()
       return
     }
@@ -365,8 +365,9 @@
       const shown = items.filter(item => !item.hasAttribute(hidden))
       Object.assign(request, { menu, last: shown.length ? lastItem(shown) : menu })
       placeActions(menu, items, lastItem(items), request.addons)
-      break
+      return
     }
+    if (request.menu && !request.menu.isConnected) clear()
   }
 
   BetterX.downloadVideo = link => {
@@ -399,12 +400,11 @@
       ownMenu(request, event)
       return
     }
+    observer.observe(document, {
+      childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'hidden', 'class', 'aria-hidden', 'data-state'],
+    })
     setTimeout(() => {
-      if (active !== request || request.own) return
-      observer.observe(document, {
-        childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'hidden', 'class', 'aria-hidden', 'data-state'],
-      })
-      scan(request)
+      if (active === request && !request.menu) scan(request)
     }, 0)
   }, true)
 
