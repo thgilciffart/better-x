@@ -3,8 +3,10 @@
   const root = document.documentElement
   const counts = [['like', 'like', 'likes'], ['retweet', 'repost', 'reposts'], ['reply', 'reply', 'replies']]
   const groupSelector = 'article [role="group"]'
+  const mac = /^Mac/.test(navigator.platform)
   const searchButtons = new Map()
   let searchDialog
+  let nativeSearch
   let stylesheet
   let loadingStyle
   let pending
@@ -18,8 +20,50 @@
     }).join(' · ')
   }
 
-  function openSearch() {
+  function closeNativeSearch() {
+    if (!nativeSearch) return
+    const { form, opener, events } = nativeSearch
+    nativeSearch = undefined
+    events.abort()
+    const restoreFocus = form.contains(document.activeElement) || document.activeElement === document.body
+    form.removeAttribute('popover')
+    form.classList.remove('better-x-search', 'better-x-native-search')
+    if (restoreFocus) opener?.focus({ preventScroll: true })
+  }
+
+  function openNativeSearch(opener) {
+    const input = document.querySelector('input[data-testid="SearchBox_Search_Input"]')
+    const form = input?.form
+    if (!form || form.hasAttribute('popover')) return false
+
+    const events = new AbortController()
+    const { signal } = events
+    nativeSearch = { form, opener, events, url: location.href }
+    form.classList.add('better-x-search', 'better-x-native-search')
+    form.popover = 'auto'
+    form.addEventListener('toggle', event => {
+      if (event.newState === 'closed') closeNativeSearch()
+    }, { signal })
+    form.addEventListener('keydown', event => {
+      if (event.key !== 'Escape') return
+      event.preventDefault()
+      event.stopPropagation()
+      closeNativeSearch()
+    }, { capture: true, signal })
+    form.showPopover()
+    input.focus({ preventScroll: true })
+    if (document.activeElement === input) {
+      input.select()
+      return true
+    }
+    closeNativeSearch()
+    return false
+  }
+
+  function openSearch(opener) {
     if (root.dataset.betterXQuiet !== 'true' || document.querySelector('dialog[open], [aria-modal="true"]')) return false
+    if (nativeSearch) return false
+    if (openNativeSearch(opener)) return true
     if (!searchDialog) {
       searchDialog = document.createElement('dialog')
       searchDialog.className = 'better-x-search'
@@ -65,10 +109,9 @@
       button = document.createElement('button')
       button.type = 'button'
       button.className = 'better-x-search-trigger'
-      button.setAttribute('aria-haspopup', 'dialog')
-      button.setAttribute('aria-keyshortcuts', 'Control+/')
-      button.innerHTML = 'Search <kbd aria-hidden="true">Ctrl+/</kbd>'
-      button.addEventListener('click', openSearch)
+      button.setAttribute('aria-keyshortcuts', mac ? 'Meta+/' : 'Meta+/ Control+/')
+      button.innerHTML = 'Search <kbd aria-hidden="true">⌘/</kbd>'
+      button.addEventListener('click', () => openSearch(button))
       searchButtons.set(slot, button)
     }
     if (after && after.nextElementSibling !== button) after.after(button)
@@ -76,17 +119,19 @@
   }
 
   function searchShortcut(event) {
-    if (event.key !== '/' || !event.ctrlKey || event.altKey || event.metaKey || event.shiftKey ||
+    const modifier = event.metaKey ? !event.ctrlKey : !mac && event.ctrlKey
+    if (event.key !== '/' || !modifier || event.altKey || event.shiftKey ||
         event.isComposing || event.repeat || event.defaultPrevented) return
     if (event.composedPath().some(target => target instanceof Element &&
         (target.isContentEditable || target.matches('input, textarea, select, [role="textbox"]')))) return
-    if (!openSearch()) return
+    if (!openSearch(document.activeElement)) return
     event.preventDefault()
     event.stopPropagation()
   }
 
   function update() {
     frame = 0
+    if (nativeSearch && (!nativeSearch.form.isConnected || nativeSearch.url !== location.href)) closeNativeSearch()
     for (const group of pending || document.querySelectorAll(groupSelector)) {
       if (pending && (!root.contains(group) || !group.matches(groupSelector))) continue
       const text = summary(group)
@@ -163,6 +208,7 @@
     }
     window.removeEventListener('keydown', searchShortcut, true)
     for (const button of searchButtons.values()) button.remove()
+    closeNativeSearch()
     searchDialog?.close()
     observer.disconnect()
     pending = undefined
