@@ -3,6 +3,8 @@
   const root = document.documentElement
   const counts = [['like', 'like', 'likes'], ['retweet', 'repost', 'reposts'], ['reply', 'reply', 'replies']]
   const groupSelector = 'article [role="group"]'
+  let stylesheet
+  let loadingStyle
   let pending
   let frame = 0
 
@@ -51,7 +53,25 @@
     }
   })
 
+  async function syncStyle() {
+    if (settings.quiet && !stylesheet) {
+      loadingStyle ??= chrome.runtime.sendMessage({ type: 'quiet-style' }).then(css => {
+        if (!css) throw new Error('Quiet Mode stylesheet is unavailable')
+        stylesheet = new CSSStyleSheet()
+        stylesheet.replaceSync(css)
+      }).catch(console.error).finally(() => { loadingStyle = undefined })
+      await loadingStyle
+    }
+    if (!stylesheet) return
+    const active = document.adoptedStyleSheets.includes(stylesheet)
+    if (settings.quiet && !active) document.adoptedStyleSheets.push(stylesheet)
+    if (!settings.quiet && active) {
+      document.adoptedStyleSheets = document.adoptedStyleSheets.filter(sheet => sheet !== stylesheet)
+    }
+  }
+
   function sync() {
+    syncStyle()
     if (settings.quiet) {
       observer.observe(root, {
         childList: true, subtree: true, characterData: true,

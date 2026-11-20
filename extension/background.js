@@ -92,6 +92,10 @@ async function downloadMedia({ url, filename }) {
 
 chrome.runtime.onMessage.addListener((message, sender, reply) => {
   if (!xOrigins.has(sender.origin) || sender.frameId !== 0) return
+  if (message?.type === 'quiet-style') {
+    fetch(chrome.runtime.getURL('quiet.css')).then(response => response.text()).then(reply, () => reply(null))
+    return true
+  }
   if (message?.type === 'render-xeet') {
     renderWithXeet(message).then(reply, () => reply({ error: 'Xeet could not start. Reload Better X and try again.' }))
     return true
