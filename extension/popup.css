@@ -77,8 +77,6 @@ legend {
 
 .row + .row { border-top: 1px solid var(--edge); }
 
-.row:hover { color: #fff; }
-
 input[type="checkbox"] {
   appearance: none;
   display: grid;
