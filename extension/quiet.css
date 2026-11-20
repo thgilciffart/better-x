@@ -270,7 +270,10 @@ html[data-better-x-quiet="true"] {
     font: 400 var(--quiet-label)/1.4 var(--quiet-font);
     overscroll-behavior: contain;
 
-    &::backdrop { background: rgb(0 0 0 / 0.45); }
+    &::backdrop {
+      background: rgb(0 0 0 / 0.45);
+      backdrop-filter: blur(3px);
+    }
 
     &.better-x-native-search {
       padding: 0;
@@ -296,15 +299,30 @@ html[data-better-x-quiet="true"] {
         & :is(button, [role="button"]) svg { display: unset; }
 
         & [data-testid="clearButton"] {
+          position: relative;
           min-width: 28px;
           min-height: 28px;
+          padding: 0;
           border: 0;
           background: transparent;
           color: var(--quiet-soft) !important;
-          font: 400 18px/1 var(--quiet-font);
 
           & svg { display: none; }
-          &::after { content: "×"; }
+
+          &::before, &::after {
+            position: absolute;
+            inset: 50% auto auto 50%;
+            width: 10px;
+            height: 1px;
+            border-radius: 1px;
+            background: currentColor;
+            translate: -50% -50%;
+            pointer-events: none;
+            content: "";
+          }
+
+          &::before { rotate: 45deg; }
+          &::after { rotate: -45deg; }
           &:is(:hover, :focus-visible) { background: var(--quiet-hover) !important; }
         }
       }
