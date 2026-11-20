@@ -7,6 +7,7 @@
     quiet: 'data-better-x-quiet',
   }
   const origins = new Set(['https://x.com', 'https://twitter.com', 'https://www.x.com', 'https://www.twitter.com'])
+  const postSelector = 'article, [data-testid="quoteTweet"], div[role="link"]:has([data-testid="User-Name"])'
 
   function apply() {
     const root = document.documentElement
@@ -29,17 +30,16 @@
   }
 
   function postLink(container) {
-    const article = container?.closest('article') || container?.querySelector('article')
-    if (article) {
-      for (const time of article.querySelectorAll('a[href] time')) {
-        if (time.closest('article') !== article || time.closest('[role="link"]')) continue
-        const url = parsePostLink(time.closest('a').href)
-        if (url) return url
-      }
-      if (article.getAttribute('tabindex') === '-1') return parsePostLink(location.href)
-      return null
+    const post = container?.closest(postSelector) || container?.querySelector('article')
+    if (!post) return parsePostLink(location.href)
+
+    for (const time of post.querySelectorAll('a[href] time')) {
+      if (time.closest(postSelector) !== post) continue
+      const url = parsePostLink(time.closest('a').href)
+      if (url) return url
     }
-    return parsePostLink(location.href)
+    if (post.getAttribute('tabindex') === '-1' && post.matches('article')) return parsePostLink(location.href)
+    return null
   }
 
   let toast
@@ -58,7 +58,7 @@
     toastTimer = setTimeout(() => toast.remove(), 2600)
   }
 
-  globalThis.BetterX = { settings, notice, postLink }
+  globalThis.BetterX = { settings, notice, postLink, postSelector }
 
   if (document.documentElement) {
     apply()

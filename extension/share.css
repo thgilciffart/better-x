@@ -1,0 +1,18 @@
+.better-x-copy-image {
+  display: block;
+  width: 100%;
+  padding: 12px 16px 12px 46px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 650;
+  text-align: start;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.better-x-copy-image:hover,
+.better-x-copy-image:focus-visible {
+  background: color-mix(in srgb, currentColor 8%, transparent);
+}
