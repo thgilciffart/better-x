@@ -13,7 +13,9 @@
   }
 
   function clear() {
-    active?.image?.remove()
+    if (!active) return
+    observer.disconnect()
+    active.image?.remove()
     active = undefined
     clearTimeout(timer)
   }
@@ -134,6 +136,9 @@
     if (!link || (!settings.copyImage && !settings.downloads)) return
     const previous = new Set(Array.from(document.querySelectorAll(menuSelector)).filter(visible))
     active = { trigger, post, link, previous }
+    observer.observe(document, {
+      childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'hidden', 'aria-hidden', 'class'],
+    })
     timer = setTimeout(clear, 1800)
   }
 
@@ -171,8 +176,6 @@
     if (event.key === 'Escape') clear()
     if ((event.key === 'Enter' || event.key === ' ') && !runDownload(event)) handle(event)
   }, true)
-  new MutationObserver(findMenu).observe(document, {
-    childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'hidden', 'aria-hidden', 'class'],
-  })
+  const observer = new MutationObserver(findMenu)
   chrome.storage.onChanged.addListener(syncImage)
 })()
