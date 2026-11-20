@@ -43,18 +43,15 @@
         </label>
         <label class="row domain">
           <span>Link domain</span>
-          <select name="linkHost">
-            <option value="x.com">x.com</option>
-            <option value="vxtwitter.com">vxtwitter.com</option>
-            <option value="fxtwitter.com">fxtwitter.com</option>
-          </select>
+          <input name="linkHost" type="text" inputmode="url" autocomplete="off" autocapitalize="none"
+            spellcheck="false" aria-describedby="status">
         </label>
         <label class="row">
           <span>Copy posts as images</span>
           <input name="copyImage" type="checkbox" role="switch">
         </label>
         <label class="row">
-          <span>Right-click downloads</span>
+          <span>Direct downloads</span>
           <input name="downloads" type="checkbox" role="switch">
         </label>
       </fieldset>
@@ -65,6 +62,7 @@
           <input name="quiet" type="checkbox" role="switch">
         </label>
       </fieldset>
+      <p id="status" role="status" hidden></p>
     </div>
     <div class="panel" id="navigation" role="tabpanel" aria-labelledby="navigation-tab" hidden>
       <fieldset disabled id="navigation-items">
@@ -75,13 +73,6 @@
   <div class="panel" id="image-export" role="tabpanel" aria-labelledby="image-export-tab" hidden>
     <form id="image-export-form" aria-label="Image export settings">
       <fieldset disabled>
-        <label class="row">Preset
-          <select id="image-preset">
-            <option value="" disabled>Custom settings</option>
-            <optgroup label="Presets" id="image-presets"></optgroup>
-            <optgroup label="Saved Variants" id="image-variants"></optgroup>
-          </select>
-        </label>
         <label class="row">Layout
           <select name="surface">
             <option value="web-timeline">Web Timeline</option>
@@ -102,6 +93,7 @@
         </label>
         <label class="row">Theme
           <select name="theme">
+            <option value="auto">Auto</option>
             <option value="light">Light</option>
             <option value="dark">Dark</option>
           </select>
@@ -118,14 +110,9 @@
         <label class="row">Auto-expand “Show more”
           <input type="checkbox" name="autoExpand" role="switch">
         </label>
-        <div class="image-variant-actions">
-          <button type="button" id="save-image-variant">Save Variant</button>
-          <button type="button" id="remove-image-variant" hidden>Remove Variant</button>
-        </div>
       </fieldset>
       <p class="image-export-status" role="status" hidden></p>
     </form>
   </div>
-  <p id="status" role="status" hidden></p>
 </body>
 </html>

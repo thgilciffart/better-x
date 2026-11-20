@@ -1,6 +1,6 @@
 const form = document.querySelector('form')
 const statusMessage = document.querySelector('#status')
-const { load, navigation } = BetterXSettings
+const { linkDomain, load, navigation } = BetterXSettings
 const saving = new Set()
 let saved
 
@@ -70,13 +70,20 @@ hydrate().then(() => {
 
 form.addEventListener('change', async ({ target }) => {
   const { name } = target
-  const value = target.type === 'checkbox' ? target.checked : target.value
+  const value = name === 'linkHost' ? linkDomain(target.value) : target.checked
+  if (value === null) {
+    target.setAttribute('aria-invalid', 'true')
+    report('Enter a domain like vxtwitter.com.')
+    return
+  }
+  target.removeAttribute('aria-invalid')
   saving.add(name)
   target.disabled = true
   updateLinkDomain()
   try {
     await chrome.storage.local.set({ [name]: value })
     saved[name] = value
+    setValue(target, value)
     report('')
   } catch {
     setValue(target, saved[name])
@@ -86,4 +93,9 @@ form.addEventListener('change', async ({ target }) => {
     target.disabled = false
     updateLinkDomain()
   }
+})
+
+form.addEventListener('submit', event => {
+  event.preventDefault()
+  form.elements.linkHost.blur()
 })

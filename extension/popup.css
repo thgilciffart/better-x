@@ -1,6 +1,7 @@
 :root {
   color-scheme: dark;
-  font: 13px/1.4 system-ui, sans-serif;
+  font: 15px/1.45 system-ui, sans-serif;
+  text-transform: lowercase;
   color: #ddd;
   background: #0c0c0c;
   --edge: #252525;
@@ -10,15 +11,16 @@
 * { box-sizing: border-box; }
 
 body {
-  width: 314px;
+  width: 358px;
   margin: 0;
   padding: 16px 18px 14px;
+  font: inherit;
 }
 
 h1 {
   margin: 0 0 10px;
   color: #f1f1f1;
-  font-size: 16px;
+  font-size: 19px;
   font-weight: 620;
 }
 
@@ -36,6 +38,7 @@ h1 {
   background: none;
   color: var(--muted);
   font: inherit;
+  text-transform: inherit;
   cursor: pointer;
 }
 
@@ -60,12 +63,12 @@ legend {
   margin-bottom: 1px;
   padding: 0;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .row {
   display: flex;
-  min-height: 34px;
+  min-height: 40px;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
@@ -109,16 +112,70 @@ input[type="checkbox"]:checked::before {
   background: #e0e0e0;
 }
 
-select {
-  width: 118px;
-  padding: 3px 5px;
-  border: 1px solid #464646;
-  border-radius: 4px;
-  background: #181818;
+select,
+input[type="text"],
+input[type="number"] {
+  min-height: 32px;
+  padding: 4px 9px;
+  border: 1px solid #383838;
+  border-radius: 8px;
+  background: #191919;
   color: inherit;
   font: inherit;
-  font-size: 12px;
 }
+
+select {
+  appearance: none;
+  width: 160px;
+  padding-inline-end: 27px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='m3 5 4 4 4-4' fill='none' stroke='%23b9b9b9' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-position: right 8px center;
+  background-repeat: no-repeat;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+@supports (appearance: base-select) {
+  select, ::picker(select) { appearance: base-select; }
+
+  select {
+    padding-inline-end: 9px;
+    background-image: none;
+  }
+
+  select::picker-icon {
+    align-self: center;
+    width: 7px;
+    height: 7px;
+    margin: -3px 1px 0 0;
+    border: solid #b9b9b9;
+    border-width: 0 1.5px 1.5px 0;
+    rotate: 45deg;
+    content: "";
+  }
+
+  ::picker(select) {
+    margin-top: 4px;
+    padding: 4px;
+    border: 1px solid #383838;
+    border-radius: 10px;
+    background: #191919;
+    color: #ededed;
+  }
+
+  option {
+    min-height: 34px;
+    padding: 5px 8px;
+    border-radius: 6px;
+    text-transform: lowercase;
+  }
+
+  option:is(:hover, :focus, :checked) { background: #303030; }
+}
+
+input[type="text"] { width: 160px; }
+input[type="number"] { width: 80px; }
+input[aria-invalid="true"] { border-color: #f39b83; }
 
 .domain:has(:disabled) { color: var(--muted); }
 
@@ -140,54 +197,21 @@ select {
 #status {
   margin: 10px 0 0;
   color: #ffc3af;
-  font-size: 12px;
-}
-
-#image-export select { width: 140px; }
-
-#image-export #image-preset { width: 174px; }
-
-#image-export input[type="number"] {
-  width: 68px;
-  padding: 3px 5px;
-  border: 1px solid #464646;
-  border-radius: 4px;
-  background: #181818;
-  color: inherit;
-  font: inherit;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .font-scale {
   display: flex;
   align-items: center;
   gap: 7px;
-  font-size: 12px;
+  font-size: 13px;
   font-variant-numeric: tabular-nums;
 }
 
 .font-scale input { width: 96px; accent-color: #bbb; }
 
-.image-variant-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.image-variant-actions button {
-  padding: 5px 8px;
-  border: 1px solid #464646;
-  border-radius: 4px;
-  background: #181818;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-}
-
-.image-variant-actions button:hover:enabled { background: #252525; }
-
 .image-export-status {
   margin: 8px 0 0;
   color: #ffc3af;
-  font-size: 12px;
+  font-size: 13px;
 }
