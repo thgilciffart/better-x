@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "minimum_chrome_version": "120",
-  "name": "Better X",
+  "name": "better 𝕏",
   "version": "0.1.0",
-  "description": "Privacy, sharing, and appearance controls for X.",
+  "description": "Privacy, sharing, and appearance controls for 𝕏.",
   "permissions": [
     "storage",
     "fontSettings",
@@ -20,7 +20,7 @@
     "128": "icons/128.png"
   },
   "action": {
-    "default_title": "Better X",
+    "default_title": "better 𝕏",
     "default_popup": "popup.html"
   },
   "content_scripts": [

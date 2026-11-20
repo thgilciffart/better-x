@@ -42,7 +42,7 @@
 
   async function render(post, options) {
     const loaded = await (engine ??= load())
-    if (!loaded) return { error: 'Xeet could not start. Reload Better X and try again.' }
+    if (!loaded) return { error: 'Xeet could not start. Reload better 𝕏 and try again.' }
     const { xeet, fonts } = loaded
     if (!await fonts.ensure({ post, options }).then(() => true, () => false)) {
       return { error: 'Could not download the fonts for this image. Check your connection and try again.' }

@@ -111,7 +111,7 @@ chrome.runtime.onMessage.addListener((message, sender, reply) => {
     return true
   }
   if (message?.type === 'render-xeet') {
-    renderWithXeet(message).then(reply, () => reply({ error: 'Xeet could not start. Reload Better X and try again.' }))
+    renderWithXeet(message).then(reply, () => reply({ error: 'Xeet could not start. Reload better 𝕏 and try again.' }))
     return true
   }
   if (message?.type !== 'download') return

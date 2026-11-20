@@ -105,7 +105,7 @@
       root.setAttribute('data-better-x-emoji-ready', '')
       observer.observe(root, { childList: true, subtree: true, attributeFilter: ['alt', 'src'] })
     } catch {
-      if (request === revision) BetterX.notice('Could not load the emoji font. Refresh X to try again.')
+      if (request === revision) BetterX.notice('Could not load the emoji font. Refresh 𝕏 to try again.')
     }
   }
 

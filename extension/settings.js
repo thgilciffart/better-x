@@ -6,7 +6,7 @@
   const ranges = { quietWidth: [480, 1000], quietSize: [12, 20], quietUiSize: [11, 18] }
   const themes = new Set(['x', 'dark', 'light'])
   const emojiFonts = {
-    '': 'X default',
+    '': '𝕏 default',
     apple: 'Apple Color Emoji',
     noto: 'Noto Color Emoji',
     segoe: 'Segoe UI Emoji',
