@@ -77,6 +77,56 @@ legend {
 
 .row + .row { border-top: 1px solid var(--edge); }
 
+.emoji-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px 8px;
+}
+
+.text-button {
+  min-height: 28px;
+  padding: 3px 8px;
+  border: 1px solid #454545;
+  border-radius: 6px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+.text-button:not(:disabled):hover { background: #202020; }
+.text-button:disabled { cursor: default; }
+
+#about h2 {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+#about .row { min-height: 33px; cursor: default; }
+#about .about-details, #emoji-downloads { margin: 0; padding: 0; }
+.about-details dd { margin: 0; }
+.about-details a { color: inherit; text-underline-offset: 3px; }
+#emoji-downloads { list-style: none; }
+#emoji-downloads .row { justify-content: flex-start; }
+
+.font-download-meta {
+  margin-inline-start: auto;
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+#about dd[id^="storage-"], .font-download-meta:not([data-downloaded]) { text-transform: none; }
+.font-download:not([hidden]) { display: grid; place-items: center; }
+.font-download { min-width: 30px; padding: 3px; }
+.font-download svg { width: 16px; height: 16px; }
+
 input[type="checkbox"] {
   appearance: none;
   display: grid;
@@ -317,6 +367,7 @@ input[aria-invalid="true"] { border-bottom-color: #f39b83; }
   clip-path: inset(50%);
 }
 
+.font-status,
 #emoji-status,
 #status {
   margin: 10px 0 0;

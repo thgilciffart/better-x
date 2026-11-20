@@ -23,6 +23,9 @@ chrome.storage.onChanged.addListener((changes, area) => {
 
 const xOrigins = new Set(['https://x.com', 'https://twitter.com'])
 const photoMenuId = 'better-x-download-photo'
+const xeetFontCache = 'better-x-xeet-fonts'
+const emoji = BetterXEmojiFonts
+let fontChanges = Promise.resolve()
 
 chrome.runtime.onInstalled.addListener(async () => {
   const { downloads } = await chrome.storage.local.get('downloads')
@@ -90,19 +93,60 @@ async function downloadMedia({ url, filename }) {
   await chrome.downloads.download({ url: media.href, filename, conflictAction: 'uniquify' })
 }
 
+async function imageFontBytes() {
+  const cache = await caches.open(xeetFontCache)
+  const responses = await cache.matchAll()
+  const sizes = await Promise.all(responses.map(async response => {
+    const size = response.headers.get('content-length')
+    return size === null ? (await response.blob()).size : Number(size)
+  }))
+  return sizes.reduce((total, size) => total + size, 0)
+}
+
+const fontActions = {
+  'emoji-library': async () => {},
+  'emoji-download': async font => {
+    if (!font) throw new Error('Choose an emoji font to download.')
+    await emoji.download(font)
+  },
+  'emoji-select': async font => {
+    if (font && !await emoji.cached(font)) throw new Error('Download this font in About first.')
+    await chrome.storage.local.set({ emojiFont: font })
+  },
+  'fonts-clear': async () => {
+    await chrome.storage.local.remove('emojiFont')
+    await Promise.all([caches.delete(emoji.cacheName), caches.delete(xeetFontCache)])
+  },
+}
+
+async function fontState(includeStorage) {
+  const [fonts, { emojiFont }] = await Promise.all([emoji.list(), chrome.storage.local.get('emojiFont')])
+  const state = { fonts, selected: fonts[emojiFont]?.downloaded ? emojiFont : '' }
+  if (includeStorage) {
+    const [settings, imageFonts] = await Promise.all([chrome.storage.local.getBytesInUse(null), imageFontBytes()])
+    state.storage = { settings, imageFonts }
+  }
+  return state
+}
+
 chrome.runtime.onMessage.addListener((message, sender, reply) => {
-  if (message?.type === 'emoji-select' && sender.url === chrome.runtime.getURL('popup.html')) {
-    const font = normalize('emojiFont', message.font)
-    Promise.resolve(font && BetterXEmojiFonts.load(font))
-      .then(() => chrome.storage.local.set({ emojiFont: font }))
-      .then(() => reply({ ok: true }), error => reply({ error: error.message }))
+  if (sender.url === chrome.runtime.getURL('popup.html') && Object.hasOwn(fontActions, message?.type)) {
+    const operation = fontChanges.then(async () => {
+      await fontActions[message.type](normalize('emojiFont', message.font))
+      return fontState(message.storage === true)
+    })
+    fontChanges = operation.catch(() => {})
+    operation.then(reply, error => reply({ error: error.message }))
     return true
   }
   if (!xOrigins.has(sender.origin) || sender.frameId !== 0) return
   if (message?.type === 'emoji-font') {
     const font = normalize('emojiFont', message.font)
     if (!font) return
-    BetterXEmojiFonts.load(font).then(bytes => reply({ font: BetterXEmojiFonts.encode(bytes) }))
+    emoji.cached(font).then(async response => {
+      if (!response) return reply({ font: null })
+      reply({ font: emoji.encode(new Uint8Array(await response.arrayBuffer())) })
+    })
       .catch(error => reply({ error: error.message }))
     return true
   }

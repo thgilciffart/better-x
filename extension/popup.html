@@ -8,6 +8,7 @@
   <script src="settings.js" defer></script>
   <script src="popup.js" defer></script>
   <script src="popup-image.js" defer></script>
+  <script src="popup-fonts.js" defer></script>
 </head>
 <body>
   <header>
@@ -17,6 +18,7 @@
     <button type="button" role="tab" id="settings-tab" aria-controls="settings" aria-selected="true">Settings</button>
     <button type="button" role="tab" id="navigation-tab" aria-controls="navigation" aria-selected="false" tabindex="-1">Navigation</button>
     <button type="button" role="tab" id="image-export-tab" aria-controls="image-export" aria-selected="false" tabindex="-1">Image Export</button>
+    <button type="button" role="tab" id="about-tab" aria-controls="about" aria-selected="false" tabindex="-1">About</button>
   </div>
   <form aria-label="better 𝕏 settings">
     <div class="panel" id="settings" role="tabpanel" aria-labelledby="settings-tab">
@@ -94,10 +96,13 @@
             aria-expanded="false" aria-controls="quiet-fonts" placeholder="𝕏 default" autocomplete="off" spellcheck="false">
           <div class="picker" id="quiet-fonts" role="listbox" hidden></div>
         </div>
-        <label class="row">
-          <span>Emoji font</span>
-          <select name="emojiFont" aria-describedby="emoji-status"></select>
-        </label>
+        <div class="row">
+          <label for="emoji-font">Emoji font</label>
+          <div class="emoji-controls">
+            <select id="emoji-font" name="emojiFont" aria-describedby="emoji-status" disabled></select>
+            <button type="button" class="text-button" id="manage-fonts">Manage Fonts</button>
+          </div>
+        </div>
         <p id="emoji-status" role="status" hidden></p>
       </fieldset>
       <p id="status" role="status" hidden></p>
@@ -146,5 +151,36 @@
       <p class="image-export-status" role="status" hidden></p>
     </form>
   </div>
+  <div class="panel" id="about" role="tabpanel" aria-labelledby="about-tab" hidden>
+    <dl class="about-details">
+      <div class="row"><dt>Version</dt><dd id="about-version"></dd></div>
+      <div class="row"><dt>Author</dt><dd id="about-author"></dd></div>
+      <div class="row"><dt>Source</dt><dd><a id="about-repo" target="_blank" rel="noopener noreferrer">GitHub Repository</a></dd></div>
+    </dl>
+    <section aria-labelledby="storage-title">
+      <h2 id="storage-title">Storage</h2>
+      <dl class="about-details">
+        <div class="row"><dt>Total Stored Data</dt><dd id="storage-total">Loading</dd></div>
+        <div class="row"><dt>Emoji Fonts</dt><dd id="storage-emoji">Loading</dd></div>
+        <div class="row"><dt>Image Export Fonts</dt><dd id="storage-image">Loading</dd></div>
+      </dl>
+      <button type="button" class="text-button" id="clear-fonts" disabled>Clear Font Caches</button>
+      <p class="font-status" id="font-storage-status" role="status" hidden></p>
+    </section>
+    <section aria-labelledby="emoji-library-title">
+      <h2 id="emoji-library-title">Emoji Downloads</h2>
+      <p class="font-status" id="font-library-status" role="status" hidden></p>
+      <ul id="emoji-downloads"></ul>
+    </section>
+  </div>
+  <template id="emoji-download-row">
+    <li class="row">
+      <span class="font-name"></span>
+      <span class="font-download-meta"></span>
+      <button type="button" class="text-button font-download" disabled>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download preview-icon" aria-hidden="true"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></svg>
+      </button>
+    </li>
+  </template>
 </body>
 </html>

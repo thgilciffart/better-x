@@ -53,7 +53,7 @@ These settings work with Quiet Mode on or off. Reset a field to let 𝕏 choose 
 - **UI font size (px)** sets the size of navigation, tabs, labels, and menus.
 - **Text font size (px)** sets the size of post text and names.
 - **Font** accepts any installed font. Leave it empty to use 𝕏's font.
-- **Emoji font** changes the artwork for emoji images on 𝕏. The first selection downloads and verifies the font, then caches it. Downloads range from about 1 MB to 27 MB. **𝕏 default** restores 𝕏's original emoji.
+- **Emoji font** changes the artwork for emoji images on 𝕏. Open **Manage Fonts** to download individual fonts, then select a downloaded font in Appearance. **𝕏 default** restores 𝕏's original emoji.
 
 ### Navigation
 
@@ -62,6 +62,10 @@ These settings work with Quiet Mode on or off. Reset a field to let 𝕏 choose 
 ### Image Export
 
 **Image Export** sets the layout, width, pixel density, and theme of **Copy as image**. The **Auto** theme follows the 𝕏 page. **Expanded Text** uses the full post text. **Auto-expand "Show more"** uses the full text for posts that show a **Show more** link.
+
+### About
+
+**About** shows the version, source repository, and storage used by settings and downloaded fonts. **Clear Font Caches** removes downloaded emoji and image export fonts and resets the emoji font to **𝕏 default**. Image export downloads the packs it needs on demand.
 
 ## Limits
 

@@ -17,7 +17,9 @@
     const response = await fetch(address)
     if (!response.ok) throw new Error('Xeet font pack is unavailable: ' + name)
     const bytes = new Uint8Array(await response.arrayBuffer())
-    if (await sha256Hex(bytes) === manifest.packs[name]?.sha256) await cache.put(address, new Response(bytes))
+    if (await sha256Hex(bytes) === manifest.packs[name]?.sha256) {
+      await cache.put(address, new Response(bytes, { headers: { 'Content-Length': String(bytes.length) } }))
+    }
     return bytes
   }
 

@@ -92,7 +92,8 @@
     try {
       const result = await chrome.runtime.sendMessage({ type: 'emoji-font', font })
       if (request !== revision) return
-      if (!result?.font) throw new Error(result?.error)
+      if (!result || result.error) throw new Error(result?.error)
+      if (!result.font) return
       const loaded = await new FontFace('BetterXEmoji', decode(result.font)).load()
       if (request !== revision) return
       face = loaded
