@@ -22,13 +22,18 @@
 
   const combobox = ':is(input[data-testid="SearchBox_Search_Input"], input[role="combobox"])'
   function hideEmptyTypeaheads() {
-    for (const dd of document.querySelectorAll('[id^="typeahead"], [data-testid*="typeahead" i]')) {
+    const overlayInput = nativeSearch?.form.querySelector(combobox)
+    for (const dd of document.querySelectorAll('[id^="typeahead"], [data-testid*="typeahead" i], [role="listbox"]')) {
       if (dd.matches('input, form, [role="combobox"]') || dd.querySelector(combobox)) continue
       const owner = (dd.id && document.querySelector(
         `[aria-owns~="${CSS.escape(dd.id)}"], [aria-controls~="${CSS.escape(dd.id)}"]`))
         || dd.closest('form')?.querySelector(combobox)
-      dd.toggleAttribute('data-better-x-hide', owner instanceof HTMLInputElement
-        ? !owner.value.trim() : !dd.querySelector('[role="option"]'))
+        || null
+      let hide
+      if (owner) hide = owner === overlayInput ? !overlayInput.value.trim() : true
+      else if (!dd.matches('[role="listbox"]') || dd.closest('form[role="search"]')) hide = true
+      else continue
+      dd.toggleAttribute('data-better-x-hide', hide)
     }
   }
 

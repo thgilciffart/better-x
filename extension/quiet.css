@@ -425,6 +425,12 @@ html[data-better-x-quiet="true"] {
 
   & [data-better-x-hide] { display: none !important; }
 
+  & form[role="search"]:not(.better-x-native-search) :is(div, input) {
+    border-color: var(--quiet-edge) !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+
   & :is([id^="typeaheadDropdown"], [data-testid="typeaheadDropdownWrapper"]) {
     border: 1px solid var(--quiet-edge) !important;
     border-radius: 8px !important;
