@@ -1,171 +1,389 @@
 html[data-better-x-quiet="true"] {
-  color-scheme: dark;
-  --better-x-quiet-bg: #0b0b0c;
-  --better-x-quiet-fg: #e6e5e3;
-  --better-x-quiet-muted: #a2a1a1;
-  --better-x-quiet-line: #252526;
-  background: var(--better-x-quiet-bg) !important;
-}
+  --quiet-bg: #000;
+  --quiet-menu: #0b0b0b;
+  --quiet-fg: #e7e7e7;
+  --quiet-soft: #a0a0a0;
+  --quiet-muted: #777;
+  --quiet-faint: #4a4a4a;
+  --quiet-line: #1c1c1c;
+  --quiet-edge: #2a2a2a;
+  --quiet-hover: #141414;
+  --quiet-like: #e5675f;
+  --quiet-shadow: rgb(0 0 0 / 0.5);
+  --quiet-font: TwitterChirp, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--quiet-bg);
 
-html[data-better-x-quiet="true"] :is(body, #react-root, main[role="main"], [data-testid="primaryColumn"]) {
-  background: var(--better-x-quiet-bg) !important;
-  color: var(--better-x-quiet-fg) !important;
-}
-
-html[data-better-x-quiet="true"] :is([data-testid="sidebarColumn"], [data-testid="GrokDrawer"], [data-testid="DMDrawer"]) {
-  display: none !important;
-}
-
-html[data-better-x-quiet="true"] [data-testid="primaryColumn"] {
-  border-inline-color: transparent !important;
-}
-
-html[data-better-x-quiet="true"] [data-testid="cellInnerDiv"] {
-  border-color: var(--better-x-quiet-line) !important;
-}
-
-html[data-better-x-quiet="true"] [data-testid="tweetText"],
-html[data-better-x-quiet="true"] [data-testid="tweetText"] :is(span, a),
-html[data-better-x-quiet="true"] [data-testid="User-Name"] :is(a, span) {
-  color: var(--better-x-quiet-fg) !important;
-}
-
-html[data-better-x-quiet="true"] :is(time, [data-testid="socialContext"]) {
-  color: var(--better-x-quiet-muted) !important;
-}
-
-html[data-better-x-quiet="true"] [data-testid="tweetText"] {
-  line-height: 1.5 !important;
-}
-
-html[data-better-x-quiet="true"] :is([data-testid="tweetPhoto"], [data-testid="videoPlayer"], [data-testid="card.wrapper"]) {
-  border-color: var(--better-x-quiet-line) !important;
-  border-radius: 9px !important;
-}
-
-html[data-better-x-quiet="true"] article[data-testid="tweet"] :is(
-  [data-testid="caret"],
-  [role="group"] :is(button, [role="button"], a)
-) {
-  color: var(--better-x-quiet-muted) !important;
-}
-
-@media (hover: hover) {
-  html[data-better-x-quiet="true"] article[data-testid="tweet"]:not(:hover, :focus-within) [role="group"] {
-    opacity: 0.52;
-  }
-}
-
-@media (min-width: 1024px) {
-  html[data-better-x-quiet="true"] #react-root div:has(> header[role="banner"]):has(> main[role="main"]) {
-    max-width: 960px !important;
-    margin-inline: auto !important;
-    justify-content: center !important;
+  &[data-theme="light"] {
+    --quiet-bg: #fff;
+    --quiet-menu: #fff;
+    --quiet-fg: #0f1419;
+    --quiet-soft: #536471;
+    --quiet-muted: #66727c;
+    --quiet-faint: #aab4bc;
+    --quiet-line: #edf0f2;
+    --quiet-edge: #dfe4e8;
+    --quiet-hover: #f3f5f6;
+    --quiet-like: #d9443b;
+    --quiet-shadow: rgb(15 20 25 / 0.12);
   }
 
-  html[data-better-x-quiet="true"] header[role="banner"] {
-    flex: 0 0 180px !important;
-    min-width: 0 !important;
+  & :is(body, #react-root, main[role="main"], header[role="banner"]) {
+    background-color: var(--quiet-bg) !important;
   }
 
-  html[data-better-x-quiet="true"] header[role="banner"] > div,
-  html[data-better-x-quiet="true"] header[role="banner"] > div > div {
-    width: 180px !important;
-  }
-
-  html[data-better-x-quiet="true"] header[role="banner"] nav :is(a, [role="button"], button):has([dir="ltr"]) {
-    min-height: 28px !important;
-    height: auto !important;
-    padding-block: 0 !important;
-  }
-
-  html[data-better-x-quiet="true"] header[role="banner"] nav :is(a, [role="button"], button):has([dir="ltr"]) svg {
+  & :is(
+    [data-testid="sidebarColumn"],
+    [data-testid="GrokDrawer"],
+    [data-testid="chat-drawer-root"],
+    [data-testid="DMDrawer"],
+    [data-testid="SideNav_AccountSwitcher_Button"],
+    article [aria-label="Grok actions"]
+  ) {
     display: none !important;
   }
 
-  html[data-better-x-quiet="true"] header[role="banner"] nav :is(a, [role="button"], button):hover {
-    color: var(--better-x-quiet-fg) !important;
+  & header[role="banner"] nav {
+    & :is(a, button):has(> div > [dir]) { padding-block: 0; }
+
+    & :is(a, button) > div:has(> [dir]) {
+      width: 184px;
+      max-width: 100%;
+      box-sizing: border-box;
+      padding: 5px 12px;
+      border-radius: 6px;
+
+      & > div:first-child {
+        order: 1;
+        margin-inline-start: auto;
+
+        & > svg { display: none; }
+      }
+
+      & > [dir] {
+        margin: 0;
+        color: var(--quiet-soft) !important;
+        font-size: 14px;
+        line-height: 18px;
+        text-transform: lowercase;
+      }
+    }
+
+    & :is(a, button) > div { background-color: transparent !important; }
+    & :is(a, button):is(:hover, :focus-visible) > div { background-color: var(--quiet-hover) !important; }
+    & :is(a, button):hover > div > [dir] { color: var(--quiet-fg) !important; }
+    & :is(a, button) > div > div:first-child > div:empty { display: none; }
   }
 
-  html[data-better-x-quiet="true"] header[role="banner"] nav :is(a, [role="button"], button) [dir="ltr"] {
-    margin: 0 !important;
-    color: var(--better-x-quiet-muted) !important;
-    font-size: 14px !important;
-    font-weight: 450 !important;
+  & main[role="main"] { anchor-name: --quiet-main; }
+
+  & header[role="banner"]:has(nav):not(:has(nav :is(a, button) > div > [dir])) {
+    & > div > div {
+      container-type: inline-size;
+
+      @supports (right: anchor(left)) {
+        left: max(0px, calc(anchor(--quiet-main left) - 192px));
+        right: anchor(--quiet-main left);
+        width: auto;
+      }
+    }
+
+    & > div > div :is(div:has(nav), div:has(> [data-testid="SideNav_NewTweet_Button"]), nav) { width: auto; padding-inline-end: 0; align-items: stretch; }
+    & > div > div div:has(> h1) { align-self: flex-start; }
+    & :is(nav :is(a, button), [data-testid="SideNav_NewTweet_Button"]) { padding: 5px 6px; font: 400 clamp(10px, 11.5cqi, 14px)/18px var(--quiet-font); }
+  }
+
+  & :is(header[role="banner"]:has(nav):not(:has(nav :is(a, button) > div > [dir])), [data-testid="BottomBar"]) nav :is(a, button) {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5em;
+    border-radius: 6px;
+    color: var(--quiet-soft);
     text-transform: lowercase;
+
+    &::before {
+      content: attr(aria-label);
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    & > div { flex: none; margin: 0; padding: 0; }
+    & > div, & > div > div { width: auto; min-width: 0; height: auto; }
+    & svg, & > div > div > div:empty { display: none; }
+    & [aria-live] { font-size: inherit !important; }
+    &:is(:hover, :focus-visible) { background-color: var(--quiet-hover); color: var(--quiet-fg); }
+    &[data-testid="AppTabBar_Home_Link"]::before { content: "home"; }
+    &[data-testid="AppTabBar_Explore_Link"]::before { content: "explore"; }
+    &[data-testid="AppTabBar_Notifications_Link"]::before { content: "notifications"; }
+    &:is([data-testid="AppTabBar_DirectMessage_Link"], [data-testid="AppTabBar_Chat_Link"])::before { content: "chat"; }
+    &:is([data-testid="AppTabBar_Grok_Link"], [href="/i/grok"])::before { content: "grok"; }
+    &[data-testid="AppTabBar_More_Menu"]::before { content: "more"; }
   }
 
-  html[data-better-x-quiet="true"] header[role="banner"] nav [aria-current="page"] [dir="ltr"],
-  html[data-better-x-quiet="true"] header[role="banner"] nav :hover > [dir="ltr"] {
-    color: var(--better-x-quiet-fg) !important;
+  & [data-testid="BottomBar"] nav :is(a, button) {
+    flex: 1 1 auto;
+    justify-content: center;
+    padding-inline: 4px;
+    font: 400 13px/18px var(--quiet-font);
   }
 
-  html[data-better-x-quiet="true"] [data-testid="SideNav_NewTweet_Button"] {
-    width: fit-content !important;
-    min-width: 0 !important;
-    min-height: 28px !important;
-    padding: 0 10px !important;
-    border: 1px solid var(--better-x-quiet-line) !important;
-    border-radius: 6px !important;
+  & header[role="banner"] [data-testid="SideNav_NewTweet_Button"] {
+    width: 184px;
+    max-width: 100%;
+    box-sizing: border-box;
+    height: auto;
+    min-height: 0;
+    padding: 5px 12px;
+    flex-direction: row;
+    justify-content: space-between;
+    border: 0;
+    border-radius: 6px;
     background: transparent !important;
-    color: var(--better-x-quiet-fg) !important;
+    box-shadow: none;
+    color: var(--quiet-soft);
+    font: 400 14px/18px var(--quiet-font);
+
+    & > div { display: none; }
+    &::before { content: "post"; }
+    &::after { content: "n"; color: var(--quiet-faint); }
+    &:is(:hover, :focus-visible) { background: var(--quiet-hover) !important; color: var(--quiet-fg); }
   }
 
-  html[data-better-x-quiet="true"] [data-testid="SideNav_NewTweet_Button"] span {
-    color: inherit !important;
-    font-size: 14px !important;
+  & :is(header[role="banner"] nav, [data-testid="BottomBar"]) :is(a, button) [aria-live] {
+    position: static;
+    min-width: 0;
+    height: auto;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--quiet-fg) !important;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 18px;
+  }
+
+  & [data-testid="primaryColumn"] {
+    border-color: transparent !important;
+
+    & [data-testid="cellInnerDiv"] > div { border-color: var(--quiet-line); }
+    & article div[role="link"]:has([data-testid="User-Name"]) { border-color: var(--quiet-edge); }
+
+    & h2[role="heading"] > span {
+      color: var(--quiet-soft);
+      font-size: 15px;
+      font-weight: 400;
+      text-transform: lowercase;
+    }
+  }
+
+  & [role="tablist"]:has(> [role="presentation"] > [role="tab"]) {
+    gap: 24px;
+    padding-inline: 16px;
+
+    & > [role="presentation"] { flex: none; }
+  }
+
+  & [role="tab"] {
+    & > div { padding-inline: 0; }
+    & [dir] { color: var(--quiet-muted) !important; font-size: 14px; font-weight: 400; text-transform: lowercase; }
+    &[aria-selected="true"] [dir] { color: var(--quiet-fg) !important; }
+    &:hover [dir] { color: var(--quiet-soft) !important; }
+    & svg { width: 0; margin: 0; visibility: hidden; }
+    & [dir] div:empty { display: none; }
+  }
+
+  & .public-DraftEditorPlaceholder-inner {
+    color: var(--quiet-muted);
+    text-transform: lowercase;
+
+    &::before { content: "> "; }
+  }
+
+  & :is([data-testid="tweetButtonInline"], [data-testid="tweetButton"]) {
+    min-height: 0;
+    padding-inline: 4px;
+    border: 0;
+    background: transparent !important;
+    box-shadow: none;
+
+    & span { color: var(--quiet-fg) !important; font-size: 14px; font-weight: 400; text-transform: lowercase; }
+    &[aria-disabled="true"] span { color: var(--quiet-faint) !important; }
+  }
+
+  & :is([data-testid$="-follow"], [data-testid$="-unfollow"], [data-testid="editProfileButton"], div:has(> [data-testid="userActions"]) button) {
+    min-height: 32px;
+    border: 1px solid var(--quiet-edge) !important;
+    border-radius: 6px;
+    background: transparent !important;
+
+    & :is([dir], span) { color: var(--quiet-fg) !important; font-size: 14px; font-weight: 500; text-transform: lowercase; }
+    &:hover { background: var(--quiet-hover) !important; }
+  }
+
+  & [data-testid="UserProfileHeader_Items"] svg { display: none; }
+
+  & :is([data-testid="UserJoinDate"], a:is([href$="/following"], [href$="/followers"], [href$="/verified_followers"])) {
     text-transform: lowercase;
   }
-}
 
-html[data-better-x-quiet="true"] {
-  article[data-testid="tweet"] [role="group"] {
-    & :is(button, [role="button"])[data-testid]:has(svg) {
-      min-width: 0 !important;
+  & article {
+    & :is(time, [data-testid="tweet-text-show-more-link"], a[href$="/analytics"], [data-testid="socialContext"]:not(a *)) {
+      text-transform: lowercase;
     }
 
-    & :is([data-testid="reply"], [data-testid="retweet"], [data-testid="unretweet"],
-          [data-testid="like"], [data-testid="unlike"], [data-testid="bookmark"],
-          [data-testid="removeBookmark"], [aria-label*="Share" i])::after {
-      margin-inline: 4px;
-      font-size: 12px;
+    & div:has(+ div [data-testid="socialContext"]) svg { display: none; }
+
+    & [role="group"] {
+      gap: 18px;
+      font-family: var(--quiet-font);
+      max-width: none;
+      justify-content: flex-start;
+
+      & > div { flex: none; }
+
+      & :is(button, a) {
+        min-height: 0;
+        padding: 0;
+
+        & > [dir] {
+          color: var(--quiet-muted) !important;
+          font-size: 13px;
+          line-height: 18px;
+
+          & > div:first-child { display: none; }
+          & > div:has(> [data-testid="app-text-transition-container"]) { padding-inline-start: 5px; }
+          & [data-testid="app-text-transition-container"] { font-size: 13px; }
+        }
+
+        &:is(:hover, :focus-visible) > [dir] { color: var(--quiet-fg) !important; }
+      }
+
+      & [data-testid="reply"] > div::before { content: "reply"; }
+      & [data-testid="retweet"] > div::before { content: "repost"; }
+      & [data-testid="unretweet"] > div::before { content: "reposted"; }
+      & [data-testid="like"] > div::before { content: "like"; }
+      & [data-testid="bookmark"] > div::before { content: "keep"; }
+      & [data-testid="removeBookmark"] > div::before { content: "kept"; }
+      & > div:last-child [aria-haspopup="menu"] > div::before { content: "share"; }
+      & :is([data-testid="unlike"], [data-testid="unretweet"], [data-testid="removeBookmark"]) > div { color: var(--quiet-fg) !important; }
     }
 
-    & [data-testid="reply"]::after { content: "reply"; }
-    & [data-testid="retweet"]::after { content: "repost"; }
-    & [data-testid="unretweet"]::after { content: "reposted"; }
-    & [data-testid="like"]::after { content: "like"; }
-    & [data-testid="unlike"]::after { content: "liked"; }
-    & [data-testid="bookmark"]::after { content: "keep"; }
-    & [data-testid="removeBookmark"]::after { content: "kept"; }
-    & [aria-label*="Share" i]::after { content: "share"; }
+    & [data-testid="unlike"] > div::before,
+    &:not([tabindex="-1"]) [role="group"]:has([data-testid="unlike"])::before {
+      content: "liked";
+      padding-inline-start: 10px;
+      background: radial-gradient(circle 2.5px at 2.5px 50%, var(--quiet-like) 95%, transparent) no-repeat;
+    }
+
+    &:not([tabindex="-1"]) [role="group"] {
+      justify-content: flex-end;
+      font-size: 13px;
+      line-height: 18px;
+
+      &::after {
+        content: attr(data-better-x-summary);
+        order: -1;
+        margin-inline-end: auto;
+        overflow: hidden;
+        color: var(--quiet-muted);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      &:has([data-testid="unlike"])::before {
+        order: -2;
+        margin-inline-end: 10px;
+        color: var(--quiet-fg);
+      }
+
+      & > div:has(> a[href$="/analytics"]),
+      & div:has(> [data-testid="app-text-transition-container"]) {
+        display: none;
+      }
+    }
+
+    &[tabindex="-1"] div:has(> div > [role="group"]) {
+      display: flex;
+      flex-flow: row wrap;
+      align-items: center;
+      column-gap: 24px;
+      border-color: transparent;
+
+      & [role="group"] { padding: 0; border-color: transparent; }
+      & > div:has(> [role="group"]) { flex: 1 1 auto; }
+
+      & > div:last-child:not(:has([role="group"])) {
+        flex: none;
+        margin: 0;
+        flex-direction: row;
+        align-items: center;
+        gap: 14px;
+
+        & :is(span, [dir]) { color: var(--quiet-muted) !important; font-size: 13px; font-weight: 400; text-transform: lowercase; }
+        & :is(button, a):hover :is(span, [dir]) { color: var(--quiet-fg) !important; }
+        & a svg { display: none; }
+        & button::before { content: "sort"; margin-inline-end: 6px; color: var(--quiet-muted); font: 13px var(--quiet-font); }
+      }
+    }
   }
 
-  .better-x-quiet-counts { display: none; }
-
-  @media (hover: hover) and (min-width: 768px) {
-    article[data-testid="tweet"] {
-      & :is([data-testid="reply"], [data-testid="retweet"], [data-testid="unretweet"],
-            [data-testid="like"], [data-testid="unlike"], [data-testid="bookmark"],
-            [data-testid="removeBookmark"], [aria-label*="Share" i]) svg {
-        display: none !important;
-      }
-
-      &:not(:hover, :focus-within) [role="group"]:has(> .better-x-quiet-counts) {
-        position: relative;
-        opacity: 1;
-
-        & > :not(.better-x-quiet-counts) { opacity: 0; }
-
-        & > .better-x-quiet-counts {
-          position: absolute;
-          display: block;
-          inset-inline-start: 0;
-          color: var(--better-x-quiet-muted);
-          font-size: 12px;
-          pointer-events: none;
-        }
-      }
+  @media (hover: hover) {
+    & article:not(:hover, :focus-within) [data-testid="caret"],
+    & article:not([tabindex="-1"]):not(:hover, :focus-within) [role="group"] > div {
+      opacity: 0;
     }
+  }
+
+  & :is([role="menu"], [data-slot="xds-menu-popup"], [data-slot$="context-menu-content"]) {
+    border: 1px solid var(--quiet-edge);
+    border-radius: 8px;
+    background-color: var(--quiet-menu) !important;
+    box-shadow: 0 8px 24px var(--quiet-shadow);
+
+    & :is([role="menuitem"], a[role="link"]) {
+      min-height: 0;
+      padding-block: 8px;
+    }
+
+    & :is([role="menuitem"], a[role="link"]) > div:has(> [dir]) { min-height: 0; padding-block: 0; }
+
+    & :is(span, [dir], .better-x-copy-image, .better-x-media-action) {
+      color: var(--quiet-soft) !important;
+      font-size: 14px !important;
+      font-weight: 400 !important;
+      line-height: 18px !important;
+      text-transform: lowercase;
+    }
+
+    & :is(.better-x-copy-image, .better-x-media-action) {
+      min-height: 0 !important;
+      padding-block: 8px;
+    }
+
+    & :is([role="menuitem"], a[role="link"], .better-x-media-action):is(:hover, :focus-visible) {
+      background-color: var(--quiet-hover) !important;
+
+      & :is(span, [dir]) { color: var(--quiet-fg) !important; }
+    }
+
+    & :is(.better-x-copy-image, .better-x-media-action):is(:hover, :focus-visible) { color: var(--quiet-fg) !important; }
+
+    & [data-better-x-handle] :is(span, [dir]) { text-transform: none; }
+    & [data-better-x-handle] [dir]::first-letter { text-transform: lowercase; }
+
+    & svg, & [role="menuitem"] > div:first-child:has(> svg) { display: none; }
+
+    & [role="menuitem"] > div:not(:first-child):has(svg)::after {
+      content: "•";
+      color: var(--quiet-fg);
+    }
+
+    & [role="menuitem"][aria-haspopup] > div:not(:first-child):has(svg)::after {
+      content: "›";
+      color: var(--quiet-muted);
+    }
+
+    & [role="separator"] { border-color: var(--quiet-line); background-color: var(--quiet-line); }
   }
 }
