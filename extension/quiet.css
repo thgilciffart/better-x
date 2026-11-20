@@ -911,11 +911,12 @@ html[data-better-x-quiet="true"] {
 
       & > div:first-child:not([role]) { padding-inline: 10px; }
 
-      & > [role="menuitem"] {
+      & :is([role="menuitem"], [role="menuitemradio"]) {
         align-items: center;
         justify-content: space-between;
         gap: 8px;
-        padding-inline: 10px;
+        min-height: 0;
+        padding: 8px 10px;
 
         & > div:not(:first-child):last-child { display: none; }
 
@@ -927,7 +928,7 @@ html[data-better-x-quiet="true"] {
           content: "";
         }
 
-        &:not([aria-haspopup]):has(> div:not(:first-child) svg) {
+        &:is([aria-checked="true"], :not([aria-checked], [aria-haspopup]):has(> div:not(:first-child) svg)) {
           &::after { background: var(--quiet-accent); }
           & [dir] { text-decoration: none; }
         }

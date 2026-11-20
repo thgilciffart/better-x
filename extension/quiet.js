@@ -208,11 +208,21 @@
     }
   }
 
+  function isReplySortMenu(menu, firstItem) {
+    for (let row = firstItem; row && row !== menu; row = row.parentElement) {
+      for (let heading = row.previousElementSibling; heading; heading = heading.previousElementSibling) {
+        if (/^sort\s+replies$/i.test(heading.textContent.trim())) return true
+      }
+    }
+    return false
+  }
+
   function styleMenus() {
     for (const menu of menus || document.querySelectorAll(menuSelector)) {
       if (!root.contains(menu)) continue
-      menu.toggleAttribute('data-better-x-reply-sort', /^sort replies$/i.test(menu.firstElementChild?.textContent.trim()))
-      for (const item of menu.querySelectorAll('[role="menuitem"], a[role="link"]')) {
+      const items = menu.querySelectorAll('[role="menuitem"], [role="menuitemradio"], a[role="link"]')
+      menu.toggleAttribute('data-better-x-reply-sort', isReplySortMenu(menu, items[0]))
+      for (const item of items) {
         item.toggleAttribute('data-better-x-handle', item.textContent.includes('@'))
       }
       markMatches(menu, menuHeadingSelector, 'data-better-x-menu-heading')
