@@ -166,12 +166,12 @@
   }
 
   async function renderImage(post, link) {
-    const { surface, width, dpr, theme, fontScale, expanded, autoExpand } = settings.imageExport
+    const { surface, width, dpr, theme, expanded, autoExpand } = settings.imageExport
     const shouldExpand = expanded || (autoExpand && Boolean(ownElements(post, showMore).length))
     const [, handle] = link.pathname.split('/')
     const id = link.pathname.split('/').at(-1)
     const input = await xeetInput(post, id, handle, shouldExpand)
-    const options = { surface, width, dpr, theme: theme === 'auto' ? pageTheme(post) : theme, fontScale, expanded: shouldExpand }
+    const options = { surface, width, dpr, theme: theme === 'auto' ? pageTheme(post) : theme, expanded: shouldExpand }
     const result = await chrome.runtime.sendMessage({ type: 'render-xeet', post: input, options })
     if (!result?.png) throw new Error(result?.error || 'Xeet could not render this post.')
     return new Blob([Uint8Array.from(atob(result.png), character => character.charCodeAt(0))], { type: 'image/png' })

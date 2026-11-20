@@ -1,6 +1,6 @@
 (() => {
   const imageDefaults = {
-    surface: 'ios-timeline', width: 430, dpr: 3, theme: 'auto', fontScale: 1, expanded: false,
+    surface: 'ios-timeline', width: 430, dpr: 3, theme: 'auto', expanded: false,
   }
   const surfaces = new Set(['web-timeline', 'web-detail', 'ios-timeline', 'ios-detail'])
   const navigation = {
@@ -38,7 +38,6 @@
       width: Number.isInteger(value?.width) && value.width >= 280 && value.width <= 1200 ? value.width : imageDefaults.width,
       dpr: [1, 2, 3].includes(value?.dpr) ? value.dpr : imageDefaults.dpr,
       theme: ['light', 'dark'].includes(value?.theme) ? value.theme : imageDefaults.theme,
-      fontScale: Number.isFinite(value?.fontScale) && value.fontScale >= .8 && value.fontScale <= 1.3 ? value.fontScale : 1,
       expanded: value?.expanded === true,
       autoExpand: value?.autoExpand !== false,
     }

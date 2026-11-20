@@ -1,7 +1,6 @@
 (() => {
   const { normalize } = BetterXSettings
   const form = document.querySelector('#image-export-form')
-  const scale = form.querySelector('#font-scale')
   const status = form.querySelector('[role="status"]')
   const controls = [...form.querySelectorAll('[name]')]
   let current
@@ -18,7 +17,6 @@
       if (control.type === 'checkbox') control.checked = current[control.name]
       else control.value = current[control.name]
     }
-    scale.value = current.fontScale.toFixed(2) + '×'
   }
 
   function save(update) {
@@ -48,13 +46,10 @@
       return
     }
     const value = target.type === 'checkbox' ? target.checked :
-      ['width', 'fontScale', 'dpr'].includes(target.name) ? Number(target.value) : target.value
+      ['width', 'dpr'].includes(target.name) ? Number(target.value) : target.value
     save({ [target.name]: value })
   })
 
-  form.elements.fontScale.addEventListener('input', ({ target }) => {
-    scale.value = Number(target.value).toFixed(2) + '×'
-  })
   chrome.storage.local.get('imageExport').then(({ imageExport }) => {
     current = saved = normalize('imageExport', imageExport)
     render()

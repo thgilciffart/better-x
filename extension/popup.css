@@ -115,21 +115,33 @@ input[type="checkbox"]:checked::before {
 select,
 input[type="text"],
 input[type="number"] {
-  min-height: 32px;
-  padding: 4px 9px;
-  border: 1px solid #383838;
-  border-radius: 8px;
-  background: #191919;
-  color: inherit;
+  min-height: 29px;
+  padding: 3px 6px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background-color: transparent;
+  color: #f2f2f2;
   font: inherit;
+}
+
+select:hover,
+input[type="text"]:hover,
+input[type="number"]:hover {
+  background-color: #1b1b1b;
+}
+
+input[type="text"],
+input[type="number"] {
+  border-bottom-color: #4a4a4a;
+  text-align: end;
 }
 
 select {
   appearance: none;
-  width: 160px;
-  padding-inline-end: 27px;
+  width: max-content;
+  padding-inline-end: 22px;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='m3 5 4 4 4-4' fill='none' stroke='%23b9b9b9' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-position: right 8px center;
+  background-position: right 4px center;
   background-repeat: no-repeat;
   text-transform: inherit;
   cursor: pointer;
@@ -139,7 +151,9 @@ select {
   select, ::picker(select) { appearance: base-select; }
 
   select {
-    padding-inline-end: 9px;
+    field-sizing: content;
+    column-gap: 9px;
+    padding-inline-end: 8px;
     background-image: none;
   }
 
@@ -155,6 +169,7 @@ select {
   }
 
   ::picker(select) {
+    min-width: max-content;
     margin-top: 4px;
     padding: 4px;
     border: 1px solid #383838;
@@ -173,9 +188,9 @@ select {
   option:is(:hover, :focus, :checked) { background: #303030; }
 }
 
-input[type="text"] { width: 160px; }
-input[type="number"] { width: 80px; }
-input[aria-invalid="true"] { border-color: #f39b83; }
+input[type="text"] { width: 166px; }
+input[type="number"] { width: 6ch; }
+input[aria-invalid="true"] { border-bottom-color: #f39b83; }
 
 .domain:has(:disabled) { color: var(--muted); }
 
@@ -199,16 +214,6 @@ input[aria-invalid="true"] { border-color: #f39b83; }
   color: #ffc3af;
   font-size: 13px;
 }
-
-.font-scale {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 13px;
-  font-variant-numeric: tabular-nums;
-}
-
-.font-scale input { width: 96px; accent-color: #bbb; }
 
 .image-export-status {
   margin: 8px 0 0;
