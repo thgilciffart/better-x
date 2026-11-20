@@ -698,7 +698,7 @@ html[data-better-x-quiet="true"] {
     &[aria-disabled="true"] span { color: var(--quiet-faint) !important; }
   }
 
-  & :is([data-testid$="-follow"], [data-testid$="-unfollow"], [data-testid="editProfileButton"], div:has(> [data-testid="userActions"]) button) {
+  & :is([data-testid$="-follow"], [data-testid$="-unfollow"], [data-testid="editProfileButton"], div[data-better-x-profile-actions] button) {
     min-height: 32px;
     border: 1px solid var(--quiet-edge) !important;
     border-radius: 6px;
@@ -733,7 +733,7 @@ html[data-better-x-quiet="true"] {
 
     & :is([data-testid="tweetText"] a, [data-testid="tweet-text-show-more-link"]) { color: var(--quiet-accent) !important; }
 
-    & div:has(+ div [data-testid="socialContext"]) svg { display: none; }
+    & div[data-better-x-social-icon] svg { display: none; }
 
     & [role="group"] {
       gap: 18px;
@@ -898,7 +898,7 @@ html[data-better-x-quiet="true"] {
 
     & [role="separator"] { border-color: var(--quiet-line); background-color: var(--quiet-line); }
 
-    & div:has(> [role="menuitem"]) > div:not([role]):has(> [dir]) {
+    & div > div[data-better-x-menu-heading]:not([role]) {
       padding: 10px 16px 4px;
       border: 0;
 

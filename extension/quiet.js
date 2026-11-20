@@ -4,9 +4,14 @@
   const counts = [['like', 'like', 'likes'], ['retweet', 'repost', 'reposts'], ['reply', 'reply', 'replies']]
   const groupSelector = 'article [role="group"]'
   const navigationSelector = 'header[role="banner"], [data-testid="BottomBar"]'
-  const menuSelector = '[role="menu"]'
+  const menuSelector = '[role="menu"], [data-slot="xds-menu-popup"], [data-slot$="context-menu-content"]'
+  const menuHeadingSelector = `:is(${menuSelector}) div:has(> [role="menuitem"]) > div:not([role]):has(> [dir])`
   const modalSelector = 'dialog[open], [aria-modal="true"], [data-testid="confirmationSheetDialog"]'
-  const observedSelector = `${groupSelector}, ${navigationSelector}, ${menuSelector}`
+  const userActions = '[data-testid="userActions"]'
+  const profileActions = 'data-better-x-profile-actions'
+  const socialIcon = 'data-better-x-social-icon'
+  const socialIconSelector = 'article div:has(+ div [data-testid="socialContext"])'
+  const observedSelector = `article, ${groupSelector}, ${navigationSelector}, ${menuSelector}, ${userActions}, [${profileActions}]`
   const searchButtons = new Map()
   let searchDialog
   let nativeSearch
@@ -17,6 +22,7 @@
   let navigationChanged = true
   let currentPath
   let frame = 0
+  const hasElements = nodes => Array.prototype.some.call(nodes, node => node.nodeType === Node.ELEMENT_NODE)
 
   function summary(group) {
     return counts.flatMap(([id, one, many]) => {
@@ -188,6 +194,20 @@
     event.stopPropagation()
   }
 
+  function markMatches(scope, selector, attribute) {
+    const matches = new Set(scope.querySelectorAll(selector))
+    for (const item of scope.querySelectorAll(`[${attribute}]`)) {
+      if (!matches.delete(item)) item.removeAttribute(attribute)
+    }
+    for (const item of matches) item.setAttribute(attribute, '')
+  }
+
+  function styleProfileActions(parent) {
+    if (parent?.tagName === 'DIV') {
+      parent.toggleAttribute(profileActions, Boolean(parent.querySelector(`:scope > ${userActions}`)))
+    }
+  }
+
   function styleMenus() {
     for (const menu of menus || document.querySelectorAll(menuSelector)) {
       if (!root.contains(menu)) continue
@@ -195,6 +215,7 @@
       for (const item of menu.querySelectorAll('[role="menuitem"], a[role="link"]')) {
         item.toggleAttribute('data-better-x-handle', item.textContent.includes('@'))
       }
+      markMatches(menu, menuHeadingSelector, 'data-better-x-menu-heading')
     }
   }
 
@@ -225,10 +246,13 @@
     mountSearch('compact', document.querySelector('[data-testid="BottomBar"] nav'))
   }
 
-  function track(node) {
+  function track(node, articles) {
+    if (node.matches('article')) articles.add(node)
     if (node.matches(groupSelector)) pending.add(node)
     if (node.matches(menuSelector)) menus.add(node)
     if (node.matches(navigationSelector)) navigationChanged = true
+    if (node.matches(userActions)) styleProfileActions(node.parentElement)
+    if (node.hasAttribute(profileActions)) styleProfileActions(node)
   }
 
   function queueUpdate() {
@@ -252,6 +276,7 @@
   const observer = new MutationObserver(records => {
     if (nativeSearch && records.some(opensModal)) closeNativeSearch()
     if (!pending) return
+    const articles = new Set()
     for (const record of records) {
       const target = record.target
       const element = target.nodeType === 1 ? target : target.parentElement
@@ -263,11 +288,27 @@
         pending.add(group)
         group = group.parentElement?.closest(groupSelector)
       }
+      if (record.attributeName === 'data-testid' &&
+          (element.matches(userActions) || element.parentElement?.hasAttribute(profileActions))) {
+        styleProfileActions(element.parentElement)
+      }
+      if (record.type === 'childList' && element?.hasAttribute(profileActions)) styleProfileActions(element)
+
+      const structureChanged = record.attributeName === 'data-testid' ||
+        hasElements(record.addedNodes) || hasElements(record.removedNodes)
+      if (structureChanged) {
+        for (let article = element?.closest('article'); article; article = article.parentElement?.closest('article')) {
+          articles.add(article)
+        }
+      }
       for (const node of record.addedNodes) {
         if (node.nodeType !== 1) continue
-        track(node)
-        for (const child of node.querySelectorAll(observedSelector)) track(child)
+        track(node, articles)
+        for (const child of node.querySelectorAll(observedSelector)) track(child, articles)
       }
+    }
+    for (const article of articles) {
+      if (article.isConnected) markMatches(article, socialIconSelector, socialIcon)
     }
     if (menus.size) {
       styleMenus()
@@ -304,13 +345,15 @@
   function sync() {
     syncStyle()
     if (settings.quiet) {
+      markMatches(root, `div:has(> ${userActions})`, profileActions)
+      markMatches(root, socialIconSelector, socialIcon)
       window.addEventListener('keydown', handleSearchKey, true)
       window.addEventListener('focusin', watchSearchResults, true)
       watchSearchResults({ target: document.activeElement })
       window.navigation?.addEventListener('currententrychange', queueUpdate)
       observer.observe(root, {
         childList: true, subtree: true, characterData: true,
-        attributeFilter: ['role', 'data-testid', 'aria-modal', 'open'],
+        attributeFilter: ['role', 'data-testid', 'dir', 'data-slot', 'aria-modal', 'open'],
       })
       queueUpdate()
       return
