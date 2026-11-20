@@ -37,11 +37,3 @@
 .better-x-copy-image[data-copied="true"] .better-x-clipboard {
   color: #1d9bf0;
 }
-
-.better-x-copy-status {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-}

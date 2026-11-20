@@ -17,14 +17,28 @@
     clearTimeout(timer)
   }
 
-  function closeMenu(menu) {
+  function closeMenu(menu, copy) {
     const event = new KeyboardEvent('keydown', {
       key: 'Escape', code: 'Escape', keyCode: 27, bubbles: true,
     })
-    menu.dispatchEvent(event)
-    queueMicrotask(() => {
-      if (menu.isConnected) menu.closest('#layers')?.querySelector('[data-testid="mask"]')?.click()
-    })
+    if (!menu.contains(document.activeElement)) copy.focus({ preventScroll: true })
+    const target = menu.contains(document.activeElement) ? document.activeElement : menu
+    target.dispatchEvent(event)
+  }
+
+  function placeLast() {
+    const native = [...active.menu.querySelectorAll('[role="menuitem"]')]
+      .filter(item => item !== active.image && visible(item))
+    if (!native.length) return
+    const last = native.reduce((bottom, item) =>
+      item.getBoundingClientRect().bottom >= bottom.getBoundingClientRect().bottom ? item : bottom)
+    let row = last
+    while (row.parentElement !== active.menu && !native.some(item => item !== last && row.parentElement.contains(item))) {
+      row = row.parentElement
+    }
+    const reverse = getComputedStyle(row.parentElement).flexDirection === 'column-reverse'
+    if (reverse && row.previousElementSibling !== active.image) row.before(active.image)
+    if (!reverse && row.nextElementSibling !== active.image) row.after(active.image)
   }
 
   function syncImage() {
@@ -33,7 +47,10 @@
       active.image?.remove()
       return
     }
-    if (active.image?.isConnected) return
+    if (active.image) {
+      placeLast()
+      return
+    }
     const image = document.createElement('button')
     image.type = 'button'
     image.setAttribute('role', 'menuitem')
@@ -65,10 +82,7 @@
     icon.setAttribute('viewBox', '0 0 24 24')
     icon.setAttribute('class', 'better-x-clipboard')
     icon.setAttribute('aria-hidden', 'true')
-    const status = document.createElement('span')
-    status.className = 'better-x-copy-status'
-    status.setAttribute('role', 'status')
-    image.append(icon, 'Copy as image', status)
+    image.append(icon, 'Copy as image')
     image.addEventListener('keydown', event => {
       if (event.key === 'Enter' || event.key === ' ') event.stopPropagation()
     })
@@ -81,11 +95,10 @@
         return
       }
       image.setAttribute('aria-busy', 'true')
-      status.textContent = ''
       try {
         await copyPostImage(post, link)
         image.dataset.copied = 'true'
-        status.textContent = 'Copied post image'
+        notice('Copied post image')
         setTimeout(() => { delete image.dataset.copied }, 1600)
       } catch (error) {
         notice(error instanceof Error ? error.message : 'Could not copy post image')
@@ -93,13 +106,8 @@
         image.removeAttribute('aria-busy')
       }
     })
-    let row = active.copy
-    while (row.parentElement !== active.menu && row.parentElement.querySelectorAll('[role="menuitem"]').length === 1) {
-      row = row.parentElement
-    }
-    if (getComputedStyle(row.parentElement).flexDirection === 'column-reverse') row.before(image)
-    else row.after(image)
     active.image = image
+    placeLast()
   }
 
   function findMenu() {
@@ -140,7 +148,7 @@
     if (active?.copy?.contains(target) && settings.cleanLinks && active.post.isConnected) {
       event.preventDefault()
       event.stopImmediatePropagation()
-      const { link, menu } = active
+      const { link, menu, copy } = active
       const url = new URL(link)
       url.hostname = settings.linkHost
       navigator.clipboard.writeText(url.href).then(
@@ -149,7 +157,7 @@
         },
         () => notice('Could not copy link'),
       )
-      closeMenu(menu)
+      closeMenu(menu, copy)
       return
     }
     if (active?.menu?.contains(target)) return
@@ -158,8 +166,17 @@
     if (trigger) start(trigger)
   }
 
-  document.addEventListener('click', handle, true)
-  document.addEventListener('keydown', event => {
+  function blockNativeCopy(event) {
+    if (!settings.cleanLinks || !active?.post.isConnected || !active.copy?.contains(event.target)) return
+    if ('button' in event && event.button !== 0) return
+    event.stopImmediatePropagation()
+  }
+
+  for (const type of ['pointerdown', 'pointerup', 'mousedown', 'mouseup']) {
+    window.addEventListener(type, blockNativeCopy, true)
+  }
+  window.addEventListener('click', handle, true)
+  window.addEventListener('keydown', event => {
     if (event.key === 'Escape') clear()
     if (event.key === 'Enter' || event.key === ' ') handle(event)
   }, true)
