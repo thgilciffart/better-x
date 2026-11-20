@@ -65,7 +65,8 @@ html[data-better-x-quiet="true"] {
       }
 
       & > [dir] {
-        margin: 0;
+        margin: -5px 0;
+        padding-block: 5px;
         color: var(--quiet-soft) !important;
         font-size: var(--quiet-label);
         font-weight: 400;
