@@ -10,55 +10,65 @@
 </head>
 <body>
   <header>
-    <img src="icons/48.png" alt="">
     <h1>Better X</h1>
   </header>
+  <div class="tabs" role="tablist" aria-label="Settings sections">
+    <button type="button" role="tab" id="settings-tab" aria-controls="settings" aria-selected="true">Settings</button>
+    <button type="button" role="tab" id="navigation-tab" aria-controls="navigation" aria-selected="false" tabindex="-1">Navigation</button>
+  </div>
   <form aria-label="Better X settings">
-    <fieldset disabled>
-      <legend>Privacy</legend>
-      <label class="row">
-        <span>Block ads</span>
-        <input name="ads" type="checkbox" role="switch">
-      </label>
-      <label class="row">
-        <span>Block telemetry</span>
-        <input name="telemetry" type="checkbox" role="switch">
-      </label>
-      <label class="row">
-        <span>Skip 18+ interstitials</span>
-        <input name="ageWarning" type="checkbox" role="switch">
-      </label>
-    </fieldset>
-    <fieldset disabled>
-      <legend>Sharing</legend>
-      <label class="row">
-        <span>Clean copied links</span>
-        <input name="cleanLinks" type="checkbox" role="switch">
-      </label>
-      <label class="row domain">
-        <span>Link domain</span>
-        <select name="linkHost">
-          <option value="x.com">x.com</option>
-          <option value="vxtwitter.com">vxtwitter.com</option>
-          <option value="fxtwitter.com">fxtwitter.com</option>
-        </select>
-      </label>
-      <label class="row">
-        <span>Copy posts as images</span>
-        <input name="copyImage" type="checkbox" role="switch">
-      </label>
-      <label class="row">
-        <span>Right-click downloads</span>
-        <input name="downloads" type="checkbox" role="switch">
-      </label>
-    </fieldset>
-    <fieldset disabled>
-      <legend>Appearance</legend>
-      <label class="row">
-        <span>Quiet Mode <small>A calmer, focused feed</small></span>
-        <input name="quiet" type="checkbox" role="switch">
-      </label>
-    </fieldset>
+    <div class="panel" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+      <fieldset disabled>
+        <legend>Privacy</legend>
+        <label class="row">
+          <span>Block ads</span>
+          <input name="ads" type="checkbox" role="switch">
+        </label>
+        <label class="row">
+          <span>Block telemetry</span>
+          <input name="telemetry" type="checkbox" role="switch">
+        </label>
+        <label class="row">
+          <span>Skip 18+ interstitials</span>
+          <input name="ageWarning" type="checkbox" role="switch">
+        </label>
+      </fieldset>
+      <fieldset disabled>
+        <legend>Sharing</legend>
+        <label class="row">
+          <span>Clean copied links</span>
+          <input name="cleanLinks" type="checkbox" role="switch">
+        </label>
+        <label class="row domain">
+          <span>Link domain</span>
+          <select name="linkHost">
+            <option value="x.com">x.com</option>
+            <option value="vxtwitter.com">vxtwitter.com</option>
+            <option value="fxtwitter.com">fxtwitter.com</option>
+          </select>
+        </label>
+        <label class="row">
+          <span>Copy posts as images</span>
+          <input name="copyImage" type="checkbox" role="switch">
+        </label>
+        <label class="row">
+          <span>Right-click downloads</span>
+          <input name="downloads" type="checkbox" role="switch">
+        </label>
+      </fieldset>
+      <fieldset disabled>
+        <legend>Appearance</legend>
+        <label class="row">
+          <span>Quiet Mode</span>
+          <input name="quiet" type="checkbox" role="switch">
+        </label>
+      </fieldset>
+    </div>
+    <div class="panel" id="navigation" role="tabpanel" aria-labelledby="navigation-tab" hidden>
+      <fieldset disabled id="navigation-items">
+        <legend class="visually-hidden">Visible navigation items</legend>
+      </fieldset>
+    </div>
   </form>
   <p id="status" role="status" hidden></p>
 </body>

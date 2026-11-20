@@ -1,5 +1,5 @@
 (() => {
-  const { defaults, load, normalize } = BetterXSettings
+  const { defaults, load, navigation, normalize } = BetterXSettings
   const settings = { ...defaults }
   const attributes = {
     ads: 'data-better-x-ads',
@@ -14,6 +14,9 @@
     for (const [key, attribute] of Object.entries(attributes)) {
       root.setAttribute(attribute, String(settings[key]))
     }
+    root.dataset.betterXHiddenTabs = Object.keys(navigation)
+      .filter(key => !settings[`nav:${key}`])
+      .join(' ')
   }
 
   function parsePostLink(value) {

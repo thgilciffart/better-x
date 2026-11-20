@@ -1,5 +1,21 @@
 (() => {
   const linkHosts = ['x.com', 'vxtwitter.com', 'fxtwitter.com']
+  const navigation = {
+    home: 'Home',
+    explore: 'Explore',
+    notifications: 'Notifications',
+    follow: 'Follow',
+    chat: 'Chat',
+    calls: 'Calls',
+    grok: 'Grok',
+    history: 'History',
+    bookmarks: 'Bookmarks',
+    studio: 'Creator Studio',
+    premium: 'Premium',
+    profile: 'Profile',
+    more: 'More',
+    post: 'Post',
+  }
   const defaults = {
     ads: true,
     ageWarning: false,
@@ -9,6 +25,7 @@
     downloads: true,
     copyImage: true,
     quiet: false,
+    ...Object.fromEntries(Object.keys(navigation).map(key => [`nav:${key}`, true])),
   }
 
   function normalize(key, value) {
@@ -21,5 +38,5 @@
     return Object.fromEntries(Object.keys(defaults).map(key => [key, normalize(key, saved[key])]))
   }
 
-  globalThis.BetterXSettings = { defaults, load, normalize }
+  globalThis.BetterXSettings = { defaults, load, navigation, normalize }
 })()

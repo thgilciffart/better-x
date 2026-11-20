@@ -19,7 +19,7 @@
     {
       "matches": ["https://x.com/*", "https://twitter.com/*"],
       "js": ["settings.js", "content.js"],
-      "css": ["content.css"],
+      "css": ["content.css", "navigation.css"],
       "run_at": "document_start"
     }
   ]

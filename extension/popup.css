@@ -1,42 +1,50 @@
 :root {
   color-scheme: dark;
-  font: 14px/1.35 system-ui, sans-serif;
-  color: #eaf3ef;
-  background: #101815;
-  --surface: #17211d;
-  --edge: #2b3a32;
-  --muted: #a4b5ab;
-  --accent: #a7e7ca;
+  font: 13px/1.4 system-ui, sans-serif;
+  color: #ddd;
+  background: #0c0c0c;
+  --edge: #252525;
+  --muted: #999;
 }
 
 * { box-sizing: border-box; }
 
 body {
-  width: 328px;
+  width: 314px;
   margin: 0;
-  padding: 18px 16px 16px;
-}
-
-header {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  margin: 0 2px 18px;
-}
-
-header img {
-  width: 34px;
-  height: 34px;
+  padding: 16px 18px 14px;
 }
 
 h1 {
-  margin: 0;
-  font-size: 21px;
-  font-weight: 690;
-  letter-spacing: -0.035em;
+  margin: 0 0 10px;
+  color: #f1f1f1;
+  font-size: 16px;
+  font-weight: 620;
 }
 
-form {
+.tabs {
+  display: flex;
+  gap: 17px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--edge);
+}
+
+.tabs button {
+  padding: 6px 0 8px;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.tabs button[aria-selected="true"] {
+  border-bottom-color: #bbb;
+  color: #eee;
+}
+
+.panel:not([hidden]) {
   display: grid;
   gap: 12px;
 }
@@ -44,22 +52,20 @@ form {
 fieldset {
   min-width: 0;
   margin: 0;
-  padding: 1px 11px 4px;
-  border: 1px solid var(--edge);
-  border-radius: 12px;
-  background: var(--surface);
+  padding: 0;
+  border: 0;
 }
 
 legend {
-  padding: 0 5px;
+  margin-bottom: 1px;
+  padding: 0;
   color: var(--muted);
-  font-size: 12px;
-  font-weight: 650;
+  font-size: 11px;
 }
 
 .row {
   display: flex;
-  min-height: 41px;
+  min-height: 34px;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
@@ -68,55 +74,47 @@ legend {
 
 .row + .row { border-top: 1px solid var(--edge); }
 
-small {
-  display: block;
-  margin-top: 1px;
-  color: var(--muted);
-  font-size: 11px;
-}
-
-.row:has(small) { min-height: 52px; }
+.row:hover { color: #fff; }
 
 input[type="checkbox"] {
   appearance: none;
   display: grid;
   flex: none;
-  width: 33px;
-  height: 19px;
+  width: 28px;
+  height: 16px;
   margin: 0;
   align-items: center;
   padding: 2px;
-  border: 1px solid #62766b;
-  border-radius: 20px;
-  background: #26332c;
+  border: 1px solid #626262;
+  border-radius: 9px;
+  background: #202020;
   cursor: pointer;
 }
 
 input[type="checkbox"]::before {
-  width: 13px;
-  height: 13px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  background: #c0cec6;
+  background: #888;
   content: "";
-  transition: translate 120ms ease;
 }
 
 input[type="checkbox"]:checked {
-  border-color: var(--accent);
-  background: var(--accent);
+  border-color: #8c8c8c;
+  background: #363636;
 }
 
 input[type="checkbox"]:checked::before {
-  translate: 14px;
-  background: #284b3c;
+  translate: 12px;
+  background: #e0e0e0;
 }
 
 select {
-  width: 125px;
-  padding: 4px 6px;
-  border: 1px solid #506358;
-  border-radius: 6px;
-  background: #202d26;
+  width: 118px;
+  padding: 3px 5px;
+  border: 1px solid #464646;
+  border-radius: 4px;
+  background: #181818;
   color: inherit;
   font: inherit;
   font-size: 12px;
@@ -127,16 +125,20 @@ select {
 :disabled { opacity: 0.6; }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 1px solid #ddd;
   outline-offset: 3px;
 }
 
-#status {
-  margin: 12px 2px 0;
-  color: #ffbda8;
-  font-size: 12px;
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  input[type="checkbox"]::before { transition: none; }
+#status {
+  margin: 10px 0 0;
+  color: #ffc3af;
+  font-size: 12px;
 }
