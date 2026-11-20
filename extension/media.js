@@ -332,13 +332,13 @@
     menu.className = 'better-x-media-menu'
     menu.setAttribute('role', 'menu')
     menu.popover = 'manual'
+    menu.style.setProperty('--better-x-menu-x', `${clientX}px`)
+    menu.style.setProperty('--better-x-menu-y', `${clientY}px`)
     menu.style.backgroundColor = getComputedStyle(document.body).backgroundColor
     menu.append(...actionButtons(request, clear))
     const host = document.fullscreenElement || document.body
     host.append(menu)
     menu.showPopover()
-    menu.style.left = `${Math.max(8, Math.min(clientX, innerWidth - menu.offsetWidth - 8))}px`
-    menu.style.top = `${Math.max(8, Math.min(clientY, innerHeight - menu.offsetHeight - 8))}px`
     request.observer.disconnect()
     clearTimeout(request.timer)
     Object.assign(request, { own: true, menu, addons: menu })

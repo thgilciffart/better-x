@@ -19,7 +19,9 @@
 
 .better-x-media-menu {
   position: fixed;
-  inset: auto;
+  inset: 8px auto auto 8px;
+  translate: clamp(0px, var(--better-x-menu-x) - 8px, 100vw - 100% - 16px)
+    clamp(0px, var(--better-x-menu-y) - 8px, 100vh - 100% - 16px);
   min-width: 200px;
   max-width: 384px;
   margin: 0;
