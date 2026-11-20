@@ -22,6 +22,40 @@ chrome.storage.onChanged.addListener((changes, area) => {
 })
 
 const xOrigins = new Set(['https://x.com', 'https://twitter.com'])
+const photoMenuId = 'better-x-download-photo'
+
+chrome.runtime.onInstalled.addListener(async () => {
+  const { downloads } = await chrome.storage.local.get('downloads')
+  chrome.contextMenus.removeAll(() => chrome.contextMenus.create({
+    id: photoMenuId,
+    title: 'Download photo',
+    contexts: ['image'],
+    documentUrlPatterns: ['https://x.com/*', 'https://twitter.com/*'],
+    targetUrlPatterns: ['https://pbs.twimg.com/media/*'],
+    visible: normalize('downloads', downloads),
+  }))
+})
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area !== 'local' || !Object.hasOwn(changes, 'downloads')) return
+  const visible = normalize('downloads', changes.downloads.newValue)
+  chrome.contextMenus.update(photoMenuId, { visible }, () => chrome.runtime.lastError)
+})
+
+chrome.contextMenus.onClicked.addListener(async info => {
+  if (info.menuItemId !== photoMenuId || !URL.canParse(info.pageUrl) || !URL.canParse(info.srcUrl)) return
+  if (!xOrigins.has(new URL(info.pageUrl).origin)) return
+  const url = new URL(info.srcUrl)
+  if (url.origin !== 'https://pbs.twimg.com' || !url.pathname.startsWith('/media/')) return
+  const { downloads } = await chrome.storage.local.get('downloads')
+  if (!normalize('downloads', downloads)) return
+  url.pathname = url.pathname.replace(/:\w+$/, '')
+  const id = url.pathname.split('/').at(-1).split('.')[0].replace(/[^\w-]/g, '').slice(0, 80)
+  const format = (url.searchParams.get('format') || url.pathname.split('.').at(-1)).toLowerCase()
+  const extension = /^(?:jpg|jpeg|png|webp|gif|avif)$/.test(format) ? format : 'jpg'
+  url.searchParams.set('name', 'orig')
+  await downloadMedia({ url: url.href, filename: `x-${id || 'photo'}.${extension}` }).catch(console.error)
+})
+
 let creatingXeetDocument
 
 async function renderWithXeet(message) {

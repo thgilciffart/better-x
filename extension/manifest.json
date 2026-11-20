@@ -7,6 +7,7 @@
   "permissions": [
     "storage",
     "clipboardWrite",
+    "contextMenus",
     "offscreen",
     "declarativeNetRequest",
     "downloads"
