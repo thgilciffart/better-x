@@ -189,7 +189,16 @@ select {
 }
 
 input[type="text"] { width: 166px; }
-input[type="number"] { width: 6ch; }
+input[type="number"] {
+  appearance: textfield;
+  width: 6ch;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  appearance: none;
+  margin: 0;
+}
 input[aria-invalid="true"] { border-bottom-color: #f39b83; }
 
 .domain:has(:disabled) { color: var(--muted); }
