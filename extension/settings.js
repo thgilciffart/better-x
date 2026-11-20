@@ -3,7 +3,7 @@
     surface: 'ios-timeline', width: 430, dpr: 3, theme: 'auto', expanded: false,
   }
   const surfaces = new Set(['web-timeline', 'web-detail', 'ios-timeline', 'ios-detail'])
-  const ranges = { quietWidth: [480, 1000], quietSize: [12, 20] }
+  const ranges = { quietWidth: [480, 1000], quietSize: [12, 20], quietUiSize: [11, 18] }
   const themes = new Set(['x', 'dark', 'light'])
   const navigation = {
     home: 'Home',
@@ -33,6 +33,7 @@
     quiet: false,
     quietWidth: 600,
     quietSize: 15,
+    quietUiSize: 14,
     quietFont: '',
     quietTheme: 'x',
     quietAccent: '#1d9bf0',

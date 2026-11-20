@@ -10,7 +10,7 @@
     cleanLinks: 'data-better-x-clean-links',
     linkHost: 'data-better-x-link-host',
   }
-  const lengths = { quietWidth: '--better-x-quiet-width', quietSize: '--better-x-quiet-size' }
+  const lengths = { quietWidth: '--better-x-quiet-width', quietSize: '--better-x-quiet-size', quietUiSize: '--better-x-quiet-ui-size' }
   const genericFonts = new Set(['serif', 'sans-serif', 'monospace', 'cursive', 'system-ui', 'ui-serif', 'ui-sans-serif', 'ui-monospace', 'ui-rounded'])
   const origins = new Set(['https://x.com', 'https://twitter.com', 'https://www.x.com', 'https://www.twitter.com'])
   const postSelector = 'article, [data-testid="quoteTweet"], div[role="link"]:has([data-testid="User-Name"])'

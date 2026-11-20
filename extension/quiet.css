@@ -13,8 +13,8 @@ html[data-better-x-quiet="true"] {
   --quiet-accent: var(--better-x-quiet-accent, #1d9bf0);
   --quiet-width: var(--better-x-quiet-width, 600px);
   --quiet-size: var(--better-x-quiet-size, 15px);
-  --quiet-label: calc(var(--quiet-size) - 1px);
-  --quiet-small: calc(var(--quiet-size) - 2px);
+  --quiet-label: var(--better-x-quiet-ui-size, 14px);
+  --quiet-small: calc(var(--quiet-label) - 1px);
   --quiet-friction: cubic-bezier(0.6, 0, 0.2, 1);
   --quiet-underline-in: color 320ms var(--quiet-friction) 60ms, text-decoration-color 320ms var(--quiet-friction) 60ms, text-underline-offset 320ms var(--quiet-friction) 60ms;
   --quiet-underline-out: color 180ms ease-out, text-decoration-color 180ms ease-out, text-underline-offset 180ms ease-out;
@@ -223,7 +223,7 @@ html[data-better-x-quiet="true"] {
 
     & h2[role="heading"] > span {
       color: var(--quiet-soft);
-      font-size: var(--quiet-size);
+      font-size: calc(var(--quiet-label) + 1px);
       font-weight: 400;
       text-transform: lowercase;
     }
