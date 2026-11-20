@@ -276,6 +276,27 @@ html[data-better-x-quiet="true"] {
       pointer-events: auto;
       overflow: visible;
 
+      & :is(div, input) {
+        border-color: transparent !important;
+        background: transparent !important;
+        box-shadow: none !important;
+      }
+
+      & input {
+        padding: 8px 4px;
+        color: var(--quiet-fg);
+        font: 400 17px var(--quiet-font);
+        &::placeholder { color: var(--quiet-muted); }
+      }
+
+      & > div:first-child {
+        padding: 4px 8px;
+        border-bottom: 1px solid var(--quiet-edge);
+      }
+
+      & svg { display: none; }
+      & :is(button, [role="button"]) svg { display: unset; }
+
       & [role="listbox"] {
         max-height: calc(100dvh - var(--quiet-search-top) - 72px);
         overflow-y: auto;
@@ -343,6 +364,31 @@ html[data-better-x-quiet="true"] {
         font-size: var(--quiet-small);
       }
     }
+  }
+
+  & :is([id^="typeaheadDropdown"], [data-testid="typeaheadDropdownWrapper"]) {
+    border: 1px solid var(--quiet-edge) !important;
+    border-radius: 8px !important;
+    background-color: var(--quiet-menu) !important;
+    box-shadow: 0 8px 24px var(--quiet-shadow) !important;
+    color: var(--quiet-fg);
+    font-family: var(--quiet-font);
+
+    & :is(ul, li) { margin: 0; padding: 0; list-style: none; }
+    & :is([role="option"], [data-testid="typeaheadResult"]) { min-height: 0; padding-block: 8px; }
+
+    & :is(span, [dir]) { font-size: var(--quiet-label); }
+
+    & :is([role="option"], [data-testid="typeaheadResult"]):is(:hover, :focus-within, [aria-selected="true"]) {
+      background-color: var(--quiet-hover) !important;
+    }
+
+    & :is([role="option"], [data-testid="typeaheadResult"]):not(:has(img)) :is(span, [dir]) {
+      color: var(--quiet-soft) !important;
+      text-transform: lowercase;
+    }
+
+    & svg { display: none; }
   }
 
   & :is(header[role="banner"] nav, [data-testid="BottomBar"]) :is(a, button) [aria-live] {
