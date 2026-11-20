@@ -22,9 +22,10 @@
 
   function closeNativeSearch() {
     if (!nativeSearch) return
-    const { form, opener, events } = nativeSearch
+    const { form, opener, events, observer } = nativeSearch
     nativeSearch = undefined
     events.abort()
+    observer?.disconnect()
     const restoreFocus = form.contains(document.activeElement) || document.activeElement === document.body
     form.removeAttribute('popover')
     form.classList.remove('better-x-search', 'better-x-native-search')
@@ -41,14 +42,44 @@
     nativeSearch = { form, opener, events, url: location.href }
     form.classList.add('better-x-search', 'better-x-native-search')
     form.popover = 'auto'
+    const options = () => [...form.querySelectorAll('[role="option"]')]
+    const stamp = () => {
+      let slot = 0
+      for (const option of options()) {
+        const goto = /^go to @/i.test(option.textContent.trim())
+        option.toggleAttribute('data-better-x-goto', goto)
+        option.toggleAttribute('data-better-x-overflow', !goto && slot >= 9)
+        slot++
+      }
+    }
+    const observer = new MutationObserver(stamp)
+    observer.observe(form, { childList: true, subtree: true })
+    nativeSearch.observer = observer
+    stamp()
     form.addEventListener('toggle', event => {
       if (event.newState === 'closed') closeNativeSearch()
     }, { signal })
     form.addEventListener('keydown', event => {
-      if (event.key !== 'Escape') return
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        event.stopPropagation()
+        closeNativeSearch()
+        return
+      }
+      if (!(event.ctrlKey || event.altKey) || event.metaKey || event.shiftKey || !/^[1-9]$/.test(event.key)) return
+      const all = [...form.querySelectorAll('[role="option"]')]
+      const goto = all.find(option => option.hasAttribute('data-better-x-goto'))
+      const visible = [...(goto ? [goto] : []), ...all.filter(option => option !== goto && !option.hasAttribute('data-better-x-overflow'))]
+      const target = visible[event.key - 1]
+      if (!target) return
       event.preventDefault()
       event.stopPropagation()
-      closeNativeSearch()
+      const input = form.querySelector('input[data-testid="SearchBox_Search_Input"]')
+      const press = key => input.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }))
+      const current = all.findIndex(option => option.id === input.getAttribute('aria-activedescendant'))
+      const steps = all.indexOf(target) - current
+      for (let i = 0; i < Math.abs(steps); i++) press(steps > 0 ? 'ArrowDown' : 'ArrowUp')
+      press('Enter')
     }, { capture: true, signal })
     form.showPopover()
     input.focus({ preventScroll: true })

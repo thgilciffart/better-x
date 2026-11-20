@@ -276,10 +276,15 @@ html[data-better-x-quiet="true"] {
       pointer-events: auto;
       overflow: visible;
 
-      & :is(div, input) {
-        border-color: transparent !important;
-        background: transparent !important;
-        box-shadow: none !important;
+      & > div:first-child {
+        padding: 4px 8px;
+        border-bottom: 1px solid var(--quiet-edge) !important;
+
+        & :is(div, input) {
+          border-color: transparent !important;
+          background: transparent !important;
+          box-shadow: none !important;
+        }
       }
 
       & input {
@@ -289,17 +294,32 @@ html[data-better-x-quiet="true"] {
         &::placeholder { color: var(--quiet-muted); }
       }
 
-      & > div:first-child {
-        padding: 4px 8px;
-        border-bottom: 1px solid var(--quiet-edge);
-      }
-
       & svg { display: none; }
       & :is(button, [role="button"]) svg { display: unset; }
 
-      & [role="listbox"] {
-        max-height: calc(100dvh - var(--quiet-search-top) - 72px);
-        overflow-y: auto;
+      & [id^="typeaheadDropdown"] {
+        position: static !important;
+        width: auto !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+
+        & > div {
+          border: 0 !important;
+          background: transparent !important;
+          box-shadow: none !important;
+        }
+
+        & [role="listbox"] {
+          display: flex;
+          flex-direction: column;
+          max-height: calc(100dvh - var(--quiet-search-top) - 96px);
+          overflow-y: auto;
+        }
+
+        & [data-better-x-goto] { order: -1; }
+        & [data-better-x-overflow] { display: none !important; }
       }
     }
 
