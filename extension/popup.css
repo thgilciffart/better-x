@@ -1,0 +1,142 @@
+:root {
+  color-scheme: dark;
+  font: 14px/1.35 system-ui, sans-serif;
+  color: #eaf3ef;
+  background: #101815;
+  --surface: #17211d;
+  --edge: #2b3a32;
+  --muted: #a4b5ab;
+  --accent: #a7e7ca;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  width: 328px;
+  margin: 0;
+  padding: 18px 16px 16px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 0 2px 18px;
+}
+
+header img {
+  width: 34px;
+  height: 34px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 690;
+  letter-spacing: -0.035em;
+}
+
+form {
+  display: grid;
+  gap: 12px;
+}
+
+fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 1px 11px 4px;
+  border: 1px solid var(--edge);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+legend {
+  padding: 0 5px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.row {
+  display: flex;
+  min-height: 41px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.row + .row { border-top: 1px solid var(--edge); }
+
+small {
+  display: block;
+  margin-top: 1px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.row:has(small) { min-height: 52px; }
+
+input[type="checkbox"] {
+  appearance: none;
+  display: grid;
+  flex: none;
+  width: 33px;
+  height: 19px;
+  margin: 0;
+  align-items: center;
+  padding: 2px;
+  border: 1px solid #62766b;
+  border-radius: 20px;
+  background: #26332c;
+  cursor: pointer;
+}
+
+input[type="checkbox"]::before {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #c0cec6;
+  content: "";
+  transition: translate 120ms ease;
+}
+
+input[type="checkbox"]:checked {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+input[type="checkbox"]:checked::before {
+  translate: 14px;
+  background: #284b3c;
+}
+
+select {
+  width: 125px;
+  padding: 4px 6px;
+  border: 1px solid #506358;
+  border-radius: 6px;
+  background: #202d26;
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+}
+
+.domain:has(:disabled) { color: var(--muted); }
+
+:disabled { opacity: 0.6; }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+#status {
+  margin: 12px 2px 0;
+  color: #ffbda8;
+  font-size: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  input[type="checkbox"]::before { transition: none; }
+}

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Better X</title>
+  <link rel="stylesheet" href="popup.css">
+  <script src="settings.js" defer></script>
+  <script src="popup.js" defer></script>
+</head>
+<body>
+  <header>
+    <img src="icons/48.png" alt="">
+    <h1>Better X</h1>
+  </header>
+  <form aria-label="Better X settings">
+    <fieldset disabled>
+      <legend>Privacy</legend>
+      <label class="row">
+        <span>Block ads</span>
+        <input name="ads" type="checkbox" role="switch">
+      </label>
+      <label class="row">
+        <span>Block telemetry</span>
+        <input name="telemetry" type="checkbox" role="switch">
+      </label>
+      <label class="row">
+        <span>Skip 18+ interstitials</span>
+        <input name="ageWarning" type="checkbox" role="switch">
+      </label>
+    </fieldset>
+    <fieldset disabled>
+      <legend>Sharing</legend>
+      <label class="row">
+        <span>Clean copied links</span>
+        <input name="cleanLinks" type="checkbox" role="switch">
+      </label>
+      <label class="row domain">
+        <span>Link domain</span>
+        <select name="linkHost">
+          <option value="x.com">x.com</option>
+          <option value="vxtwitter.com">vxtwitter.com</option>
+          <option value="fxtwitter.com">fxtwitter.com</option>
+        </select>
+      </label>
+      <label class="row">
+        <span>Copy posts as images</span>
+        <input name="copyImage" type="checkbox" role="switch">
+      </label>
+      <label class="row">
+        <span>Right-click downloads</span>
+        <input name="downloads" type="checkbox" role="switch">
+      </label>
+    </fieldset>
+    <fieldset disabled>
+      <legend>Appearance</legend>
+      <label class="row">
+        <span>Quiet Mode <small>A calmer, focused feed</small></span>
+        <input name="quiet" type="checkbox" role="switch">
+      </label>
+    </fieldset>
+  </form>
+  <p id="status" role="status" hidden></p>
+</body>
+</html>
