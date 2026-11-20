@@ -300,12 +300,14 @@ html[data-better-x-quiet="true"] {
       & [id^="typeaheadDropdown"] {
         position: static !important;
         width: auto !important;
+        height: auto !important;
         border: 0 !important;
         border-radius: 0 !important;
         background: transparent !important;
         box-shadow: none !important;
 
         & > div {
+          height: auto !important;
           border: 0 !important;
           background: transparent !important;
           box-shadow: none !important;
@@ -314,19 +316,46 @@ html[data-better-x-quiet="true"] {
         & [role="listbox"] {
           display: flex;
           flex-direction: column;
+          height: auto !important;
           max-height: calc(100dvh - var(--quiet-search-top) - 96px);
           overflow-y: auto;
+          scrollbar-gutter: stable;
+        }
+
+        & [role="option"] {
+          display: flex !important;
+          align-items: center !important;
+          height: auto !important;
+          min-height: 0 !important;
+          padding-block: 9px !important;
+          background-color: transparent !important;
+          transition: none !important;
+
+          & :is(div, span) {
+            min-height: 0 !important;
+            background-color: transparent !important;
+            transition: none !important;
+          }
+        }
+
+        & [role="option"]:is(:hover, :focus-within, [aria-selected="true"]) {
+          background-color: var(--quiet-hover) !important;
         }
 
         & [data-better-x-goto] { order: -1; }
         & [data-better-x-overflow] { display: none !important; }
 
         & [data-better-x-slot]::after {
-          content: "⌃⇧ " attr(data-better-x-slot);
+          content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='23' height='15' viewBox='0 0 36 24' fill='none' stroke='%2371767b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m18 15-6-6-6 6' transform='translate(1 4) scale(0.8)'/%3E%3Cpath transform='translate(17 3) scale(0.85)' d='M9 19a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-6a1 1 0 0 1 1-1h3.293a.707.707 0 0 0 .5-1.207l-7.086-7.086a1 1 0 0 0-1.414 0l-7.086 7.086a.707.707 0 0 0 .5 1.207H8a1 1 0 0 1 1 1z'/%3E%3C/svg%3E") " " attr(data-better-x-slot);
+          display: inline-flex;
+          align-items: center;
+          gap: 3px;
           margin-inline-start: auto;
           align-self: center;
           color: var(--quiet-faint);
           font-size: var(--quiet-small);
+          font-variant-numeric: tabular-nums;
+          line-height: 1;
         }
       }
     }

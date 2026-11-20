@@ -62,7 +62,7 @@
         const goto = /^go to @/i.test(option.textContent.trim())
         if (goto) gotoOption = option
         option.toggleAttribute('data-better-x-goto', goto)
-        option.toggleAttribute('data-better-x-overflow', !goto && slot >= 9)
+        option.toggleAttribute('data-better-x-overflow', !goto && slot >= 8)
         option.removeAttribute('data-better-x-slot')
         slot++
       }
