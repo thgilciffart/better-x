@@ -8,14 +8,14 @@ html[data-better-x-emoji-ready] img[data-better-x-emoji-image] {
   height: 1.2em;
 }
 
-html:not([data-better-x-quiet="true"]) {
-  &[data-better-x-appearance~="quietWidth"] [data-testid="primaryColumn"] {
-    width: var(--better-x-quiet-width) !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    flex: 0 1 var(--better-x-quiet-width) !important;
-  }
+html[data-better-x-appearance~="quietWidth"] [data-testid="primaryColumn"] {
+  width: var(--better-x-quiet-width) !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  flex: 0 1 var(--better-x-quiet-width) !important;
+}
 
+html:not([data-better-x-quiet="true"]) {
   &[data-better-x-appearance~="quietWidth"] [data-testid="primaryColumn"] + :is([data-testid="sidebarColumn"], :has([data-testid="sidebarColumn"])) {
     flex-shrink: 0 !important;
   }
