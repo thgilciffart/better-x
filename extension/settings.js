@@ -35,7 +35,7 @@
     quietSize: 15,
     quietFont: '',
     quietTheme: 'x',
-    quietAccent: '#e5675f',
+    quietAccent: '#1d9bf0',
     ...Object.fromEntries(Object.keys(navigation).map(key => [`nav:${key}`, true])),
   }
 

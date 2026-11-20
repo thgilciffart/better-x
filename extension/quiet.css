@@ -10,7 +10,7 @@ html[data-better-x-quiet="true"] {
   --quiet-hover: #141414;
   --quiet-shadow: rgb(0 0 0 / 0.5);
   --quiet-font: var(--better-x-quiet-font, TwitterChirp, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
-  --quiet-accent: var(--better-x-quiet-accent, #e5675f);
+  --quiet-accent: var(--better-x-quiet-accent, #1d9bf0);
   --quiet-width: var(--better-x-quiet-width, 600px);
   --quiet-size: var(--better-x-quiet-size, 15px);
   --quiet-label: calc(var(--quiet-size) - 1px);
