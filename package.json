@@ -2,7 +2,7 @@
   "name": "better-x",
   "private": true,
   "scripts": {
-    "setup:xeet": "node scripts/setup-xeet.mjs"
+    "update:xeet": "node scripts/update-xeet.mjs"
   },
   "devDependencies": {
     "@xeet/core": "0.1.2"

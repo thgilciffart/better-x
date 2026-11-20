@@ -23,7 +23,7 @@ await mkdir(destination, { recursive: true })
 await Promise.all([
   ...bundle.map(([name, bytes]) => writeFile(new URL(name, destination), bytes)),
   ...['abi.js', 'fonts.js', 'resolve.js'].map(name => cp(new URL('src/' + name, packageRoot), new URL(name, destination))),
-  cp(new URL('wasm/fonts/', packageRoot), new URL('fonts/', destination), { recursive: true }),
+  mkdir(new URL('fonts/', destination), { recursive: true }).then(() => cp(new URL('wasm/fonts/packs.json', packageRoot), new URL('fonts/packs.json', destination))),
   cp(new URL('LICENSE', packageRoot), new URL('LICENSE', destination)),
 ])
-console.log('Xeet is installed locally. Reload Better X in your browser.')
+console.log('Updated the pinned Xeet build in extension/vendor/xeet.')

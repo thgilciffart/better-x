@@ -12,15 +12,13 @@ Better X is a Manifest V3 extension for X. It runs on Chrome 120 or newer and on
 
 Open **Better X** from the toolbar to change settings. After you change the extension files, reload Better X at `chrome://extensions` and refresh X.
 
-## Set up Copy as image
+## Copy as image
 
-**Copy as image** renders posts locally with [Xeet](https://github.com/rauchg/xeet). The Xeet build is not in the repository. You need Node 20 or newer.
+**Copy as image** renders posts locally with [Xeet](https://github.com/rauchg/xeet). The pinned Xeet build ships in `extension/vendor/xeet` under its [Apache 2.0 license](extension/vendor/xeet/LICENSE).
 
-1. From the repository root, run `npm ci`.
-2. Run `npm run setup:xeet`.
-3. Reload Better X, and refresh X.
+Xeet has the Chirp and Arial fonts built in. Other scripts, symbols, and emoji use font packs, which are not in the repository. The first image that needs a pack downloads it from Xeet's site, checks its SHA-256 against `packs.json`, and caches it. The packs range from 36 KB for Hebrew to 29 MB for CJK, and the emoji pack is 20 MB.
 
-The setup script downloads the pinned Xeet WebAssembly build, checks its hashes, and copies it with its fonts into `extension/vendor/xeet`. Xeet has its own [license terms](https://github.com/rauchg/xeet#license).
+To update the pinned build, run `npm ci` and then `npm run update:xeet`. You need Node 20 or newer.
 
 ## Settings
 

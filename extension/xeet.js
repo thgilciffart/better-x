@@ -1,11 +1,24 @@
 (() => {
   const url = name => chrome.runtime.getURL('vendor/xeet/' + name)
+  const fontHost = 'https://xeet-rs.vercel.app/wasm/d8cf89a6dde754d6/fonts/'
   let engine
 
   async function read(name) {
     const response = await fetch(url(name))
     if (!response.ok) throw new Error('Xeet asset is unavailable: ' + name)
     return response
+  }
+
+  async function pack(name, manifest, sha256Hex) {
+    const address = fontHost + name + '.bin'
+    const cache = await caches.open('better-x-xeet-fonts')
+    const cached = await cache.match(address)
+    if (cached) return new Uint8Array(await cached.arrayBuffer())
+    const response = await fetch(address)
+    if (!response.ok) throw new Error('Xeet font pack is unavailable: ' + name)
+    const bytes = new Uint8Array(await response.arrayBuffer())
+    if (await sha256Hex(bytes) === manifest.packs[name]?.sha256) await cache.put(address, new Response(bytes))
+    return bytes
   }
 
   async function load() {
@@ -19,7 +32,7 @@
     await wasm.default()
     const fonts = createFontPacks({
       manifest,
-      read: name => read('fonts/' + name + '.bin').then(async response => new Uint8Array(await response.arrayBuffer())),
+      read: name => pack(name, manifest, sha256Hex),
       hash: sha256Hex,
       register: wasm.register_font,
       missingPacks: wasm.missing_packs,
@@ -29,9 +42,11 @@
 
   async function render(post, options) {
     const loaded = await (engine ??= load())
-    if (!loaded) return { error: 'Set up Xeet with npm run setup:xeet, then reload Better X.' }
+    if (!loaded) return { error: 'Xeet could not start. Reload Better X and try again.' }
     const { xeet, fonts } = loaded
-    await fonts.ensure({ post, options })
+    if (!await fonts.ensure({ post, options }).then(() => true, () => false)) {
+      return { error: 'Could not download the fonts for this image. Check your connection and try again.' }
+    }
     const blob = new Blob([xeet.renderPng(post, options)], { type: 'image/png' })
     const png = await new Promise((resolve, reject) => {
       const reader = new FileReader()
