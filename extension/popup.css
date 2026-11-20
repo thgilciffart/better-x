@@ -186,8 +186,6 @@ select {
   option::checkmark { content: "•"; }
 }
 
-fieldset:has([name="quiet"]:not(:checked)) .quiet-option { display: none; }
-
 .field {
   display: inline-flex;
   align-items: center;

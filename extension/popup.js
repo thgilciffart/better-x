@@ -18,6 +18,8 @@ chrome.fontSettings.getFontList().then(installed => {
 
 const accent = form.elements.quietAccent
 const custom = accent.closest('.custom')
+const resetAccent = document.querySelector('#reset-accent')
+resetAccent.addEventListener('click', () => save(accent, ''))
 for (const [label, color] of Object.entries(accents)) {
   const swatch = document.createElement('button')
   swatch.type = 'button'
@@ -34,7 +36,7 @@ for (const [label, color] of Object.entries(accents)) {
 }
 
 function fallback(input) {
-  return String(defaults[input.name] ?? defaults.imageExport[input.name])
+  return String(defaults[input.name] ?? defaults.imageExport[input.name] ?? '')
 }
 
 for (const input of document.querySelectorAll('input[type="text"], input[type="number"]')) {
@@ -55,13 +57,19 @@ for (const input of document.querySelectorAll('input[type="text"], input[type="n
 }
 
 function syncControls() {
-  for (const revert of document.querySelectorAll('.revert')) {
+  for (const revert of document.querySelectorAll('.field .revert')) {
     revert.toggleAttribute('data-default', revert.previousElementSibling.value === fallback(revert.previousElementSibling))
   }
+  const color = saved.quietAccent
   for (const swatch of document.querySelectorAll('.swatch')) {
-    swatch.toggleAttribute('data-selected', swatch === custom ? !Object.values(accents).includes(accent.value) : swatch.value === accent.value)
+    const selected = color && (swatch === custom ? !Object.values(accents).includes(color) : swatch.value === color)
+    swatch.toggleAttribute('data-selected', Boolean(selected))
   }
-  custom.style.setProperty('--swatch', accent.value)
+  resetAccent.toggleAttribute('data-default', !color)
+  custom.style.setProperty('--swatch', color)
+  for (const [key, size] of Object.entries({ quietWidth: 600, quietUiSize: 14, quietSize: 15 })) {
+    form.elements[key].placeholder = saved.quiet ? String(size) : 'Default'
+  }
 }
 
 const font = form.elements.quietFont
@@ -166,6 +174,7 @@ function report(message) {
 
 function setValue(control, value) {
   if (control.type === 'checkbox') control.checked = value
+  else if (control === accent) control.value = value || accents.Blue
   else control.value = value
 }
 
@@ -181,7 +190,7 @@ hydrate().then(() => {
   syncControls()
 }).catch(() => report('Settings could not be loaded.'))
 
-form.addEventListener('change', async ({ target }) => {
+form.addEventListener('change', ({ target }) => {
   const { name } = target
   if (!target.checkValidity()) {
     target.reportValidity()
@@ -190,13 +199,18 @@ form.addEventListener('change', async ({ target }) => {
   }
   const value = name === 'linkHost' ? linkDomain(target.value) :
     target.type === 'checkbox' ? target.checked :
-    normalize(name, target.type === 'number' ? Number(target.value) : target.value)
-  if (value === null) {
+    normalize(name, target.type === 'number' && target.value ? Number(target.value) : target.value)
+  if (name === 'linkHost' && value === null) {
     target.setAttribute('aria-invalid', 'true')
     report('Enter a domain like vxtwitter.com.')
     return
   }
   target.removeAttribute('aria-invalid')
+  save(target, value)
+})
+
+async function save(target, value) {
+  const { name } = target
   target.disabled = true
   try {
     await chrome.storage.local.set({ [name]: value })
@@ -210,7 +224,7 @@ form.addEventListener('change', async ({ target }) => {
     target.disabled = false
     syncControls()
   }
-})
+}
 
 form.addEventListener('submit', event => {
   event.preventDefault()

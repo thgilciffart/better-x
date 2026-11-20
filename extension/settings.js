@@ -31,12 +31,12 @@
     copyImage: true,
     imageExport: { ...imageDefaults, autoExpand: true },
     quiet: false,
-    quietWidth: 600,
-    quietSize: 15,
-    quietUiSize: 14,
+    quietWidth: null,
+    quietSize: null,
+    quietUiSize: null,
     quietFont: '',
     quietTheme: 'x',
-    quietAccent: '#1d9bf0',
+    quietAccent: '',
     ...Object.fromEntries(Object.keys(navigation).map(key => [`nav:${key}`, true])),
   }
 

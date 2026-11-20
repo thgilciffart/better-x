@@ -38,8 +38,6 @@ html[data-better-x-quiet="true"] {
     --quiet-shadow: rgb(15 20 25 / 0.12);
   }
 
-  &:not([data-better-x-quiet-font=""]) :is(body, body *) { font-family: var(--quiet-font) !important; }
-
   & :is(body, #react-root, main[role="main"], header[role="banner"]) {
     background-color: var(--quiet-bg) !important;
   }

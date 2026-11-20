@@ -61,7 +61,7 @@
           <span>Quiet Mode</span>
           <input name="quiet" type="checkbox" role="switch">
         </label>
-        <label class="row quiet-option">
+        <label class="row">
           <span>Theme</span>
           <select name="quietTheme">
             <option value="x">X default</option>
@@ -69,25 +69,26 @@
             <option value="light">Light</option>
           </select>
         </label>
-        <div class="row quiet-option">
+        <div class="row">
           <span id="accent-label">Accent colour</span>
           <div class="swatches" role="group" aria-labelledby="accent-label">
+            <button id="reset-accent" type="button" class="revert" title="Reset to X default" aria-label="Reset accent colour">↺</button>
             <label class="swatch custom" title="Custom colour"><input name="quietAccent" type="color" aria-label="Custom colour"></label>
           </div>
         </div>
-        <label class="row quiet-option">
+        <label class="row">
           <span>Feed width (px)</span>
-          <input name="quietWidth" type="number" min="480" max="1000" step="10" required>
+          <input name="quietWidth" type="number" min="480" max="1000" step="10" placeholder="Default">
         </label>
-        <label class="row quiet-option">
+        <label class="row">
           <span>UI font size (px)</span>
-          <input name="quietUiSize" type="number" min="11" max="18" step="1" required>
+          <input name="quietUiSize" type="number" min="11" max="18" step="1" placeholder="Default">
         </label>
-        <label class="row quiet-option">
+        <label class="row">
           <span>Text font size (px)</span>
-          <input name="quietSize" type="number" min="12" max="20" step="1" required>
+          <input name="quietSize" type="number" min="12" max="20" step="1" placeholder="Default">
         </label>
-        <div class="row quiet-option font-row">
+        <div class="row font-row">
           <label for="quiet-font">Font</label>
           <input id="quiet-font" name="quietFont" type="text" role="combobox" aria-autocomplete="list"
             aria-expanded="false" aria-controls="quiet-fonts" placeholder="X default" autocomplete="off" spellcheck="false">

@@ -51,6 +51,7 @@
       "css": [
         "content.css",
         "navigation.css",
+        "appearance.css",
         "quiet.css",
         "share.css",
         "ads.css",

@@ -1,0 +1,40 @@
+html[data-better-x-quiet-font]:not([data-better-x-quiet-font=""]) :is(body, body *) {
+  font-family: var(--better-x-quiet-font) !important;
+}
+
+html:not([data-better-x-quiet="true"]) {
+  &[data-better-x-appearance~="quietWidth"] [data-testid="primaryColumn"] {
+    width: var(--better-x-quiet-width) !important;
+    max-width: 100% !important;
+    min-width: 0;
+    flex: 0 1 var(--better-x-quiet-width);
+  }
+
+  &[data-better-x-appearance~="quietWidth"] [data-testid="primaryColumn"] + :is([data-testid="sidebarColumn"], :has([data-testid="sidebarColumn"])) {
+    flex-shrink: 0;
+  }
+
+  &[data-better-x-appearance~="quietSize"] :is([data-testid="tweetText"], [data-testid="User-Name"], [data-testid="UserDescription"]) :is(span, a),
+  &[data-better-x-appearance~="quietSize"] :is([data-testid="tweetText"], [data-testid="UserDescription"]) {
+    font-size: var(--better-x-quiet-size) !important;
+  }
+
+  &[data-better-x-appearance~="quietUiSize"] :is(
+    header[role="banner"] nav [dir],
+    [role="tab"] [dir],
+    [role="menuitem"] :is([dir], span),
+    [data-testid="primaryColumn"] h2,
+    [data-testid="primaryColumn"] h2 span
+  ) {
+    font-size: var(--better-x-quiet-ui-size) !important;
+  }
+
+  &[data-better-x-appearance~="quietAccent"] :is(
+    [data-testid="tweetText"] a,
+    [data-testid="tweet-text-show-more-link"],
+    [data-testid="UserDescription"] a,
+    [data-testid="UserUrl"] span
+  ) {
+    color: var(--better-x-quiet-accent) !important;
+  }
+}

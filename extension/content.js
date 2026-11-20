@@ -22,12 +22,17 @@
       root.setAttribute(attribute, String(settings[key]))
     }
     for (const [key, property] of Object.entries(lengths)) {
-      root.style.setProperty(property, `${settings[key]}px`)
+      if (settings[key] === null) root.style.removeProperty(property)
+      else root.style.setProperty(property, `${settings[key]}px`)
     }
+    root.dataset.betterXAppearance = ['quietWidth', 'quietSize', 'quietUiSize', 'quietAccent']
+      .filter(key => settings[key])
+      .join(' ')
     const font = settings.quietFont
     if (font) root.style.setProperty('--better-x-quiet-font', genericFonts.has(font) ? font : `"${font}", system-ui, sans-serif`)
     else root.style.removeProperty('--better-x-quiet-font')
-    root.style.setProperty('--better-x-quiet-accent', settings.quietAccent)
+    if (settings.quietAccent) root.style.setProperty('--better-x-quiet-accent', settings.quietAccent)
+    else root.style.removeProperty('--better-x-quiet-accent')
     root.dataset.betterXHiddenTabs = Object.keys(navigation)
       .filter(key => !settings[`nav:${key}`])
       .join(' ')

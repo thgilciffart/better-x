@@ -246,7 +246,7 @@
   const nightModes = { dark: '2', light: '0' }
 
   function forcedNightMode() {
-    return enabled('data-better-x-quiet', false) && nightModes[document.documentElement.getAttribute('data-better-x-quiet-theme')]
+    return nightModes[document.documentElement?.getAttribute('data-better-x-quiet-theme')]
   }
 
   Object.defineProperty(Document.prototype, 'cookie', {
