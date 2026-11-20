@@ -5,7 +5,52 @@
     "action": { "type": "block" },
     "condition": {
       "requestDomains": ["x.com", "twitter.com"],
-      "regexFilter": "^https://[^/]+/(i/api/)?1\\.1/(jot/client_event|graphql/(user_flow|error_log))\\.json([?#]|$)"
+      "regexFilter": "^https://[^/]+/(?:i/api/)?1\\.1/(?:jot/client_event|graphql/(?:user_flow|error_log|app_context|viewer_context))\\.json([?#]|$)"
+    }
+  },
+  {
+    "id": 2,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "requestDomains": ["x.com", "twitter.com"],
+      "regexFilter": "^https://[^/]+/(?:i/api/)?1\\.1/(?:jot|attribution|flow/(?:viewer|timeline))\\.json([?#]|$)"
+    }
+  },
+  {
+    "id": 3,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "requestDomains": ["x.com", "twitter.com"],
+      "regexFilter": "^https://[^/]+/(?:i/jot|i/csp_report|scribe/|oct\\.js|jot\\.html|9/measurement)"
+    }
+  },
+  {
+    "id": 4,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "requestDomains": ["x.com", "twitter.com"],
+      "regexFilter": "^https://[^/]+/(?:[^?#]*/)?log\\.json([?#]|$)"
+    }
+  },
+  {
+    "id": 5,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "initiatorDomains": ["x.com", "twitter.com"],
+      "requestDomains": [
+        "analytics.twitter.com",
+        "ads.twitter.com",
+        "ads-api.twitter.com",
+        "ads-twitter.com",
+        "static.ads-twitter.com",
+        "platform.twitter.com",
+        "syndication.twitter.com",
+        "syndication.twimg.com"
+      ]
     }
   }
 ]
