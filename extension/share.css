@@ -1,12 +1,14 @@
 .better-x-copy-image {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-sizing: border-box;
   width: 100%;
-  padding: 12px 16px 12px 46px;
+  padding: 10px 16px;
   border: 0;
   background: transparent;
   color: inherit;
   font: inherit;
-  font-weight: 650;
   text-align: start;
   white-space: nowrap;
   cursor: pointer;
@@ -15,4 +17,35 @@
 .better-x-copy-image:hover,
 .better-x-copy-image:focus-visible {
   background: color-mix(in srgb, currentColor 8%, transparent);
+}
+
+.better-x-copy-image[aria-busy="true"] {
+  cursor: progress;
+}
+
+.better-x-clipboard {
+  position: relative;
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+
+.better-x-clipboard::before,
+.better-x-clipboard::after {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1.5px solid currentColor;
+  content: "";
+}
+
+.better-x-clipboard::before {
+  inset: 3px 2px 0;
+  border-radius: 2.5px;
+}
+
+.better-x-clipboard::after {
+  inset: 0 5px auto;
+  height: 5.5px;
+  border-radius: 2px;
+  background: color-mix(in srgb, currentColor 9%, transparent);
 }

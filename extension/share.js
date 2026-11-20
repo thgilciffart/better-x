@@ -33,23 +33,39 @@
     image.type = 'button'
     image.setAttribute('role', 'menuitem')
     image.className = 'better-x-copy-image'
-    image.textContent = 'Copy as image'
-    image.addEventListener('click', event => {
+    const nativeLabel = Array.from(active.copy.querySelectorAll('span, [dir]'))
+      .findLast(element => element.textContent.trim()) || active.copy
+    const style = getComputedStyle(nativeLabel)
+    image.style.font = `${style.fontWeight} ${style.fontSize}/${style.lineHeight} ${style.fontFamily}`
+    image.style.color = style.color
+    image.style.minHeight = `${active.copy.getBoundingClientRect().height}px`
+    const icon = document.createElement('span')
+    icon.className = 'better-x-clipboard'
+    icon.setAttribute('aria-hidden', 'true')
+    image.append(icon, 'Copy as image')
+    image.addEventListener('keydown', event => {
+      if (event.key === 'Enter' || event.key === ' ') event.stopPropagation()
+    })
+    image.addEventListener('click', async event => {
       event.stopPropagation()
-      if (!settings.copyImage || !active?.post.isConnected) return
-      const { post, link, menu } = active
+      if (!settings.copyImage || !active?.post.isConnected || image.hasAttribute('aria-busy')) return
+      const { post, link } = active
       if (postLink(post)?.href !== link.href) {
         notice('Could not locate post')
-        closeMenu(menu)
         return
       }
-      copyPostImage(post, link).then(
-        () => notice('Copied post image'),
-        () => notice('Could not copy post image'),
-      )
-      closeMenu(menu)
+      image.setAttribute('aria-busy', 'true')
+      try {
+        await copyPostImage(post, link)
+        notice('Copied post image')
+      } catch {
+        notice('Could not copy post image')
+      } finally {
+        image.removeAttribute('aria-busy')
+      }
     })
-    active.copy.after(image)
+    if (getComputedStyle(active.copy.parentElement).flexDirection === 'column-reverse') active.copy.before(image)
+    else active.copy.after(image)
     active.image = image
   }
 
@@ -59,7 +75,10 @@
       clear()
       return
     }
-    if (active.copy?.isConnected) return
+    if (active.copy?.isConnected) {
+      syncImage()
+      return
+    }
 
     for (const menu of document.querySelectorAll(menuSelector)) {
       const items = Array.from(menu.querySelectorAll('[role="menuitem"]'))
