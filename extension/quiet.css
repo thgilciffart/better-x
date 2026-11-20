@@ -507,7 +507,7 @@ html[data-better-x-quiet="true"] {
     padding: 4px 10px !important;
     border-radius: 7px;
 
-    &:not(:has(img, [data-testid^="UserAvatar-Container"])) svg:not(button *) {
+    &:not(:has(img, [data-testid^="UserAvatar-Container"])) svg:not(:is(button, [role="button"]) *) {
       width: 14px;
       height: 14px;
       color: var(--quiet-muted) !important;
@@ -515,16 +515,17 @@ html[data-better-x-quiet="true"] {
     }
   }
 
-  & :is([data-testid="typeaheadRecentSearchesHeader"], [data-testid="typeaheadRecentSearchesItem"]) button {
+  & :is([data-testid="typeaheadRecentSearchesHeader"], [data-testid="typeaheadRecentSearchesItem"]) :is(button, [role="button"]) {
+    --quiet-recent-action: var(--quiet-soft);
     min-height: 28px;
     border: 0;
     background: transparent;
-    color: var(--quiet-soft) !important;
     text-transform: lowercase;
 
-    &:is(:hover, :focus-visible) { color: var(--quiet-fg) !important; }
-    & :is(span, svg) { color: inherit !important; }
-    & svg { fill: currentColor; }
+    &:is(:hover, :focus-visible) { --quiet-recent-action: var(--quiet-fg); }
+    &, & :is(div, span, svg, svg *) { color: var(--quiet-recent-action) !important; }
+    & :is(svg, svg *):not([fill="none"]) { fill: currentColor !important; }
+    & [stroke]:not([stroke="none"]) { stroke: currentColor !important; }
   }
 
   & :is([id^="typeaheadDropdown"], [data-testid="typeaheadDropdownWrapper"]) {
