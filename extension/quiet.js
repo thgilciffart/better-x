@@ -232,6 +232,10 @@
   function update() {
     frame = 0
     if (nativeSearch && (!nativeSearch.form.isConnected || nativeSearch.url !== location.href)) closeNativeSearch()
+    if (!pending) {
+      markMatches(root, `div:has(> ${userActions})`, profileActions)
+      markMatches(root, socialIconSelector, socialIcon)
+    }
     for (const group of pending || document.querySelectorAll(groupSelector)) {
       if (pending && (!root.contains(group) || !group.matches(groupSelector))) continue
       const text = summary(group)
@@ -355,8 +359,6 @@
   function sync() {
     syncStyle()
     if (settings.quiet) {
-      markMatches(root, `div:has(> ${userActions})`, profileActions)
-      markMatches(root, socialIconSelector, socialIcon)
       window.addEventListener('keydown', handleSearchKey, true)
       window.addEventListener('focusin', watchSearchResults, true)
       watchSearchResults({ target: document.activeElement })
