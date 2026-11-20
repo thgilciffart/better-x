@@ -9,7 +9,8 @@ html[data-better-x-quiet="true"] {
   --quiet-edge: #2a2a2a;
   --quiet-hover: #141414;
   --quiet-shadow: rgb(0 0 0 / 0.5);
-  --quiet-font: TwitterChirp, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --quiet-font: var(--better-x-quiet-font, TwitterChirp, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
+  --quiet-accent: var(--better-x-quiet-accent, #e5675f);
   --quiet-width: var(--better-x-quiet-width, 600px);
   --quiet-size: var(--better-x-quiet-size, 15px);
   --quiet-label: calc(var(--quiet-size) - 1px);
@@ -29,10 +30,7 @@ html[data-better-x-quiet="true"] {
     --quiet-shadow: rgb(15 20 25 / 0.12);
   }
 
-  &[data-better-x-quiet-font="system"] { --quiet-font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  &[data-better-x-quiet-font="serif"] { --quiet-font: ui-serif, Georgia, "Times New Roman", serif; }
-  &[data-better-x-quiet-font="mono"] { --quiet-font: ui-monospace, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace; }
-  &:not([data-better-x-quiet-font="x"]) :is(body, body *) { font-family: var(--quiet-font) !important; }
+  &:not([data-better-x-quiet-font=""]) :is(body, body *) { font-family: var(--quiet-font) !important; }
 
   & :is(body, #react-root, main[role="main"], header[role="banner"]) {
     background-color: var(--quiet-bg) !important;
@@ -232,6 +230,7 @@ html[data-better-x-quiet="true"] {
   }
 
   & [data-testid="UserProfileHeader_Items"] svg { display: none; }
+  & :is([data-testid="UserDescription"] a, [data-testid="UserUrl"] span) { color: var(--quiet-accent) !important; }
 
   & :is([data-testid="UserJoinDate"], a:is([href$="/following"], [href$="/followers"], [href$="/verified_followers"])) {
     text-transform: lowercase;
@@ -246,6 +245,8 @@ html[data-better-x-quiet="true"] {
     & :is(time, [data-testid="tweet-text-show-more-link"], a[href$="/analytics"], [data-testid="socialContext"]:not(a *)) {
       text-transform: lowercase;
     }
+
+    & :is([data-testid="tweetText"] a, [data-testid="tweet-text-show-more-link"]) { color: var(--quiet-accent) !important; }
 
     & div:has(+ div [data-testid="socialContext"]) svg { display: none; }
 
@@ -287,8 +288,8 @@ html[data-better-x-quiet="true"] {
         color: var(--quiet-fg) !important;
 
         &::before {
-          text-decoration: underline;
-          text-decoration-thickness: 1px;
+          text-decoration: underline var(--quiet-accent);
+          text-decoration-thickness: 2px;
           text-underline-offset: 4px;
         }
       }
@@ -386,9 +387,10 @@ html[data-better-x-quiet="true"] {
 
     & svg, & [role="menuitem"] > div:first-child:has(> svg) { display: none; }
 
-    & [role="menuitem"] > div:not(:first-child):has(svg)::after {
-      content: "•";
-      color: var(--quiet-fg);
+    & [role="menuitem"]:not([aria-haspopup]):has(> div:not(:first-child) svg) [dir] {
+      color: var(--quiet-fg) !important;
+      text-decoration: underline 2px var(--quiet-accent);
+      text-underline-offset: 4px;
     }
 
     & [role="menuitem"][aria-haspopup] > div:not(:first-child):has(svg)::after {
@@ -397,5 +399,26 @@ html[data-better-x-quiet="true"] {
     }
 
     & [role="separator"] { border-color: var(--quiet-line); background-color: var(--quiet-line); }
+
+    & div:has(> [role="menuitem"]) > div:not([role]):has(> [dir]) {
+      padding: 10px 16px 4px;
+      border: 0;
+
+      & [dir] { color: var(--quiet-muted) !important; font-size: var(--quiet-small) !important; }
+    }
+  }
+
+  & :is([data-testid="toast"], .better-x-notice) {
+    border: 1px solid var(--quiet-edge);
+    border-radius: 8px;
+    background: var(--quiet-menu) !important;
+    box-shadow: 0 8px 24px var(--quiet-shadow);
+    color: var(--quiet-fg);
+    font: 400 var(--quiet-label)/1.3 var(--quiet-font);
+    text-transform: lowercase;
+
+    & :is([dir], span) { color: var(--quiet-fg) !important; font-size: var(--quiet-label) !important; }
+    & > svg { display: none; }
+    & svg { color: var(--quiet-soft); }
   }
 }
