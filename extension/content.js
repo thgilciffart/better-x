@@ -88,7 +88,12 @@
   function menuChanged(records, selector, menu, addon) {
     for (const { type, target, addedNodes, removedNodes } of records) {
       if (addon?.contains(target)) continue
-      const inside = menu ? menu.contains(target) : target.closest?.(selector)
+      const element = type === 'characterData' ? target.parentElement : target
+      const inside = menu ? menu.contains(target) : element?.closest?.(selector)
+      if (type === 'characterData') {
+        if (inside) return true
+        continue
+      }
       if (type === 'attributes') {
         if (inside || (menu ? target.contains(menu) : target.querySelector(selector))) return true
         continue

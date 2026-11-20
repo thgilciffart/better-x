@@ -415,7 +415,7 @@
     request.previous = new Set(Array.from(document.querySelectorAll(menuSelector))
       .filter(menu => menu !== reused && visible(menu)))
     observer.observe(document, {
-      childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'hidden', 'class', 'aria-hidden', 'data-state'],
+      childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['style', 'hidden', 'class', 'aria-hidden', 'data-state'],
     })
     setTimeout(() => {
       if (active === request && !request.menu) scan(request)

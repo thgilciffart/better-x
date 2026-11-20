@@ -143,7 +143,7 @@
     const previous = new Set(Array.from(document.querySelectorAll(menuSelector)).filter(visible))
     active = { trigger, post, link, previous }
     observer.observe(document, {
-      childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'hidden', 'aria-hidden', 'class'],
+      childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['style', 'hidden', 'aria-hidden', 'class'],
     })
     timer = setTimeout(clear, 1800)
   }
