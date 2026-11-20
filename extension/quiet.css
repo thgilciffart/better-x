@@ -8,7 +8,6 @@ html[data-better-x-quiet="true"] {
   --quiet-line: #1c1c1c;
   --quiet-edge: #2a2a2a;
   --quiet-hover: #141414;
-  --quiet-like: #e5675f;
   --quiet-shadow: rgb(0 0 0 / 0.5);
   --quiet-font: TwitterChirp, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background: var(--quiet-bg);
@@ -23,7 +22,6 @@ html[data-better-x-quiet="true"] {
     --quiet-line: #edf0f2;
     --quiet-edge: #dfe4e8;
     --quiet-hover: #f3f5f6;
-    --quiet-like: #d9443b;
     --quiet-shadow: rgb(15 20 25 / 0.12);
   }
 
@@ -263,17 +261,20 @@ html[data-better-x-quiet="true"] {
       & [data-testid="retweet"] > div::before { content: "repost"; }
       & [data-testid="unretweet"] > div::before { content: "reposted"; }
       & [data-testid="like"] > div::before { content: "like"; }
-      & [data-testid="bookmark"] > div::before { content: "keep"; }
-      & [data-testid="removeBookmark"] > div::before { content: "kept"; }
+      & [data-testid="unlike"] > div::before { content: "liked"; }
+      & [data-testid="bookmark"] > div::before { content: "save"; }
+      & [data-testid="removeBookmark"] > div::before { content: "saved"; }
       & > div:last-child [aria-haspopup="menu"] > div::before { content: "share"; }
-      & :is([data-testid="unlike"], [data-testid="unretweet"], [data-testid="removeBookmark"]) > div { color: var(--quiet-fg) !important; }
-    }
 
-    & [data-testid="unlike"] > div::before,
-    &:not([tabindex="-1"]) [role="group"]:has([data-testid="unlike"])::before {
-      content: "liked";
-      padding-inline-start: 10px;
-      background: radial-gradient(circle 2.5px at 2.5px 50%, var(--quiet-like) 95%, transparent) no-repeat;
+      & :is([data-testid="unlike"], [data-testid="unretweet"], [data-testid="removeBookmark"]) > div {
+        color: var(--quiet-fg) !important;
+
+        &::before {
+          text-decoration: underline;
+          text-decoration-thickness: 1px;
+          text-underline-offset: 4px;
+        }
+      }
     }
 
     &:not([tabindex="-1"]) [role="group"] {
@@ -289,12 +290,6 @@ html[data-better-x-quiet="true"] {
         color: var(--quiet-muted);
         text-overflow: ellipsis;
         white-space: nowrap;
-      }
-
-      &:has([data-testid="unlike"])::before {
-        order: -2;
-        margin-inline-end: 10px;
-        color: var(--quiet-fg);
       }
 
       & > div:has(> a[href$="/analytics"]),
@@ -330,7 +325,7 @@ html[data-better-x-quiet="true"] {
 
   @media (hover: hover) {
     & article:not(:hover, :focus-within) [data-testid="caret"],
-    & article:not([tabindex="-1"]):not(:hover, :focus-within) [role="group"] > div {
+    & article:not([tabindex="-1"]):not(:hover, :focus-within) [role="group"] > div:not(:has(:is([data-testid="unlike"], [data-testid="unretweet"], [data-testid="removeBookmark"]))) {
       opacity: 0;
     }
   }
