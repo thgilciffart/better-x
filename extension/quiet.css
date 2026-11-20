@@ -811,6 +811,35 @@ html[data-better-x-quiet="true"] {
 
       & [dir] { color: var(--quiet-muted) !important; font-size: var(--quiet-small) !important; }
     }
+
+    &[data-better-x-reply-sort] {
+      inline-size: max-content;
+      min-inline-size: 0;
+
+      & > div:first-child:not([role]) { padding-inline: 10px; }
+
+      & > [role="menuitem"] {
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding-inline: 10px;
+
+        & > div:not(:first-child):last-child { display: none; }
+
+        &::after {
+          flex: none;
+          inline-size: 5px;
+          block-size: 5px;
+          border-radius: 50%;
+          content: "";
+        }
+
+        &:not([aria-haspopup]):has(> div:not(:first-child) svg) {
+          &::after { background: var(--quiet-accent); }
+          & [dir] { text-decoration: none; }
+        }
+      }
+    }
   }
 
   & :is([data-testid="toast"], .better-x-notice) {

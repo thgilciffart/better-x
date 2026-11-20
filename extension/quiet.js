@@ -199,6 +199,7 @@
     pending = new Set()
     for (const menu of menus || document.querySelectorAll(menuSelector)) {
       if (!root.contains(menu)) continue
+      menu.toggleAttribute('data-better-x-reply-sort', /^sort replies$/i.test(menu.firstElementChild?.textContent.trim()))
       for (const item of menu.querySelectorAll('[role="menuitem"], a[role="link"]')) {
         item.toggleAttribute('data-better-x-handle', item.textContent.includes('@'))
       }
