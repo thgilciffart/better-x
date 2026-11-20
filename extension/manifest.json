@@ -45,6 +45,7 @@
         "content.js",
         "media.js",
         "quiet.js",
+        "emoji.js",
         "post-image.js",
         "share.js"
       ],

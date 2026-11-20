@@ -7,6 +7,7 @@
     quiet: 'data-better-x-quiet-requested',
     quietFont: 'data-better-x-quiet-font',
     quietTheme: 'data-better-x-quiet-theme',
+    emojiFont: 'data-better-x-emoji-font',
     cleanLinks: 'data-better-x-clean-links',
     linkHost: 'data-better-x-link-host',
   }

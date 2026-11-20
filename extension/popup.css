@@ -317,6 +317,7 @@ input[aria-invalid="true"] { border-bottom-color: #f39b83; }
   clip-path: inset(50%);
 }
 
+#emoji-status,
 #status {
   margin: 10px 0 0;
   color: #ffc3af;

@@ -5,6 +5,16 @@
   const surfaces = new Set(['web-timeline', 'web-detail', 'ios-timeline', 'ios-detail'])
   const ranges = { quietWidth: [480, 1000], quietSize: [12, 20], quietUiSize: [11, 18] }
   const themes = new Set(['x', 'dark', 'light'])
+  const emojiFonts = {
+    '': 'X default',
+    apple: 'Apple Color Emoji',
+    noto: 'Noto Color Emoji',
+    segoe: 'Segoe UI Emoji',
+    twemoji: 'Twemoji',
+    fluent: 'Fluent Emoji',
+    samsung: 'Samsung Emoji',
+    openmoji: 'OpenMoji',
+  }
   const navigation = {
     home: 'Home',
     explore: 'Explore',
@@ -37,6 +47,7 @@
     quietFont: '',
     quietTheme: 'x',
     quietAccent: '',
+    emojiFont: '',
     ...Object.fromEntries(Object.keys(navigation).map(key => [`nav:${key}`, true])),
   }
 
@@ -66,6 +77,7 @@
   }
 
   function normalize(key, value) {
+    if (key === 'emojiFont') return typeof value === 'string' && Object.hasOwn(emojiFonts, value) ? value : defaults[key]
     if (key === 'linkHost') return linkDomain(value) ?? defaults.linkHost
     if (key === 'imageExport') return normalizeImageExport(value)
     if (key === 'quietFont') {
@@ -86,5 +98,5 @@
     return Object.fromEntries(Object.keys(defaults).map(key => [key, normalize(key, saved[key])]))
   }
 
-  globalThis.BetterXSettings = { defaults, linkDomain, load, navigation, normalize }
+  globalThis.BetterXSettings = { defaults, emojiFonts, linkDomain, load, navigation, normalize }
 })()

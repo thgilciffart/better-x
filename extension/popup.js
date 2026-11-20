@@ -1,12 +1,17 @@
 const form = document.querySelector('form')
 const statusMessage = document.querySelector('#status')
-const { defaults, linkDomain, load, navigation, normalize } = BetterXSettings
+const { defaults, emojiFonts, linkDomain, load, navigation, normalize } = BetterXSettings
 const accents = {
   Blue: '#1d9bf0', Yellow: '#ffd400', Pink: '#f91880', Purple: '#7856ff', Orange: '#ff7a00', Green: '#00ba7c',
 }
 const genericFonts = ['system-ui', 'sans-serif', 'serif', 'monospace']
 const fonts = [...genericFonts]
 let saved
+
+const emojiStatus = document.querySelector('#emoji-status')
+for (const [value, label] of Object.entries(emojiFonts)) {
+  form.elements.emojiFont.add(new Option(label, value))
+}
 
 chrome.fontSettings.getFontList().then(installed => {
   const seen = new Set(fonts)
@@ -206,8 +211,27 @@ form.addEventListener('change', ({ target }) => {
     return
   }
   target.removeAttribute('aria-invalid')
-  save(target, value)
+  if (name === 'emojiFont') selectEmoji(target, value)
+  else save(target, value)
 })
+
+async function selectEmoji(target, value) {
+  target.disabled = true
+  emojiStatus.textContent = 'Loading emoji font…'
+  emojiStatus.hidden = !value
+  try {
+    const result = await chrome.runtime.sendMessage({ type: 'emoji-select', font: value })
+    if (!result?.ok) throw new Error(result?.error)
+    saved.emojiFont = value
+    emojiStatus.hidden = true
+  } catch (error) {
+    setValue(target, saved.emojiFont)
+    emojiStatus.textContent = error.message || 'Could not load the emoji font.'
+    emojiStatus.hidden = false
+  } finally {
+    target.disabled = false
+  }
+}
 
 async function save(target, value) {
   const { name } = target

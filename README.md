@@ -53,6 +53,7 @@ These settings work with Quiet Mode on or off. Reset a field to let X choose its
 - **UI font size (px)** sets the size of navigation, tabs, labels, and menus.
 - **Text font size (px)** sets the size of post text and names.
 - **Font** accepts any installed font. Leave it empty to use X's font.
+- **Emoji font** changes the artwork for emoji images on X. The first selection downloads and verifies the font, then caches it. Downloads range from about 1 MB to 27 MB. **X default** restores X's original emoji.
 
 ### Navigation
 

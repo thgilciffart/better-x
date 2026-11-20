@@ -1,4 +1,4 @@
-importScripts('settings.js')
+importScripts('settings.js', 'emoji-fonts.js')
 
 const { normalize } = BetterXSettings
 let telemetryUpdate = Promise.resolve()
@@ -91,7 +91,21 @@ async function downloadMedia({ url, filename }) {
 }
 
 chrome.runtime.onMessage.addListener((message, sender, reply) => {
+  if (message?.type === 'emoji-select' && sender.url === chrome.runtime.getURL('popup.html')) {
+    const font = normalize('emojiFont', message.font)
+    Promise.resolve(font && BetterXEmojiFonts.load(font))
+      .then(() => chrome.storage.local.set({ emojiFont: font }))
+      .then(() => reply({ ok: true }), error => reply({ error: error.message }))
+    return true
+  }
   if (!xOrigins.has(sender.origin) || sender.frameId !== 0) return
+  if (message?.type === 'emoji-font') {
+    const font = normalize('emojiFont', message.font)
+    if (!font) return
+    BetterXEmojiFonts.load(font).then(bytes => reply({ font: BetterXEmojiFonts.encode(bytes) }))
+      .catch(error => reply({ error: error.message }))
+    return true
+  }
   if (message?.type === 'quiet-style') {
     fetch(chrome.runtime.getURL('quiet.css')).then(response => response.text()).then(reply, () => reply(null))
     return true
