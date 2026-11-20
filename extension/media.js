@@ -389,10 +389,8 @@
     const media = find(event)
     if (!media) return
 
-    const previous = new Set(Array.from(document.querySelectorAll(menuSelector))
-      .filter(menu => menu !== reused && visible(menu)))
     const observer = new MutationObserver(() => scan(request))
-    const request = { event, media, previous, observer, timer: setTimeout(clear, 1500) }
+    const request = { event, media, observer, timer: setTimeout(clear, 1500) }
     active = request
     if (document.fullscreenElement?.contains(event.target)) {
       event.preventDefault()
@@ -400,6 +398,8 @@
       ownMenu(request, event)
       return
     }
+    request.previous = new Set(Array.from(document.querySelectorAll(menuSelector))
+      .filter(menu => menu !== reused && visible(menu)))
     observer.observe(document, {
       childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'hidden', 'class', 'aria-hidden', 'data-state'],
     })
