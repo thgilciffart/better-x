@@ -128,7 +128,10 @@
       if (clips.length === 1) [entry] = clips
     }
     if (!entry) return directMedia(sources, place, video)
-    const author = place.id === entry.postId && place.author !== 'i' && place.author
+    return named(entry, place.id === entry.postId && place.author !== 'i' && place.author)
+  }
+
+  function named(entry, author) {
     const name = ['x', author, entry.postId, entry.total > 1 && entry.index + 1].filter(Boolean).join('-')
     return { kind: entry.kind, url: entry.url, filename: `${name}.${entry.extension}` }
   }
@@ -339,6 +342,12 @@
       }
       break
     }
+  }
+
+  BetterX.downloadVideo = link => {
+    const [, author, id] = link.pathname.match(route) || []
+    const entry = posts.get(id)?.find(entry => entry.kind !== 'photo')
+    return entry ? download(named(entry, author !== 'i' && author)) : BetterX.notice('Could not find this video')
   }
 
   document.addEventListener('better-x:media', event => {

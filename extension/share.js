@@ -1,8 +1,9 @@
 (() => {
-  const { settings, notice, postLink, postSelector, copyPostImage } = BetterX
+  const { settings, notice, postLink, postSelector, copyPostImage, downloadVideo } = BetterX
   const menuSelector = '[role="menu"], [data-testid="Dropdown"], [data-testid="sheetDialog"]'
   const shareSelector = '[data-engagement-action="share"], [data-testid="share"], button[aria-label*="share" i], [role="button"][aria-label*="share" i]'
   const copyLabel = /^copy link(?: to (?:post|tweet))?$/i
+  const downloadLabel = /^download video\b/i
   let active
   let timer
 
@@ -130,7 +131,7 @@
   function start(trigger) {
     const post = trigger.closest(postSelector) || trigger.closest('[role="dialog"]')?.querySelector('article')
     const link = post && postLink(post)
-    if (!link || !settings.copyImage) return
+    if (!link || (!settings.copyImage && !settings.downloads)) return
     const previous = new Set(Array.from(document.querySelectorAll(menuSelector)).filter(visible))
     active = { trigger, post, link, previous }
     timer = setTimeout(clear, 1800)
@@ -145,13 +146,32 @@
     if (trigger) start(trigger)
   }
 
+  function blockDownload(event) {
+    const item = event.target instanceof Element && active?.menu?.contains(event.target) && event.target.closest('[role="menuitem"]')
+    if (!item || !settings.downloads || !downloadLabel.test(item.textContent.trim())) return false
+    event.preventDefault()
+    event.stopImmediatePropagation()
+    return true
+  }
+
+  function runDownload(event) {
+    if (!blockDownload(event)) return false
+    const { link, menu } = active
+    const mask = document.elementFromPoint(0, 0)
+    const box = mask?.getBoundingClientRect()
+    if (mask?.closest('#layers') && !menu.contains(mask) && box.width >= innerWidth && box.height >= innerHeight) mask.click()
+    downloadVideo(link)
+    return true
+  }
+
   window.addEventListener('pointerdown', event => {
-    if (event.button === 0) handle(event)
+    if (!blockDownload(event) && event.button === 0) handle(event)
   }, true)
-  window.addEventListener('click', handle, true)
+  for (const type of ['pointerup', 'mousedown', 'mouseup']) window.addEventListener(type, blockDownload, true)
+  window.addEventListener('click', event => runDownload(event) || handle(event), true)
   window.addEventListener('keydown', event => {
     if (event.key === 'Escape') clear()
-    if (event.key === 'Enter' || event.key === ' ') handle(event)
+    if ((event.key === 'Enter' || event.key === ' ') && !runDownload(event)) handle(event)
   }, true)
   new MutationObserver(findMenu).observe(document, {
     childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'hidden', 'aria-hidden', 'class'],
