@@ -195,6 +195,7 @@ fieldset:has([name="quiet"]:not(:checked)) .quiet-option { display: none; }
 }
 
 .revert {
+  order: -1;
   width: 18px;
   padding: 0;
   border: 0;
