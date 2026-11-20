@@ -17,6 +17,7 @@
       if (control.type === 'checkbox') control.checked = current[control.name]
       else control.value = current[control.name]
     }
+    syncControls()
   }
 
   function save(update) {

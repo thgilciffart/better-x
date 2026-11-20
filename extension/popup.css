@@ -183,25 +183,120 @@ select {
   }
 
   option:is(:hover, :focus, :checked) { background: #303030; }
+  option::checkmark { content: "•"; }
 }
 
 fieldset:has([name="quiet"]:not(:checked)) .quiet-option { display: none; }
 
-input[type="color"] {
-  width: 30px;
-  height: 20px;
+.field {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.revert {
+  width: 18px;
   padding: 0;
-  border: 1px solid #626262;
-  border-radius: 6px;
+  border: 0;
   background: none;
+  color: var(--muted);
+  font: inherit;
   cursor: pointer;
 }
 
-input[type="color"]::-webkit-color-swatch-wrapper { padding: 2px; }
-input[type="color"]::-webkit-color-swatch { border: 0; border-radius: 4px; }
+.revert:hover { color: #eee; }
+.revert[data-default] { visibility: hidden; }
+
+.swatches {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.swatch {
+  position: relative;
+  display: grid;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--swatch);
+  cursor: pointer;
+}
+
+.swatch[data-selected] {
+  outline: 1.5px solid #e6e6e6;
+  outline-offset: 2px;
+}
+
+.swatch.custom {
+  border: 1px dashed #777;
+  background:
+    linear-gradient(#bbb, #bbb) center / 8px 1.5px no-repeat,
+    linear-gradient(#bbb, #bbb) center / 1.5px 8px no-repeat;
+}
+
+.swatch.custom[data-selected] {
+  border: 0;
+  background: var(--swatch);
+}
+
+.swatch.custom:focus-within { outline: 1px solid #ddd; outline-offset: 3px; }
+
+.swatch input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
 
 input[type="text"] { width: 166px; }
-input[list]::-webkit-calendar-picker-indicator { opacity: 0.5; }
+
+input[role="combobox"] {
+  border-bottom-color: transparent;
+  padding-inline-end: 22px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath d='m3 5 4 4 4-4' fill='none' stroke='%23b9b9b9' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") right 4px center no-repeat;
+  cursor: pointer;
+}
+
+input[role="combobox"]:focus-visible { border-bottom-color: #8c8c8c; cursor: text; }
+
+.font-row { position: relative; }
+
+.picker {
+  position: absolute;
+  z-index: 1;
+  right: 20px;
+  bottom: calc(100% - 4px);
+  width: 210px;
+  max-height: 232px;
+  overflow-y: auto;
+  padding: 4px;
+  border: 1px solid #383838;
+  border-radius: 10px;
+  background: #191919;
+  color: #ededed;
+  scrollbar-color: #444 transparent;
+  scrollbar-width: thin;
+}
+
+.picker [role="option"] {
+  padding: 5px 8px;
+  overflow: hidden;
+  border-radius: 6px;
+  line-height: 24px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.picker [role="option"]::before { display: inline-block; width: 12px; content: ""; }
+.picker [aria-selected="true"]::before { content: "•"; }
+.picker [role="option"]:is(:hover, .active, [aria-selected="true"]) { background: #303030; }
 input[type="number"] {
   appearance: textfield;
   width: 6ch;

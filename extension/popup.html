@@ -69,10 +69,12 @@
             <option value="light">Light</option>
           </select>
         </label>
-        <label class="row quiet-option">
-          <span>Accent colour</span>
-          <input name="quietAccent" type="color">
-        </label>
+        <div class="row quiet-option">
+          <span id="accent-label">Accent colour</span>
+          <div class="swatches" role="group" aria-labelledby="accent-label">
+            <label class="swatch custom" title="Custom colour"><input name="quietAccent" type="color" aria-label="Custom colour"></label>
+          </div>
+        </div>
         <label class="row quiet-option">
           <span>Feed width (px)</span>
           <input name="quietWidth" type="number" min="480" max="1000" step="10" required>
@@ -81,12 +83,12 @@
           <span>Font size (px)</span>
           <input name="quietSize" type="number" min="12" max="20" step="1" required>
         </label>
-        <label class="row quiet-option">
-          <span>Font</span>
-          <input name="quietFont" type="text" list="quiet-fonts" placeholder="X default" autocomplete="off"
-            spellcheck="false">
-          <datalist id="quiet-fonts"></datalist>
-        </label>
+        <div class="row quiet-option font-row">
+          <label for="quiet-font">Font</label>
+          <input id="quiet-font" name="quietFont" type="text" role="combobox" aria-autocomplete="list"
+            aria-expanded="false" aria-controls="quiet-fonts" placeholder="X default" autocomplete="off" spellcheck="false">
+          <div class="picker" id="quiet-fonts" role="listbox" hidden></div>
+        </div>
       </fieldset>
       <p id="status" role="status" hidden></p>
     </div>
