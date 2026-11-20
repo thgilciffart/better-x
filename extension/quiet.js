@@ -57,7 +57,12 @@
       event.stopPropagation()
       closeNativeSearch(true)
     }, { capture: true, signal })
-    form.showPopover()
+    try {
+      form.showPopover()
+    } catch {
+      closeNativeSearch()
+      return false
+    }
     input.focus({ preventScroll: true })
     if (document.activeElement === input) {
       input.select()
@@ -71,9 +76,9 @@
     if (root.dataset.betterXQuiet !== 'true' || document.querySelector('dialog[open], [aria-modal="true"]')) return false
     if (nativeSearch) return false
     const inputs = [...document.querySelectorAll(searchInput)]
-    const inline = inputs.find(input => input.form && input.getClientRects().length)
+    const inline = inputs.find(input => input.form && input.checkVisibility({ checkVisibilityCSS: true }))
     if (inline) {
-      inline.focus({ preventScroll: true })
+      inline.focus()
       if (document.activeElement === inline) return true
     }
     const sidebar = inputs.find(input => input.closest('[data-testid="sidebarColumn"]'))
@@ -140,7 +145,14 @@
     else if (button.parentElement !== parent) parent.append(button)
   }
 
-  function searchShortcut(event) {
+  function handleSearchKey(event) {
+    const input = event.target
+    if (event.key === 'Escape' && !nativeSearch && input instanceof HTMLInputElement && input.matches(searchInput)) {
+      setTimeout(() => {
+        if (document.activeElement === input) input.blur()
+      }, 0)
+      return
+    }
     const modifier = event.metaKey ? !event.ctrlKey : !mac && event.ctrlKey
     if (event.key !== '/' || !modifier || event.altKey || event.shiftKey ||
         event.isComposing || event.repeat || event.defaultPrevented) return
@@ -241,7 +253,7 @@
   function sync() {
     syncStyle()
     if (settings.quiet) {
-      window.addEventListener('keydown', searchShortcut, true)
+      window.addEventListener('keydown', handleSearchKey, true)
       window.navigation?.addEventListener('currententrychange', queueUpdate)
       observer.observe(root, {
         childList: true, subtree: true, characterData: true,
@@ -250,7 +262,7 @@
       queueUpdate()
       return
     }
-    window.removeEventListener('keydown', searchShortcut, true)
+    window.removeEventListener('keydown', handleSearchKey, true)
     window.navigation?.removeEventListener('currententrychange', queueUpdate)
     for (const button of searchButtons.values()) button.remove()
     closeNativeSearch()
