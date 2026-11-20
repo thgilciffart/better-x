@@ -239,6 +239,27 @@
     return body
   }
 
+  const nativeCookie = Object.getOwnPropertyDescriptor(Document.prototype, 'cookie')
+  const nightModes = { dark: '2', light: '0' }
+
+  function forcedNightMode() {
+    return enabled('data-better-x-quiet', false) && nightModes[document.documentElement.getAttribute('data-better-x-quiet-theme')]
+  }
+
+  Object.defineProperty(Document.prototype, 'cookie', {
+    ...nativeCookie,
+    get() {
+      const value = nativeCookie.get.call(this)
+      const mode = forcedNightMode()
+      if (!mode) return value
+      return [...value.split('; ').filter(part => part && !part.startsWith('night_mode=')), `night_mode=${mode}`].join('; ')
+    },
+    set(value) {
+      if (forcedNightMode() && /^\s*night_mode=/.test(value)) return
+      nativeCookie.set.call(this, value)
+    },
+  })
+
   const xhrBodies = new WeakMap()
   const xhrTypes = new Set(['', 'text', 'json'])
 

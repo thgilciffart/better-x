@@ -1,7 +1,12 @@
 const form = document.querySelector('form')
 const statusMessage = document.querySelector('#status')
-const { linkDomain, load, navigation } = BetterXSettings
+const { linkDomain, load, navigation, normalize } = BetterXSettings
 let saved
+
+chrome.fontSettings.getFontList().then(fonts => {
+  const names = ['system-ui', 'sans-serif', 'serif', 'monospace', ...fonts.map(font => font.displayName)]
+  document.querySelector('#quiet-fonts').append(...names.map(name => new Option(name)))
+}).catch(() => {})
 
 const navigationItems = document.querySelector('#navigation-items')
 for (const [key, label] of Object.entries(navigation)) {
@@ -71,7 +76,7 @@ form.addEventListener('change', async ({ target }) => {
   }
   const value = name === 'linkHost' ? linkDomain(target.value) :
     target.type === 'checkbox' ? target.checked :
-    target.type === 'number' ? Number(target.value) : target.value
+    normalize(name, target.type === 'number' ? Number(target.value) : target.value)
   if (value === null) {
     target.setAttribute('aria-invalid', 'true')
     report('Enter a domain like vxtwitter.com.')

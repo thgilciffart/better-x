@@ -6,6 +6,7 @@
   "description": "Privacy, sharing, and appearance controls for X.",
   "permissions": [
     "storage",
+    "fontSettings",
     "clipboardWrite",
     "contextMenus",
     "offscreen",

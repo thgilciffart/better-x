@@ -6,10 +6,12 @@
     ageWarning: 'data-better-x-age-warning',
     quiet: 'data-better-x-quiet',
     quietFont: 'data-better-x-quiet-font',
+    quietTheme: 'data-better-x-quiet-theme',
     cleanLinks: 'data-better-x-clean-links',
     linkHost: 'data-better-x-link-host',
   }
   const lengths = { quietWidth: '--better-x-quiet-width', quietSize: '--better-x-quiet-size' }
+  const genericFonts = new Set(['serif', 'sans-serif', 'monospace', 'cursive', 'system-ui', 'ui-serif', 'ui-sans-serif', 'ui-monospace', 'ui-rounded'])
   const origins = new Set(['https://x.com', 'https://twitter.com', 'https://www.x.com', 'https://www.twitter.com'])
   const postSelector = 'article, [data-testid="quoteTweet"], div[role="link"]:has([data-testid="User-Name"])'
 
@@ -22,6 +24,10 @@
     for (const [key, property] of Object.entries(lengths)) {
       root.style.setProperty(property, `${settings[key]}px`)
     }
+    const font = settings.quietFont
+    if (font) root.style.setProperty('--better-x-quiet-font', genericFonts.has(font) ? font : `"${font}", system-ui, sans-serif`)
+    else root.style.removeProperty('--better-x-quiet-font')
+    root.style.setProperty('--better-x-quiet-accent', settings.quietAccent)
     root.dataset.betterXHiddenTabs = Object.keys(navigation)
       .filter(key => !settings[`nav:${key}`])
       .join(' ')

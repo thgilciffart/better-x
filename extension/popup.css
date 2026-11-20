@@ -185,7 +185,23 @@ select {
   option:is(:hover, :focus, :checked) { background: #303030; }
 }
 
+fieldset:has([name="quiet"]:not(:checked)) .quiet-option { display: none; }
+
+input[type="color"] {
+  width: 30px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid #626262;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper { padding: 2px; }
+input[type="color"]::-webkit-color-swatch { border: 0; border-radius: 4px; }
+
 input[type="text"] { width: 166px; }
+input[list]::-webkit-calendar-picker-indicator { opacity: 0.5; }
 input[type="number"] {
   appearance: textfield;
   width: 6ch;

@@ -4,7 +4,7 @@
   }
   const surfaces = new Set(['web-timeline', 'web-detail', 'ios-timeline', 'ios-detail'])
   const ranges = { quietWidth: [480, 1000], quietSize: [12, 20] }
-  const fonts = new Set(['x', 'system', 'serif', 'mono'])
+  const themes = new Set(['x', 'dark', 'light'])
   const navigation = {
     home: 'Home',
     explore: 'Explore',
@@ -33,7 +33,9 @@
     quiet: false,
     quietWidth: 600,
     quietSize: 15,
-    quietFont: 'x',
+    quietFont: '',
+    quietTheme: 'x',
+    quietAccent: '#e5675f',
     ...Object.fromEntries(Object.keys(navigation).map(key => [`nav:${key}`, true])),
   }
 
@@ -65,7 +67,12 @@
   function normalize(key, value) {
     if (key === 'linkHost') return linkDomain(value) ?? defaults.linkHost
     if (key === 'imageExport') return normalizeImageExport(value)
-    if (key === 'quietFont') return fonts.has(value) ? value : defaults[key]
+    if (key === 'quietFont') {
+      const font = { x: '', system: 'system-ui', mono: 'monospace' }[value] ?? value
+      return typeof font === 'string' ? font.replace(/["\\;{}<>\p{Cc}]/gu, '').trim().slice(0, 100) : defaults[key]
+    }
+    if (key === 'quietTheme') return themes.has(value) ? value : defaults[key]
+    if (key === 'quietAccent') return /^#[\da-f]{6}$/i.test(value) ? value.toLowerCase() : defaults[key]
     if (ranges[key]) {
       const [min, max] = ranges[key]
       return Number.isInteger(value) && value >= min && value <= max ? value : defaults[key]
