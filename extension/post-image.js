@@ -1,6 +1,6 @@
 (() => {
   const { postSelector, settings } = BetterX
-  const noteText = new Map()
+  const postData = new Map()
   const showMore = '[data-testid="tweet-text-show-more-link"], [data-testid="tweet-text-show-more"], [data-testid="showMore"]'
   const actionSelectors = [
     '[data-testid="reply"]',
@@ -15,13 +15,13 @@
     dark: { background: '#0f1012', text: '#f0f0f1', meta: '#a0a4aa', surface: '#1d2023' },
   }
 
-  document.addEventListener('better-x:post-text', event => {
+  document.addEventListener('better-x:post-data', event => {
     try {
       for (const [id, value] of JSON.parse(event.detail)) {
-        if (typeof id !== 'string' || !/^\d+$/.test(id) || typeof value !== 'string') continue
-        noteText.delete(id)
-        noteText.set(id, value.slice(0, 24000))
-        if (noteText.size > 96) noteText.delete(noteText.keys().next().value)
+        if (typeof id !== 'string' || !/^\d+$/.test(id) || typeof value?.text !== 'string') continue
+        postData.delete(id)
+        postData.set(id, value)
+        if (postData.size > 96) postData.delete(postData.keys().next().value)
       }
     } catch {}
   })
@@ -63,7 +63,7 @@
     return lines
   }
 
-  async function loadImage(source) {
+  async function imageBlob(source) {
     if (!source) return null
     const url = new URL(source, location.origin)
     if (url.protocol !== 'https:' || url.hostname !== mediaHost) return null
@@ -73,9 +73,25 @@
         referrerPolicy: 'no-referrer',
         signal: AbortSignal.timeout(4000),
       })
-      if (response.ok) return await createImageBitmap(await response.blob())
+      if (response.ok) return await response.blob()
     } catch {}
     return null
+  }
+
+  async function loadImage(source) {
+    const blob = await imageBlob(source)
+    return blob ? createImageBitmap(blob).catch(() => null) : null
+  }
+
+  async function encodeImage(source) {
+    const blob = await imageBlob(source)
+    if (!blob) return undefined
+    return new Promise(resolve => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(reader.result.split(',')[1])
+      reader.onerror = () => resolve(undefined)
+      reader.readAsDataURL(blob)
+    })
   }
 
   function drawImage(context, image, x, y, width, height, radius) {
@@ -126,7 +142,7 @@
     const name = content(profile) || (handle === 'i' ? 'X post' : handle)
     const time = content(ownElements(post, 'time')[0])
     const hasMore = Boolean(ownElements(post, showMore).length)
-    const fullText = expanded || (autoExpand && hasMore) ? noteText.get(id) : undefined
+    const fullText = expanded || (autoExpand && hasMore) ? postData.get(id)?.text : undefined
     const renderedText = fullText || content(body)
     const text = renderedText.slice(0, 16000)
     const fontFamily = getComputedStyle(body || heading || post).fontFamily
@@ -257,7 +273,90 @@
     })
   }
 
+  function formattedCount(text) {
+    const match = text.trim().match(/^([\d,.]+)([KMB])?$/i)
+    if (!match) return undefined
+    const multiplier = { K: 1000, M: 1000000, B: 1000000000 }[match[2]?.toUpperCase()] || 1
+    return Math.round(Number(match[1].replaceAll(',', '')) * multiplier) || undefined
+  }
+
+  function domMedia(post) {
+    if (!post) return []
+    return ownElements(post, '[data-testid="tweetPhoto"] img, [data-testid="videoPlayer"] video[poster]')
+      .map(element => element instanceof HTMLVideoElement
+        ? { kind: 'video', url: element.poster, width: element.videoWidth || 1280, height: element.videoHeight || 720,
+            duration: Number.isFinite(element.duration) ? element.duration : undefined }
+        : { kind: 'image', url: element.currentSrc || element.src,
+            width: element.naturalWidth || 600, height: element.naturalHeight || 400 })
+  }
+
+  async function xeetInput(post, id, handle, expanded, depth = 0) {
+    const cached = postData.get(id)
+    if (!post && !cached) return undefined
+    const [heading, body, time, avatarElement, group] = post ? [
+      ownElements(post, '[data-testid="User-Name"]')[0],
+      ownElements(post, '[data-testid="tweetText"]')[0],
+      ownElements(post, 'time')[0],
+      ownElements(post, '[data-testid^="UserAvatar-Container"] img')[0],
+      ownElements(post, '[role="group"]')[0],
+    ] : []
+    const author = cached?.author
+    const name = author?.name || content(heading?.querySelector('a[href="/' + handle + '"]'))
+    const verified = author?.verified ||
+      (heading?.querySelector('[data-testid^="icon-verified"]') ? 'blue' : undefined)
+    const quoted = depth < 2 && post && Array.from(post.querySelectorAll(postSelector))
+      .find(element => element.parentElement.closest(postSelector) === post)
+    const quotedLink = quoted && BetterX.postLink(quoted)
+    const quoteId = cached?.quote ?? quotedLink?.pathname.split('/').at(-1)
+    const quoteHandle = quotedLink?.pathname.split('/')[1]
+    const recorded = time?.dateTime || cached?.createdAt
+    const parsed = recorded && new Date(recorded)
+    const createdAt = parsed && Number.isFinite(parsed.getTime()) ? parsed.toISOString() : undefined
+    const counts = {}
+    for (const [index, key] of ['replies', 'reposts', 'likes', 'views', 'bookmarks'].entries()) {
+      const control = group?.querySelector(actionSelectors[index])
+      const count = content(control?.querySelector('[data-testid="app-text-transition-container"]')) || content(control)
+      counts[key] = cached?.counts?.[key] ?? formattedCount(count)
+    }
+    const source = cached?.media?.length ? cached.media : domMedia(post)
+    const [avatar, badge, media, quote] = await Promise.all([
+      encodeImage(author?.avatar || avatarElement?.src),
+      encodeImage(author?.affiliate?.badge),
+      Promise.all(source.slice(0, 4).map(async ({ url, ...item }) => ({ ...item, data: await encodeImage(url) }))),
+      depth < 2 && (quoteId || quoted) ? xeetInput(quoted, quoteId, quoteHandle, false, depth + 1) : undefined,
+    ])
+    return {
+      text: (expanded ? cached?.text || content(body) : content(body) || cached?.text || '').slice(0, 24000),
+      author: {
+        name: name || (handle === 'i' ? undefined : handle),
+        handle: author?.handle || (handle === 'i' ? undefined : handle),
+        verified,
+        avatar,
+        squareAvatar: verified === 'business',
+        affiliate: badge ? { name: author.affiliate.name || '', badge } : undefined,
+      },
+      media,
+      quote,
+      counts,
+      createdAt,
+      now: new Date().toISOString(),
+    }
+  }
+
+  async function renderPreferred(post, link) {
+    const engine = await BetterX.xeet()
+    if (!engine) return render(post, link)
+    const { surface, width, dpr, theme, fontScale, expanded, autoExpand } = settings.imageExport
+    const shouldExpand = expanded || (autoExpand && Boolean(ownElements(post, showMore).length))
+    const [, handle] = link.pathname.split('/')
+    const id = link.pathname.split('/').at(-1)
+    const input = await xeetInput(post, id, handle, shouldExpand)
+    const options = { surface, width, dpr, theme, fontScale, expanded: shouldExpand }
+    await engine.fonts.ensure({ post: input, options })
+    return new Blob([engine.xeet.renderPng(input, options)], { type: 'image/png' })
+  }
+
   globalThis.BetterX.copyPostImage = (post, link) => navigator.clipboard.write([
-    new ClipboardItem({ 'image/png': render(post, link) }),
+    new ClipboardItem({ 'image/png': renderPreferred(post, link) }),
   ])
 })()

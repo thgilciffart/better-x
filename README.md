@@ -8,6 +8,14 @@ Better X is a Manifest V3 extension for X on Chrome 120+ and compatible Chromium
 2. Select **Load unpacked** and choose the [extension](extension/) directory.
 3. Refresh any open X tabs. Open **Better X** in the toolbar to change settings.
 
+## Use Xeet for image exports
+
+Run `npm ci` and `npm run setup:xeet` from the repository with Node 20 or newer. Reload Better X at `chrome://extensions` and refresh X.
+
+Setup installs the pinned Xeet WebAssembly build and its font packs into your local extension folder. Image export uses Xeet when that bundle is present. A checkout without the bundle uses the Canvas renderer. Both render locally using data X has already loaded.
+
+Xeet's source and bundled reference fonts have separate license terms. [Xeet license notes](https://github.com/rauchg/xeet#license)
+
 ## Use
 
 - **Privacy** blocks promoted timeline entries and known X event and error-reporting endpoints. Turn on **Skip 18+ interstitials** to suppress the client prompt in supported timelines and post views.

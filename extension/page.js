@@ -136,25 +136,62 @@
     document.dispatchEvent(new CustomEvent('better-x:media', { detail }))
   }
 
+  function collectPost(node, posts) {
+    const id = node.rest_id
+    const legacy = node.legacy
+    const fullText = node.note_tweet?.note_tweet_results?.result?.text || legacy?.full_text
+    if (typeof id !== 'string' || !/^\d+$/.test(id) || typeof fullText !== 'string') return
+    const user = node.core?.user_results?.result
+    const affiliate = user?.affiliates_highlighted_label?.label
+    const verification = user?.verification?.verified_type ?? user?.legacy?.verified_type
+    const quote = node.quoted_status_result?.result
+    const items = Array.isArray(legacy?.extended_entities?.media) ? legacy.extended_entities.media : []
+    const media = items.flatMap(item => {
+      if (!item) return []
+      const kind = { photo: 'image', video: 'video', animated_gif: 'gif' }[item.type]
+      const width = item.original_info?.width ?? item.sizes?.large?.w
+      const height = item.original_info?.height ?? item.sizes?.large?.h
+      const url = mediaUrl(item.media_url_https)
+      if (!kind || !url || !width || !height) return []
+      return [{ kind, width, height, url: url.href, duration: item.video_info?.duration_millis / 1000 || undefined }]
+    })
+    posts.set(id, {
+      text: items.reduce((value, item) => item?.url && value.endsWith(item.url)
+        ? value.slice(0, -item.url.length).trimEnd() : value, fullText).slice(0, 24000),
+      media,
+      quote: quote?.tweet?.rest_id ?? quote?.rest_id ?? legacy?.quoted_status_id_str,
+      createdAt: legacy?.created_at,
+      author: user && {
+        name: user.core?.name ?? user.legacy?.name,
+        handle: user.core?.screen_name ?? user.legacy?.screen_name,
+        avatar: user.avatar?.image_url ?? user.legacy?.profile_image_url_https,
+        verified: verification === 'Business' ? 'business' : verification === 'Government' ? 'government' :
+          user.is_blue_verified || user.legacy?.verified ? 'blue' : undefined,
+        affiliate: affiliate && { name: affiliate.description, badge: affiliate.badge?.url },
+      },
+      counts: {
+        replies: legacy?.reply_count, reposts: legacy?.retweet_count, likes: legacy?.favorite_count,
+        bookmarks: legacy?.bookmark_count, views: Number(node.views?.count) || undefined,
+      },
+    })
+  }
+
   function filterData(operation, data) {
     const ads = enabled(adsAttribute, true) &&
       (ageOperations.has(operation) || /(?:Timeline|Tweets|Media)$/.test(operation))
     const age = enabled(ageAttribute, false) && ageOperations.has(operation)
     const records = new Map()
-    const notes = new Map()
+    const posts = new Map()
     let changed = false
     walk(data, node => {
       if (ads && pruneInstructions(node)) changed = true
       if (age && clearAgePrompt(node)) changed = true
       collectMedia(node, records)
-      const note = node.note_tweet?.note_tweet_results?.result?.text
-      if (typeof note === 'string' && typeof node.rest_id === 'string' && /^\d+$/.test(node.rest_id)) {
-        notes.set(node.rest_id, note.slice(0, 24000))
-      }
+      collectPost(node, posts)
     })
     announceMedia(records)
-    if (notes.size) {
-      document.dispatchEvent(new CustomEvent('better-x:post-text', { detail: JSON.stringify([...notes]) }))
+    if (posts.size) {
+      document.dispatchEvent(new CustomEvent('better-x:post-data', { detail: JSON.stringify([...posts]) }))
     }
     return changed
   }
