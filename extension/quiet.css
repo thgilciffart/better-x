@@ -632,9 +632,18 @@ html[data-better-x-quiet="true"] {
   }
 
   @media (hover: hover) {
-    & article:not(:hover, :focus-within) [data-testid="caret"],
-    & article:not([tabindex="-1"]):not(:hover, :focus-within) [role="group"] > div:not(:has(:is([data-testid="unlike"], [data-testid="unretweet"], [data-testid="removeBookmark"]))) {
-      opacity: 0;
+    & article {
+      & [data-testid="caret"],
+      &:not([tabindex="-1"]) [role="group"] > div:not(:has(:is([data-testid="unlike"], [data-testid="unretweet"], [data-testid="removeBookmark"]))) {
+        @media (pointer: fine) and (prefers-reduced-motion: no-preference) {
+          transition: opacity 120ms ease;
+        }
+      }
+
+      &:not(:hover, :focus-within) [data-testid="caret"],
+      &:not([tabindex="-1"]):not(:hover, :focus-within) [role="group"] > div:not(:has(:is([data-testid="unlike"], [data-testid="unretweet"], [data-testid="removeBookmark"]))) {
+        opacity: 0;
+      }
     }
   }
 
