@@ -134,9 +134,18 @@
 
   function bestMp4(variants) {
     if (!Array.isArray(variants)) return null
-    const playable = variants.filter(variant => variant?.content_type === 'video/mp4' && mediaUrl(variant.url))
-    playable.sort((a, b) => (Number(b.bitrate) || 0) - (Number(a.bitrate) || 0))
-    return playable.length ? mediaUrl(playable[0].url) : null
+    let best = null
+    let bestBitrate = -Infinity
+    for (const variant of variants) {
+      if (variant?.content_type !== 'video/mp4') continue
+      const bitrate = Number(variant.bitrate) || 0
+      if (best && bitrate <= bestBitrate) continue
+      const candidate = mediaUrl(variant.url)
+      if (!candidate) continue
+      best = candidate
+      bestBitrate = bitrate
+    }
+    return best
   }
 
   function mediaItem(media) {
@@ -273,12 +282,13 @@
       get() {
         const body = native.get.call(this)
         if (this.readyState !== XMLHttpRequest.DONE || !xhrTypes.has(this.responseType)) return body
-        const operation = graphqlOperation(this.responseURL)
-        if (!operation) return body
+        const url = this.responseURL
         const cached = xhrBodies.get(this)
-        if (cached?.url === this.responseURL && cached.raw === body) return cached.filtered
+        if (cached?.url === url && cached.raw === body) return cached.filtered
+        const operation = graphqlOperation(url)
+        if (!operation) return body
         const filtered = filterBody(operation, body)
-        xhrBodies.set(this, { url: this.responseURL, raw: body, filtered })
+        xhrBodies.set(this, { url, raw: body, filtered })
         return filtered
       },
     })

@@ -3,6 +3,9 @@
   const root = document.documentElement
   const counts = [['like', 'like', 'likes'], ['retweet', 'repost', 'reposts'], ['reply', 'reply', 'replies']]
   const groupSelector = 'article [role="group"]'
+  const navigationSelector = 'header[role="banner"], [data-testid="BottomBar"]'
+  const menuSelector = '[role="menu"]'
+  const observedSelector = `${groupSelector}, ${navigationSelector}, ${menuSelector}`
   const mac = /^Mac/.test(navigator.platform)
   const searchButtons = new Map()
   let searchDialog
@@ -10,6 +13,9 @@
   let stylesheet
   let loadingStyle
   let pending
+  let menus
+  let navigationChanged = true
+  let currentPath
   let frame = 0
 
   function summary(group) {
@@ -154,10 +160,17 @@
       if (group.dataset.betterXSummary !== text) group.dataset.betterXSummary = text
     }
     pending = new Set()
-    for (const item of document.querySelectorAll('[role="menu"] :is([role="menuitem"], a[role="link"])')) {
-      item.toggleAttribute('data-better-x-handle', item.textContent.includes('@'))
+    for (const menu of menus || document.querySelectorAll(menuSelector)) {
+      if (!root.contains(menu)) continue
+      for (const item of menu.querySelectorAll('[role="menuitem"], a[role="link"]')) {
+        item.toggleAttribute('data-better-x-handle', item.textContent.includes('@'))
+      }
     }
+    menus = new Set()
     const path = location.pathname
+    if (!navigationChanged && path === currentPath) return
+    navigationChanged = false
+    currentPath = path
     for (const link of document.querySelectorAll(':is(header[role="banner"] nav, [data-testid="BottomBar"]) a[href^="/"]')) {
       const href = link.getAttribute('href')
       link.toggleAttribute('data-better-x-current', path === href || path.startsWith(`${href}/`))
@@ -168,12 +181,24 @@
     mountSearch('compact', document.querySelector('[data-testid="BottomBar"] nav'))
   }
 
+  function track(node) {
+    if (node.matches(groupSelector)) pending.add(node)
+    if (node.matches(menuSelector)) menus.add(node)
+    if (node.matches(navigationSelector)) navigationChanged = true
+  }
+
+  function queueUpdate() {
+    frame ||= requestAnimationFrame(update)
+  }
+
   const observer = new MutationObserver(records => {
+    if (!pending) return
     for (const record of records) {
-      if (record.type !== 'attributes') frame ||= requestAnimationFrame(update)
-      if (!pending) continue
       const target = record.target
       const element = target.nodeType === 1 ? target : target.parentElement
+      const menu = element?.closest(menuSelector)
+      if (menu) menus.add(menu)
+      if (record.type !== 'characterData' && element?.closest(navigationSelector)) navigationChanged = true
       let group = element?.closest(groupSelector)
       while (group) {
         pending.add(group)
@@ -181,10 +206,12 @@
       }
       for (const node of record.addedNodes) {
         if (node.nodeType !== 1) continue
-        if (node.matches(groupSelector)) pending.add(node)
-        for (const child of node.querySelectorAll(groupSelector)) pending.add(child)
+        track(node)
+        for (const child of node.querySelectorAll(observedSelector)) track(child)
       }
     }
+    if (pending.size || menus.size || navigationChanged || location.pathname !== currentPath ||
+        (nativeSearch && !nativeSearch.form.isConnected)) queueUpdate()
   })
 
   async function syncStyle() {
@@ -215,19 +242,23 @@
     syncStyle()
     if (settings.quiet) {
       window.addEventListener('keydown', searchShortcut, true)
+      window.navigation?.addEventListener('currententrychange', queueUpdate)
       observer.observe(root, {
         childList: true, subtree: true, characterData: true,
-        attributeFilter: ['role', 'data-testid', 'data-better-x-summary'],
+        attributeFilter: ['role', 'data-testid'],
       })
-      frame ||= requestAnimationFrame(update)
+      queueUpdate()
       return
     }
     window.removeEventListener('keydown', searchShortcut, true)
+    window.navigation?.removeEventListener('currententrychange', queueUpdate)
     for (const button of searchButtons.values()) button.remove()
     closeNativeSearch()
     searchDialog?.close()
     observer.disconnect()
     pending = undefined
+    menus = undefined
+    navigationChanged = true
     cancelAnimationFrame(frame)
     frame = 0
   }
