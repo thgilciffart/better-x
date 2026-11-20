@@ -110,7 +110,7 @@ const fontActions = {
     await emoji.download(font)
   },
   'emoji-select': async font => {
-    if (font && !await emoji.cached(font)) throw new Error('Download this font in About first.')
+    if (font && !await emoji.cached(font)) throw new Error('Download this font in Appearance first.')
     await chrome.storage.local.set({ emojiFont: font })
   },
   'fonts-clear': async () => {

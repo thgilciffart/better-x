@@ -2,7 +2,6 @@
   const { emojiFonts } = BetterXSettings
   const { author, homepage_url: homepage, version } = chrome.runtime.getManifest()
   const about = document.querySelector('#about')
-  const aboutTab = document.querySelector('#about-tab')
   const select = document.querySelector('#emoji-font')
   const clear = document.querySelector('#clear-fonts')
   const storageEmoji = document.querySelector('#storage-emoji')
@@ -18,10 +17,6 @@
   document.querySelector('#about-author').textContent = author
   document.querySelector('#about-version').textContent = version
   document.querySelector('#about-repo').href = homepage
-  document.querySelector('#manage-fonts').addEventListener('click', () => {
-    aboutTab.click()
-    aboutTab.focus()
-  })
 
   const template = document.querySelector('#emoji-download-row')
   const list = document.querySelector('#emoji-downloads')
@@ -75,7 +70,7 @@
 
   async function request(type, font, message = '') {
     if (pending) return
-    const status = about.hidden ? selectionStatus : type === 'fonts-clear' ? storageStatus : libraryStatus
+    const status = type === 'emoji-download' ? libraryStatus : about.hidden ? selectionStatus : storageStatus
     report(status, message)
     pending = chrome.runtime.sendMessage({ type, font, storage: !about.hidden })
     render()

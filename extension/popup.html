@@ -96,14 +96,16 @@
             aria-expanded="false" aria-controls="quiet-fonts" placeholder="𝕏 default" autocomplete="off" spellcheck="false">
           <div class="picker" id="quiet-fonts" role="listbox" hidden></div>
         </div>
-        <div class="row">
-          <label for="emoji-font">Emoji font</label>
-          <div class="emoji-controls">
-            <select id="emoji-font" name="emojiFont" aria-describedby="emoji-status" disabled></select>
-            <button type="button" class="text-button" id="manage-fonts">Manage Fonts</button>
-          </div>
-        </div>
+        <label class="row emoji-font-row">
+          <span>Emoji Font</span>
+          <select id="emoji-font" name="emojiFont" aria-describedby="emoji-status" disabled></select>
+        </label>
         <p id="emoji-status" role="status" hidden></p>
+        <details class="emoji-library">
+          <summary>Emoji Downloads</summary>
+          <p class="font-status" id="font-library-status" role="status" hidden></p>
+          <ul id="emoji-downloads"></ul>
+        </details>
       </fieldset>
       <p id="status" role="status" hidden></p>
     </div>
@@ -166,11 +168,6 @@
       </dl>
       <button type="button" class="text-button" id="clear-fonts" disabled>Clear Font Caches</button>
       <p class="font-status" id="font-storage-status" role="status" hidden></p>
-    </section>
-    <section aria-labelledby="emoji-library-title">
-      <h2 id="emoji-library-title">Emoji Downloads</h2>
-      <p class="font-status" id="font-library-status" role="status" hidden></p>
-      <ul id="emoji-downloads"></ul>
     </section>
   </div>
   <template id="emoji-download-row">

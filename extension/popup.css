@@ -77,13 +77,12 @@ legend {
 
 .row + .row { border-top: 1px solid var(--edge); }
 
-.emoji-controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 4px 8px;
-}
+.emoji-font-row > span { flex: none; white-space: nowrap; }
+.emoji-font-row select { min-width: 0; max-width: 100%; }
+
+.emoji-library { border-top: 1px solid var(--edge); }
+.emoji-library summary { padding: 9px 0; cursor: pointer; }
+.emoji-library summary::marker { color: var(--muted); }
 
 .text-button {
   min-height: 28px;
@@ -113,7 +112,7 @@ legend {
 .about-details dd { margin: 0; }
 .about-details a { color: inherit; text-underline-offset: 3px; }
 #emoji-downloads { list-style: none; }
-#emoji-downloads .row { justify-content: flex-start; }
+#emoji-downloads .row { min-height: 33px; justify-content: flex-start; cursor: default; }
 
 .font-download-meta {
   margin-inline-start: auto;
@@ -124,7 +123,7 @@ legend {
 
 #about dd[id^="storage-"], .font-download-meta:not([data-downloaded]) { text-transform: none; }
 .font-download:not([hidden]) { display: grid; place-items: center; }
-.font-download { min-width: 30px; padding: 3px; }
+.font-download { min-width: 30px; padding: 3px; border: 0; }
 .font-download svg { width: 16px; height: 16px; }
 
 input[type="checkbox"] {
