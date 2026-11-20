@@ -182,7 +182,7 @@ select {
     text-transform: lowercase;
   }
 
-  option:is(:hover, :focus, :checked) { background: #303030; }
+  option:is(:hover, :focus-visible) { background: #303030; }
   option::checkmark { content: "•"; }
 }
 
@@ -232,16 +232,10 @@ fieldset:has([name="quiet"]:not(:checked)) .quiet-option { display: none; }
 }
 
 .swatch.custom {
-  border: 1px dashed #777;
-  background:
-    linear-gradient(#bbb, #bbb) center / 8px 1.5px no-repeat,
-    linear-gradient(#bbb, #bbb) center / 1.5px 8px no-repeat;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7.5' fill='none' stroke='%23666'/%3E%3Cpath d='M8 4.75v6.5M4.75 8h6.5' stroke='%23bbb' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% no-repeat;
 }
 
-.swatch.custom[data-selected] {
-  border: 0;
-  background: var(--swatch);
-}
+.swatch.custom[data-selected] { background: var(--swatch); }
 
 .swatch.custom:focus-within { outline: 1px solid #ddd; outline-offset: 3px; }
 
@@ -296,7 +290,7 @@ input[role="combobox"]:focus-visible { border-bottom-color: #8c8c8c; cursor: tex
 
 .picker [role="option"]::before { display: inline-block; width: 12px; content: ""; }
 .picker [aria-selected="true"]::before { content: "•"; }
-.picker [role="option"]:is(:hover, .active, [aria-selected="true"]) { background: #303030; }
+.picker [role="option"]:is(:hover, .active) { background: #303030; }
 input[type="number"] {
   appearance: textfield;
   width: 6ch;
