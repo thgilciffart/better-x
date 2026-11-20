@@ -83,7 +83,7 @@
 
   function clearAgePrompt(node) {
     let cleared = false
-    for (const key of ['__typename', 'type', 'itemType', 'entryType', 'contentType']) {
+    for (const key of ['interstitial_action', 'interstitialAction', '__typename', 'type', 'itemType', 'entryType', 'contentType']) {
       if (node[key] !== ageToken) continue
       node[key] = ''
       cleared = true
