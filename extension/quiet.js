@@ -21,6 +21,11 @@
     for (const item of document.querySelectorAll('[role="menu"] :is([role="menuitem"], a[role="link"])')) {
       item.toggleAttribute('data-better-x-handle', item.textContent.includes('@'))
     }
+    const path = location.pathname
+    for (const link of document.querySelectorAll(':is(header[role="banner"] nav, [data-testid="BottomBar"]) a[href^="/"]')) {
+      const href = link.getAttribute('href')
+      link.toggleAttribute('data-better-x-current', path === href || path.startsWith(`${href}/`))
+    }
   }
 
   const observer = new MutationObserver(() => {
