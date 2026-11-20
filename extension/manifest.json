@@ -7,7 +7,8 @@
   "permissions": [
     "storage",
     "clipboardWrite",
-    "declarativeNetRequest"
+    "declarativeNetRequest",
+    "downloads"
   ],
   "icons": {
     "16": "icons/16.png",
@@ -39,6 +40,7 @@
       "js": [
         "settings.js",
         "content.js",
+        "media.js",
         "quiet.js",
         "post-image.js",
         "share.js"
@@ -48,7 +50,8 @@
         "navigation.css",
         "quiet.css",
         "share.css",
-        "ads.css"
+        "ads.css",
+        "media.css"
       ],
       "run_at": "document_start"
     }

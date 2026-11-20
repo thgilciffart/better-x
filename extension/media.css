@@ -1,0 +1,65 @@
+.better-x-media-menu {
+  position: fixed;
+  z-index: 2147483647;
+  box-sizing: border-box;
+  padding: 5px;
+  border: 1px solid #383838;
+  border-radius: 12px;
+  background: #1a1a1a;
+  box-shadow: 0 4px 24px #0005;
+  transform-origin: 0 0;
+  animation: better-x-media-menu 100ms ease-out;
+}
+
+.better-x-media-menu button {
+  all: unset;
+  display: flex;
+  box-sizing: border-box;
+  min-width: 100%;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 14px 8px 10px;
+  border-radius: 8px;
+  color: #eeeeee;
+  font: 600 14px/1.35 system-ui, sans-serif;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+
+.better-x-media-menu button:is(:hover, :focus-visible) {
+  background: #292929;
+}
+
+.better-x-media-menu button:active {
+  background: #383838;
+}
+
+.better-x-media-menu button:focus-visible {
+  outline: 2px solid #c3c3c3;
+  outline-offset: -2px;
+}
+
+.better-x-media-menu svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: #c3c3c3;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@keyframes better-x-media-menu {
+  from {
+    opacity: 0;
+    scale: 0.96;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .better-x-media-menu {
+    animation: none;
+  }
+}
