@@ -297,6 +297,7 @@ html[data-better-x-quiet="true"] {
         padding: 8px 4px;
         border: 0 !important;
         outline: none !important;
+        appearance: none !important;
         color: var(--quiet-fg);
         font: 400 17px var(--quiet-font);
         &::placeholder { color: var(--quiet-muted); }
@@ -426,6 +427,11 @@ html[data-better-x-quiet="true"] {
     background: transparent !important;
     box-shadow: none !important;
     outline: none !important;
+  }
+
+  & form[role="search"]:not(.better-x-native-search) input {
+    appearance: none !important;
+    border-width: 0 !important;
   }
 
   & :is([id^="typeaheadDropdown"], [data-testid="typeaheadDropdownWrapper"]) {
