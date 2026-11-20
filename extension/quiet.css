@@ -512,6 +512,12 @@ html[data-better-x-quiet="true"] {
     }
   }
 
+  & [data-testid="cellInnerDiv"]:is(:hover, :focus-within),
+  & article:is(:hover, :focus-within),
+  & article:is(:hover, :focus-within) > div {
+    background-color: transparent !important;
+  }
+
   @media (hover: hover) {
     & article:not(:hover, :focus-within) [data-testid="caret"],
     & article:not([tabindex="-1"]):not(:hover, :focus-within) [role="group"] > div:not(:has(:is([data-testid="unlike"], [data-testid="unretweet"], [data-testid="removeBookmark"]))) {
