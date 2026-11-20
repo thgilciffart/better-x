@@ -346,6 +346,7 @@
 
   function scan(request) {
     if (active !== request) return
+    if (request.event.eventPhase !== Event.NONE && !request.event.defaultPrevented) return
     if (request.menu?.isConnected && request.last.isConnected && !visible(request.last)) {
       clear()
       return
