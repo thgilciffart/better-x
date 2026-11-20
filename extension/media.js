@@ -7,7 +7,7 @@
   const viewer = /\/(?:photo|video)\/\d+$/
   const posts = new Map()
   const lookup = new Map()
-  const menuSelector = '[role="menu"], [data-testid="Dropdown"], [data-testid="sheetDialog"], [data-testid$="ContextMenu" i]'
+  const menuSelector = '[role="menu"], [data-testid="Dropdown"], [data-testid="sheetDialog"], [data-testid$="ContextMenu" i], [data-slot$="context-menu-content"], [data-slot="xds-menu-popup"]'
   const itemSelector = '[role="menuitem"], button, [role="button"], [tabindex="0"]'
   const photoActions = /^(?:copy (?:photo|image) (?:link|address)|post photo)$/i
   const videoActions = /^(?:copy (?:video|gif) (?:link|address)|copy link at current time|post (?:video|gif))$/i
@@ -74,7 +74,7 @@
   }
 
   function layerOf(el) {
-    return el.closest('article, [aria-modal="true"], #layers')
+    return el.closest('article, [role="dialog"], [aria-modal="true"], #layers')
   }
 
   function locate(el) {
@@ -91,13 +91,12 @@
     return {}
   }
 
-  function directMedia(sources, { id, author }) {
-    if (!id) return null
+  function directMedia(sources, { id, author }, video) {
     for (const source of sources) {
       const url = mediaUrl(source)
       if (!url) continue
       let kind
-      if (url.hostname === 'pbs.twimg.com' && url.pathname.startsWith('/media/')) {
+      if (!video && url.hostname === 'pbs.twimg.com' && url.pathname.startsWith('/media/')) {
         kind = 'photo'
         url.pathname = url.pathname.replace(/:\w+$/, '')
         url.searchParams.set('name', 'orig')
@@ -117,13 +116,18 @@
     const wanted = new Set(sources.flatMap(keysOf))
     const place = locate(el)
     const local = posts.get(place.id) || []
-    let entry = local.find(entry => entry.keys.some(key => wanted.has(key)))
-    for (const key of wanted) entry ||= lookup.get(key)
+    const video = el instanceof HTMLVideoElement
+    const compatible = entry => entry && (!video || entry.kind !== 'photo')
+    let entry = local.find(entry => compatible(entry) && entry.keys.some(key => wanted.has(key)))
+    for (const key of wanted) {
+      const match = lookup.get(key)
+      if (compatible(match)) entry ||= match
+    }
     if (!entry && !wanted.size && !el.closest('[role="link"]:not(a)')) {
       const clips = local.filter(entry => entry.kind !== 'photo')
       if (clips.length === 1) [entry] = clips
     }
-    if (!entry) return directMedia(sources, place)
+    if (!entry) return directMedia(sources, place, video)
     const author = place.id === entry.postId && place.author !== 'i' && place.author
     const name = ['x', author, entry.postId, entry.total > 1 && entry.index + 1].filter(Boolean).join('-')
     return { kind: entry.kind, url: entry.url, filename: `${name}.${entry.extension}` }
@@ -132,12 +136,21 @@
   function find(event) {
     const layer = layerOf(event.target)
     if (!layer) return null
+    const player = event.target.closest('[data-testid="videoPlayer"], [data-slot="xds-context-menu-trigger"]')
+    let video = player?.querySelector('video') || event.target.closest('video')
     for (const el of document.elementsFromPoint(event.clientX, event.clientY)) {
+      if (layerOf(el) !== layer) continue
+      if (!video && el instanceof HTMLVideoElement) video = el
       const sources = sourcesOf(el)
-      const media = sources && layerOf(el) === layer && resolve(el, sources)
-      if (media) return media
+      const media = sources && resolve(el, sources)
+      if (media && (!video || media.kind !== 'photo')) {
+        const address = media.kind === 'photo' ? sources.find(source => mediaUrl(source)?.pathname.startsWith('/media/')) : media.url
+        return { ...media, address: address || media.url, video }
+      }
     }
-    return null
+    if (!video) return null
+    const media = resolve(video, sourcesOf(video))
+    return { kind: 'video', ...media, video }
   }
 
   function visible(element) {
@@ -148,7 +161,7 @@
     if (!active) return
     active.observer.disconnect()
     clearTimeout(active.timer)
-    active.button?.remove()
+    active.addons?.remove()
     active = null
   }
 
@@ -161,40 +174,142 @@
     if (!reply?.ok) BetterX.notice(reply?.error || `Could not download ${names[kind]}`)
   }
 
-  function appendDownload(menu, actions, request) {
-    const last = actions.reduce((bottom, item) =>
+  function png(source, width, height) {
+    const canvas = document.createElement('canvas')
+    canvas.width = width
+    canvas.height = height
+    canvas.getContext('2d').drawImage(source, 0, 0)
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('PNG encoding failed')), 'image/png')
+    })
+  }
+
+  async function photoPng(url) {
+    const response = await fetch(url, {
+      credentials: 'omit', referrerPolicy: 'no-referrer', signal: AbortSignal.timeout(6000),
+    })
+    if (!response.ok) throw new Error('Image unavailable')
+    const bitmap = await createImageBitmap(await response.blob())
+    try {
+      return await png(bitmap, bitmap.width, bitmap.height)
+    } finally {
+      bitmap.close()
+    }
+  }
+
+  function waitForVideo(video, event, signal) {
+    return new Promise((resolve, reject) => {
+      const options = { once: true, signal }
+      video.addEventListener(event, resolve, options)
+      video.addEventListener('error', () => reject(new Error('Video unavailable')), options)
+      signal.addEventListener('abort', () => reject(signal.reason), { once: true })
+    })
+  }
+
+  async function videoPng({ video, url }) {
+    if (!video || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA || !video.videoWidth) {
+      throw new Error('Video frame unavailable')
+    }
+    const time = video.currentTime
+    try {
+      return await png(video, video.videoWidth, video.videoHeight)
+    } catch (error) {
+      if (error.name !== 'SecurityError' || !url) throw error
+    }
+    const decoder = document.createElement('video')
+    decoder.crossOrigin = 'anonymous'
+    decoder.preload = 'auto'
+    const signal = AbortSignal.timeout(8000)
+    try {
+      const ready = waitForVideo(decoder, 'loadeddata', signal)
+      decoder.src = url
+      await ready
+      const target = Math.min(time, Math.max(0, decoder.duration - .001))
+      if (target > 0) {
+        const seeked = waitForVideo(decoder, 'seeked', signal)
+        decoder.currentTime = target
+        await seeked
+      }
+      return await png(decoder, decoder.videoWidth, decoder.videoHeight)
+    } finally {
+      decoder.removeAttribute('src')
+      decoder.load()
+    }
+  }
+
+  function copyPng(bytes) {
+    return navigator.clipboard.write([new ClipboardItem({ 'image/png': bytes })])
+  }
+
+  function mediaActions(media) {
+    const actions = []
+    if (media.kind === 'photo') {
+      actions.push(
+        ['Copy image', () => copyPng(photoPng(media.url)), 'Copied image'],
+        ['Copy image address', () => navigator.clipboard.writeText(media.address), 'Copied image address'],
+        ['Open image in new tab', () => window.open(media.address, '_blank', 'noopener,noreferrer')],
+      )
+    } else {
+      if (media.video) actions.push(['Copy video frame', () => copyPng(videoPng(media)), 'Copied video frame'])
+      if (media.url) actions.push(['Open video in new tab', () => window.open(media.url, '_blank', 'noopener,noreferrer')])
+    }
+    if (media.url) actions.push([`Download ${names[media.kind]}`, () => download(media)])
+    return actions
+  }
+
+  function lastItem(items) {
+    return items.reduce((bottom, item) =>
       item.getBoundingClientRect().bottom >= bottom.getBoundingClientRect().bottom ? item : bottom)
+  }
+
+  function placeActions(menu, items, last, addons) {
     let row = last
-    while (row.parentElement !== menu && !actions.some(action => action !== last && row.parentElement.contains(action))) {
+    while (row.parentElement !== menu && !items.some(item => item !== last && row.parentElement.contains(item))) {
       row = row.parentElement
     }
+    const reverse = getComputedStyle(row.parentElement).flexDirection === 'column-reverse'
+    if (reverse && row.previousElementSibling !== addons) row.before(addons)
+    if (!reverse && row.nextElementSibling !== addons) row.after(addons)
+  }
 
-    const button = document.createElement('button')
-    button.type = 'button'
-    button.setAttribute('role', 'menuitem')
-    button.className = 'better-x-media-download'
-    button.textContent = `Download ${names[request.media.kind]}`
+  function appendActions(menu, items, request) {
+    const last = lastItem(items)
     const label = Array.from(last.querySelectorAll('span, [dir]')).findLast(element => element.textContent.trim()) || last
     const style = getComputedStyle(label)
-    button.style.font = `${style.fontWeight} ${style.fontSize}/${style.lineHeight} ${style.fontFamily}`
-    button.style.color = style.color
-    button.style.minHeight = `${last.getBoundingClientRect().height}px`
-    button.addEventListener('keydown', event => {
-      if (event.key === 'Enter' || event.key === ' ') event.stopPropagation()
-    })
-    button.addEventListener('click', async event => {
-      event.stopPropagation()
-      if (!event.isTrusted || active !== request || button.hasAttribute('aria-busy')) return
-      button.setAttribute('aria-busy', 'true')
-      try {
-        await download(request.media)
-      } finally {
-        button.removeAttribute('aria-busy')
-      }
-    })
-    if (getComputedStyle(row.parentElement).flexDirection === 'column-reverse') row.before(button)
-    else row.after(button)
-    Object.assign(request, { menu, button, last })
+    const addons = document.createElement('div')
+    addons.className = 'better-x-media-actions'
+    addons.setAttribute('role', 'presentation')
+    const native = new Set(items.map(item => item.textContent.trim().toLowerCase()))
+    for (const [title, run, success] of mediaActions(request.media)) {
+      if (native.has(title.toLowerCase())) continue
+      const button = document.createElement('button')
+      button.type = 'button'
+      button.setAttribute('role', 'menuitem')
+      button.className = 'better-x-media-action'
+      button.textContent = title
+      button.style.font = `${style.fontWeight} ${style.fontSize}/${style.lineHeight} ${style.fontFamily}`
+      button.style.color = style.color
+      button.style.minHeight = `${last.getBoundingClientRect().height}px`
+      button.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') event.stopPropagation()
+      })
+      button.addEventListener('click', async event => {
+        event.stopPropagation()
+        if (!event.isTrusted || active !== request || button.hasAttribute('aria-busy')) return
+        button.setAttribute('aria-busy', 'true')
+        try {
+          await run()
+          if (success) BetterX.notice(success)
+        } catch {
+          BetterX.notice(title === 'Copy video frame' ? 'Could not copy the frame. Play the video and try again.' : `Could not ${title.toLowerCase()}`)
+        } finally {
+          button.removeAttribute('aria-busy')
+        }
+      })
+      addons.append(button)
+    }
+    placeActions(menu, items, last, addons)
+    Object.assign(request, { menu, addons, last })
     clearTimeout(request.timer)
   }
 
@@ -204,18 +319,24 @@
       clear()
       return
     }
-    if (request.button?.isConnected && request.last.isConnected) return
-    request.button?.remove()
+    const mounted = request.addons?.isConnected
+    if (!mounted) request.addons?.remove()
 
     const labels = request.media.kind === 'photo' ? photoActions : videoActions
-    for (const menu of document.querySelectorAll(menuSelector)) {
+    const menus = mounted ? [request.menu] : document.querySelectorAll(menuSelector)
+    for (const menu of menus) {
       if (request.previous.has(menu)) continue
-      const actions = [...new Set(Array.from(menu.querySelectorAll(itemSelector))
-        .filter(item => labels.test(item.textContent.trim().replace(/\s+/g, ' ')) && visible(item))
+      const items = [...new Set(Array.from(menu.querySelectorAll(itemSelector))
+        .filter(item => !request.addons?.contains(item) && visible(item))
         .map(item => item.closest('[role="menuitem"]') || item))]
         .filter(item => menu.contains(item))
-      if (!actions.length) continue
-      appendDownload(menu, actions, request)
+      if (!items.some(item => labels.test(item.textContent.trim().replace(/\s+/g, ' ')))) continue
+      if (mounted) {
+        request.last = lastItem(items)
+        placeActions(menu, items, request.last, request.addons)
+      } else {
+        appendActions(menu, items, request)
+      }
       break
     }
   }
@@ -240,12 +361,8 @@
     active = request
     setTimeout(() => {
       if (active !== request) return
-      if (!event.defaultPrevented) {
-        clear()
-        return
-      }
       observer.observe(document, {
-        childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'hidden', 'class', 'aria-hidden'],
+        childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'hidden', 'class', 'aria-hidden', 'data-state'],
       })
       scan(request)
     }, 0)

@@ -1,4 +1,4 @@
-.better-x-media-download {
+.better-x-media-action {
   display: block;
   box-sizing: border-box;
   width: 100%;
@@ -12,11 +12,11 @@
   cursor: pointer;
 }
 
-.better-x-media-download:hover,
-.better-x-media-download:focus-visible {
+.better-x-media-action:hover,
+.better-x-media-action:focus-visible {
   background: color-mix(in srgb, currentColor 8%, transparent);
 }
 
-.better-x-media-download[aria-busy="true"] {
+.better-x-media-action[aria-busy="true"] {
   cursor: progress;
 }
