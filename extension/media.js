@@ -16,6 +16,7 @@
   let active
 
   function mediaUrl(value) {
+    if (!value) return null
     try {
       const url = new URL(value)
       if (url.protocol !== 'https:' || url.username || url.password || url.port) return null
@@ -31,8 +32,7 @@
     return imageFormats.has(format?.toLowerCase()) ? format.toLowerCase() : 'jpg'
   }
 
-  function keysOf(value) {
-    const url = mediaUrl(value)
+  function keysOf(url) {
     if (!url) return []
     const path = url.pathname.replace(/:\w+$/, '').replace(/\.\w+$/, '')
     const video = path.match(/^\/(?:ext_tw_video|amplify_video)(?:_thumb)?\/(\d+)\//)
@@ -58,7 +58,7 @@
         const url = mediaUrl(item?.url)
         if (!url || !Object.hasOwn(names, item.kind)) continue
         const extension = extensionOf(url, item.kind)
-        const keys = [...keysOf(item.url), ...keysOf(item.poster)]
+        const keys = [...keysOf(url), ...keysOf(mediaUrl(item.poster))]
         const entry = { postId, kind: item.kind, url: url.href, extension, index, total: items.length, keys }
         for (const key of keys) lookup.set(key, entry)
         entries.push(entry)
@@ -115,7 +115,7 @@
   }
 
   function resolve(el, sources) {
-    const wanted = new Set(sources.flatMap(keysOf))
+    const wanted = new Set(sources.flatMap(source => keysOf(mediaUrl(source))))
     const place = locate(el)
     const local = posts.get(place.id) || []
     const video = el instanceof HTMLVideoElement
