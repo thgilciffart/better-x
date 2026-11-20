@@ -188,6 +188,16 @@
     event.stopPropagation()
   }
 
+  function styleMenus() {
+    for (const menu of menus || document.querySelectorAll(menuSelector)) {
+      if (!root.contains(menu)) continue
+      menu.toggleAttribute('data-better-x-reply-sort', /^sort replies$/i.test(menu.firstElementChild?.textContent.trim()))
+      for (const item of menu.querySelectorAll('[role="menuitem"], a[role="link"]')) {
+        item.toggleAttribute('data-better-x-handle', item.textContent.includes('@'))
+      }
+    }
+  }
+
   function update() {
     frame = 0
     if (nativeSearch && (!nativeSearch.form.isConnected || nativeSearch.url !== location.href)) closeNativeSearch()
@@ -197,14 +207,10 @@
       if (group.dataset.betterXSummary !== text) group.dataset.betterXSummary = text
     }
     pending = new Set()
-    for (const menu of menus || document.querySelectorAll(menuSelector)) {
-      if (!root.contains(menu)) continue
-      menu.toggleAttribute('data-better-x-reply-sort', /^sort replies$/i.test(menu.firstElementChild?.textContent.trim()))
-      for (const item of menu.querySelectorAll('[role="menuitem"], a[role="link"]')) {
-        item.toggleAttribute('data-better-x-handle', item.textContent.includes('@'))
-      }
+    if (!menus) {
+      styleMenus()
+      menus = new Set()
     }
-    menus = new Set()
     const path = location.pathname
     if (!navigationChanged && path === currentPath) return
     navigationChanged = false
@@ -263,7 +269,11 @@
         for (const child of node.querySelectorAll(observedSelector)) track(child)
       }
     }
-    if (pending.size || menus.size || navigationChanged || location.pathname !== currentPath ||
+    if (menus.size) {
+      styleMenus()
+      menus.clear()
+    }
+    if (pending.size || navigationChanged || location.pathname !== currentPath ||
         (nativeSearch && !nativeSearch.form.isConnected)) queueUpdate()
   })
 
