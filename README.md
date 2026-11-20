@@ -1,34 +1,73 @@
 # Better X
 
-Better X is a Manifest V3 extension for X on Chrome 120+ and compatible Chromium browsers.
+Better X is a Manifest V3 extension for X. It runs on Chrome 120 or newer and on other Chromium browsers.
 
 ## Install
 
-1. Open `chrome://extensions` and turn on **Developer mode**.
-2. Select **Load unpacked** and choose the [extension](extension/) directory.
-3. Refresh any open X tabs. Open **Better X** in the toolbar to change settings.
+1. Open `chrome://extensions`.
+2. Turn on **Developer mode**.
+3. Select **Load unpacked**.
+4. Choose the [`extension`](extension/) folder.
+5. Refresh your X tabs.
 
-## Use Xeet for image exports
+Open **Better X** from the toolbar to change settings. After you change the extension files, reload Better X at `chrome://extensions` and refresh X.
 
-Run `npm ci` and `npm run setup:xeet` from the repository with Node 20 or newer. Reload Better X at `chrome://extensions` and refresh X.
+## Set up Copy as image
 
-Setup installs the pinned Xeet WebAssembly build and its font packs into your local extension folder. **Copy as image** uses that bundle to render locally using data X has already loaded. If the bundle is missing, the copy action tells you how to set it up.
+**Copy as image** renders posts locally with [Xeet](https://github.com/rauchg/xeet). The Xeet build is not in the repository. You need Node 20 or newer.
 
-Xeet's source and bundled reference fonts have separate license terms. [Xeet license notes](https://github.com/rauchg/xeet#license)
+1. From the repository root, run `npm ci`.
+2. Run `npm run setup:xeet`.
+3. Reload Better X, and refresh X.
 
-## Use
+The setup script downloads the pinned Xeet WebAssembly build, checks its hashes, and copies it with its fonts into `extension/vendor/xeet`. Xeet has its own [license terms](https://github.com/rauchg/xeet#license).
 
-- **Privacy** blocks promoted timeline entries and known X event and error-reporting endpoints. Turn on **Skip 18+ interstitials** to suppress the client prompt in supported timelines and post views.
-- **Sharing** rewrites the status URL that X's **Copy link** puts on your clipboard to your **Link domain**, such as x.com, vxtwitter.com, or fxtwitter.com. **Clean copied links** also strips X's tracking parameters. **Copy as image** puts a locally rendered PNG on your clipboard and keeps the share menu open.
-- **Image Export** sets the PNG's layout, width, pixel density, and theme. **Auto** follows the X page theme. **Expanded Text** uses the full text available to the browser. **Auto-expand “Show more”** also does this for posts with a visible expansion link.
-- **Direct downloads** adds media actions to X’s right-click menu. **Copy video address** and **Copy GIF address** copy the media's MP4 address instead of a post link, and X's **Copy photo link** is hidden in favour of **Copy image address**. In X's photo viewer and in fullscreen, where X shows no menu of its own, Better X opens its own X-style menu with the same actions. Shift-right-click still opens the browser's menu, which has **Download photo** for X photos. **Download video** in X's share menu downloads directly instead of asking for Premium. X delivers animated GIFs as MP4, so the download uses that format.
-- **Quiet Mode** hides the right sidebar, the account switcher, and the floating Grok and Chat buttons, and turns X into lowercase text without icons. The left navigation, its collapsed rail, and the mobile tab bar show plain labels with unread counts as numbers. Posts show a muted likes, reposts, and replies summary, with text actions on hover. **liked**, **reposted**, and **saved** stay visible with an accent underline. Post pages get a full text action row, and menus and toasts drop their icons and colour. While Quiet Mode is on, **Theme** forces X's dark or light theme without changing X's own setting (reload X to apply). **Accent colour** sets underlines and links. **Feed width**, **UI font size** (navigation, tabs, labels, and menus), **Text font size** (posts and names), and **Font** adjust the feed, and the font can be any installed font. It's black on dark and stays light on light. Columns stay where X puts them.
-- **Navigation** shows or hides each supported sidebar item. These settings also work with Quiet Mode off.
+## Settings
 
-Reload X after changing the ad or age-interstitial setting if you want to refetch already loaded posts. The age toggle affects the client prompt. X's server-side eligibility rules still apply.
+### Privacy
 
-Telemetry blocking covers `jot/client_event.json`, `graphql/user_flow.json`, and `graphql/error_log.json` on X and Twitter API hosts. Clean links drop the query and fragment, including the `a` and `s` share parameters. Links copied at a video's current time keep only the timestamp and stay on x.com.
+- **Block ads** removes promoted posts from timelines.
+- **Block telemetry** blocks requests to `jot/client_event.json`, `graphql/user_flow.json`, and `graphql/error_log.json` on X and Twitter API hosts.
+- **Skip 18+ interstitials** removes X's age prompt in timelines and post views. X's server-side rules still apply.
 
-The extension renders images locally using post content already on the page and media from X's image CDN. It uses media URLs already delivered to the browser for downloads. X can change its menus and feed data, so availability can vary with language, layout, and account.
+Reload X after you change **Block ads** or **Skip 18+ interstitials**. Posts that are already loaded keep the old setting.
 
-The privacy rules draw on [uBlock Origin's filter list](https://github.com/uBlockOrigin/uAssets/blob/master/filters/filters.txt) and [X telemetry investigation](https://github.com/uBlockOrigin/uAssets/issues/33072). Media selection follows the [Cobalt extractor](https://github.com/imputnet/cobalt/blob/main/api/src/processing/services/twitter.js). [Cody Collier's video](https://x.com/codycollier/status/2119780776095121848) informed Quiet Mode.
+### Sharing
+
+- **Link domain** sets the host of links that X's **Copy link** puts on the clipboard, for example `vxtwitter.com` or `fxtwitter.com`.
+- **Clean copied links** removes the query and fragment from those links, including the `a` and `s` tracking parameters. A link copied at a video's current time keeps `t` and stays on `x.com`.
+- **Copy posts as images** adds **Copy as image** to the share menu. The PNG uses post data that X has already loaded.
+- **Direct downloads** adds media actions to X's right-click menu.
+  - A photo menu gets **Copy image**, **Copy image address**, **Open image in new tab**, and **Download photo**. X's **Copy photo link** is hidden.
+  - A video menu gets **Copy video address**, **Copy video frame**, **Open video in new tab**, and **Download video**. A GIF menu gets the same actions for the GIF. The address is the MP4 file, not a post link. X serves GIFs as MP4.
+  - In X's photo viewer and in fullscreen, Better X shows its own menu with the same actions. Shift-right-click opens the browser menu, which has **Download photo**.
+  - **Download video** in X's share menu downloads the file. X's Premium prompt does not appear.
+
+### Appearance
+
+**Quiet Mode** shows X as lowercase text without icons. It hides the right sidebar, the account switcher, and the floating Grok and Chat buttons. Unread badges become numbers. Posts show a summary of likes, reposts, and replies, and the actions appear on hover. X's columns stay in place.
+
+These settings appear when Quiet Mode is on:
+
+- **Theme** forces X's dark or light theme. X's own setting does not change. Reload X after you change it.
+- **Accent colour** sets the underline and link color.
+- **Feed width (px)** sets the width of the feed.
+- **UI font size (px)** sets the size of navigation, tabs, labels, and menus.
+- **Text font size (px)** sets the size of post text and names.
+- **Font** accepts any installed font. Leave it empty to use X's font.
+
+### Navigation
+
+**Navigation** shows or hides each item in X's left menu. It works with Quiet Mode on or off.
+
+### Image Export
+
+**Image Export** sets the layout, width, pixel density, and theme of **Copy as image**. The **Auto** theme follows the X page. **Expanded Text** uses the full post text. **Auto-expand "Show more"** uses the full text for posts that show a **Show more** link.
+
+## Limits
+
+X changes its menus and feed data often. Menu detection uses X's English labels, so some features may not work in other languages.
+
+## Credits
+
+The privacy rules use [uBlock Origin's filters](https://github.com/uBlockOrigin/uAssets/blob/master/filters/filters.txt) and its [X telemetry investigation](https://github.com/uBlockOrigin/uAssets/issues/33072). Media selection follows [Cobalt's X extractor](https://github.com/imputnet/cobalt/blob/main/api/src/processing/services/twitter.js). Quiet Mode follows [Cody Collier's video](https://x.com/codycollier/status/2119780776095121848).
