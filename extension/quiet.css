@@ -273,14 +273,14 @@ html[data-better-x-quiet="true"] {
     &::backdrop { background: rgb(0 0 0 / 0.45); }
 
     &.better-x-native-search {
+      padding: 0;
       visibility: visible;
       pointer-events: auto;
       overflow: visible;
 
       & > div:first-child {
-        padding: 4px 8px;
+        padding: 8px 14px;
         border: 0 !important;
-        border-bottom: 1px solid var(--quiet-edge) !important;
         outline: none !important;
         box-shadow: none !important;
         background: transparent !important;
@@ -294,6 +294,19 @@ html[data-better-x-quiet="true"] {
 
         & svg { display: none; }
         & :is(button, [role="button"]) svg { display: unset; }
+
+        & [data-testid="clearButton"] {
+          min-width: 28px;
+          min-height: 28px;
+          border: 0;
+          background: transparent;
+          color: var(--quiet-soft) !important;
+          font: 400 18px/1 var(--quiet-font);
+
+          & svg { display: none; }
+          &::after { content: "×"; }
+          &:is(:hover, :focus-visible) { background: var(--quiet-hover) !important; }
+        }
       }
 
       & input {
@@ -302,19 +315,31 @@ html[data-better-x-quiet="true"] {
         outline: none !important;
         appearance: none !important;
         color: var(--quiet-fg);
+        caret-color: var(--quiet-fg);
         font: 400 17px var(--quiet-font);
         &::placeholder { color: var(--quiet-muted); }
       }
 
       &::backdrop { pointer-events: none; }
 
-      & [id^="typeaheadDropdown"] {
+      & :is([id^="typeaheadDropdown"], [data-testid="typeaheadDropdownWrapper"]) {
         position: static !important;
         width: auto !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+
+        & > div:has([role="listbox"]) { box-shadow: none !important; }
       }
 
-      & [role="listbox"] {
+      & :is([role="listbox"], [data-testid="typeaheadDropdownWrapper"]:not(:has([role="listbox"]))) {
         max-height: min(70dvh, calc(100dvh - var(--quiet-search-top) - 80px)) !important;
+        margin: 0 !important;
+        padding: 4px 8px 8px;
+        border-top: 1px solid var(--quiet-line) !important;
       }
     }
 
@@ -416,6 +441,7 @@ html[data-better-x-quiet="true"] {
     border-color: var(--quiet-edge) !important;
     border-radius: 8px;
     background-color: var(--quiet-menu) !important;
+    box-shadow: none !important;
     color: var(--quiet-fg);
     font-family: var(--quiet-font);
 
@@ -423,6 +449,68 @@ html[data-better-x-quiet="true"] {
       height: auto !important;
       max-height: none !important;
     }
+
+    & :is(h2, h3, [role="heading"]) {
+      color: var(--quiet-muted) !important;
+      font: 500 var(--quiet-small)/1.4 var(--quiet-font);
+      text-transform: lowercase;
+    }
+
+    & :is(button, [role="button"]):not([role="option"], [role="option"] *) {
+      border: 0;
+      background: transparent;
+      color: var(--quiet-soft) !important;
+      font: 400 var(--quiet-small)/1.35 var(--quiet-font);
+      text-transform: lowercase;
+      &:is(:hover, :focus-visible) { color: var(--quiet-fg) !important; }
+      & :is(span, svg) { color: inherit !important; }
+    }
+
+    & :is([role="option"], [data-testid="typeaheadResult"]) {
+      flex: none;
+      min-height: 0 !important;
+      border-radius: 7px;
+      font: 400 var(--quiet-label)/1.35 var(--quiet-font);
+
+      & > :is(button, [role="button"]) {
+        width: 100%;
+        min-height: 0 !important;
+        padding: 6px 10px !important;
+        border: 0;
+        border-radius: inherit;
+        background: transparent !important;
+        color: var(--quiet-fg);
+        font: inherit;
+
+        &:focus-visible { outline: 1px solid var(--quiet-soft); outline-offset: -1px; }
+
+        & > div {
+          height: auto !important;
+          min-height: 0 !important;
+          padding: 0 !important;
+        }
+      }
+
+      &:not(:has(img, [data-testid^="UserAvatar-Container"])) > button > div > div:first-child:not(:only-child):has(svg):not(:has(span, [dir])) {
+        display: none;
+      }
+
+      & :is(span, [dir]) {
+        font-size: var(--quiet-label);
+        line-height: 1.35;
+      }
+
+      &[data-better-x-go-to-profile]:not(:has(> button, > [role="button"])) { padding: 6px 10px; }
+
+      & [data-testid^="UserAvatar-Container"] {
+        width: 32px !important;
+        height: 32px !important;
+      }
+
+      & [data-testid="icon-verified"] { opacity: 0.65; }
+    }
+
+    & [data-testid="progressBar-bar"] { background-color: var(--quiet-soft) !important; }
 
     & :is([role="option"], [data-testid="typeaheadResult"]):is(:hover, :focus-within, [aria-selected="true"]) {
       background-color: var(--quiet-hover) !important;
