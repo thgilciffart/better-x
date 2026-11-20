@@ -110,7 +110,7 @@
       button.type = 'button'
       button.className = 'better-x-search-trigger'
       button.setAttribute('aria-keyshortcuts', mac ? 'Meta+/' : 'Meta+/ Control+/')
-      button.innerHTML = 'Search <kbd aria-hidden="true">⌘/</kbd>'
+      button.innerHTML = '<span>Search</span> <kbd aria-hidden="true">⌘/</kbd>'
       button.addEventListener('click', () => openSearch(button))
       searchButtons.set(slot, button)
     }

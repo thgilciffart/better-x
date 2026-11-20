@@ -23,7 +23,7 @@
     chat: 'Chat',
     calls: 'Calls',
     grok: 'Grok',
-    bookmarks: 'History / Bookmarks',
+    bookmarks: 'History',
     studio: 'Creator Studio',
     premium: 'Premium',
     profile: 'Profile',

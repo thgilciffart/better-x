@@ -172,7 +172,7 @@ html[data-better-x-quiet="true"] {
       width: 4px;
       height: 4px;
       border-radius: 50%;
-      background: var(--quiet-fg);
+      background: var(--quiet-accent);
       content: "";
     }
   }
@@ -202,13 +202,26 @@ html[data-better-x-quiet="true"] {
     color: var(--quiet-soft);
     font: 400 var(--quiet-label)/1.3 var(--quiet-font);
 
-    &:is(:hover, :focus-visible) { background: var(--quiet-hover) !important; color: var(--quiet-fg); }
+    &:is(:hover, :focus-visible) { color: var(--quiet-fg); }
   }
 
   & header[role="banner"] [data-testid="SideNav_NewTweet_Button"] {
     & > div { display: none; }
-    &::before { content: "post"; }
+
+    &::before {
+      content: "post";
+      text-decoration: underline 2px transparent;
+      text-underline-offset: 7px;
+      transition: var(--quiet-underline-out);
+    }
+
     &::after { content: "n"; color: var(--quiet-faint); }
+
+    &:is(:hover, :focus-visible)::before {
+      text-decoration-color: var(--quiet-accent);
+      text-underline-offset: 4px;
+      transition: var(--quiet-underline-in);
+    }
   }
 
   & .better-x-search-trigger {
@@ -217,6 +230,18 @@ html[data-better-x-quiet="true"] {
     gap: 8px;
     text-transform: lowercase;
     cursor: pointer;
+
+    & span {
+      text-decoration: underline 2px transparent;
+      text-underline-offset: 7px;
+      transition: var(--quiet-underline-out);
+    }
+
+    &:is(:hover, :focus-visible) span {
+      text-decoration-color: var(--quiet-accent);
+      text-underline-offset: 4px;
+      transition: var(--quiet-underline-in);
+    }
 
     & kbd { color: var(--quiet-faint); font: inherit; }
   }
