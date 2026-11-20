@@ -282,6 +282,32 @@
     if (!reverse && row.nextElementSibling !== addons) row.after(addons)
   }
 
+  function actionButtons(request, close, native = new Set()) {
+    return mediaActions(request.media).filter(([title]) => !native.has(title.toLowerCase())).map(([title, run, success]) => {
+      const button = document.createElement('button')
+      button.type = 'button'
+      button.setAttribute('role', 'menuitem')
+      button.className = 'better-x-media-action'
+      button.textContent = title
+      button.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') event.stopPropagation()
+      })
+      button.addEventListener('click', async event => {
+        event.stopPropagation()
+        if (!event.isTrusted || active !== request) return
+        const pending = (async () => run())()
+        close()
+        try {
+          await pending
+          if (success) BetterX.notice(success)
+        } catch {
+          BetterX.notice(title === 'Copy video frame' ? 'Could not copy the frame. Play the video and try again.' : `Could not ${title.toLowerCase()}`)
+        }
+      })
+      return button
+    })
+  }
+
   function appendActions(items, request) {
     const shown = items.filter(item => !item.hasAttribute(hidden))
     const last = lastItem(shown.length ? shown : items)
@@ -291,35 +317,31 @@
     addons.className = 'better-x-media-actions'
     addons.setAttribute('role', 'presentation')
     const native = new Set(items.filter(item => !replaced.test(text(item))).map(item => text(item).toLowerCase()))
-    for (const [title, run, success] of mediaActions(request.media)) {
-      if (native.has(title.toLowerCase())) continue
-      const button = document.createElement('button')
-      button.type = 'button'
-      button.setAttribute('role', 'menuitem')
-      button.className = 'better-x-media-action'
-      button.textContent = title
+    for (const button of actionButtons(request, () => BetterX.closeMenu(request.menu), native)) {
       button.style.font = `${style.fontWeight} ${style.fontSize}/${style.lineHeight} ${style.fontFamily}`
       button.style.color = style.color
       button.style.minHeight = `${last.getBoundingClientRect().height}px`
-      button.addEventListener('keydown', event => {
-        if (event.key === 'Enter' || event.key === ' ') event.stopPropagation()
-      })
-      button.addEventListener('click', async event => {
-        event.stopPropagation()
-        if (!event.isTrusted || active !== request) return
-        const pending = (async () => run())()
-        BetterX.closeMenu(request.menu)
-        try {
-          await pending
-          if (success) BetterX.notice(success)
-        } catch {
-          BetterX.notice(title === 'Copy video frame' ? 'Could not copy the frame. Play the video and try again.' : `Could not ${title.toLowerCase()}`)
-        }
-      })
       addons.append(button)
     }
     request.addons = addons
     clearTimeout(request.timer)
+  }
+
+  function ownMenu(request, { clientX, clientY }) {
+    const menu = document.createElement('div')
+    menu.className = 'better-x-media-menu'
+    menu.setAttribute('role', 'menu')
+    menu.popover = 'manual'
+    menu.style.backgroundColor = getComputedStyle(document.body).backgroundColor
+    menu.append(...actionButtons(request, clear))
+    const host = document.fullscreenElement || document.body
+    host.append(menu)
+    menu.showPopover()
+    menu.style.left = `${Math.max(8, Math.min(clientX, innerWidth - menu.offsetWidth - 8))}px`
+    menu.style.top = `${Math.max(8, Math.min(clientY, innerHeight - menu.offsetHeight - 8))}px`
+    request.observer.disconnect()
+    clearTimeout(request.timer)
+    Object.assign(request, { own: true, menu, addons: menu })
   }
 
   function scan(request) {
@@ -369,16 +391,30 @@
     const previous = new Set(Array.from(document.querySelectorAll(menuSelector))
       .filter(menu => menu !== reused && visible(menu)))
     const observer = new MutationObserver(() => scan(request))
-    const request = { media, previous, observer, timer: setTimeout(clear, 1500) }
+    const request = { event, media, previous, observer, timer: setTimeout(clear, 1500) }
     active = request
+    if (document.fullscreenElement?.contains(event.target)) {
+      event.preventDefault()
+      event.stopImmediatePropagation()
+      ownMenu(request, event)
+      return
+    }
     setTimeout(() => {
-      if (active !== request) return
+      if (active !== request || request.own) return
       observer.observe(document, {
         childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'hidden', 'class', 'aria-hidden', 'data-state'],
       })
       scan(request)
     }, 0)
   }, true)
+
+  addEventListener('contextmenu', event => {
+    if (active?.event !== event || active.own || event.defaultPrevented) return
+    event.preventDefault()
+    ownMenu(active, event)
+  })
+
+  document.addEventListener('fullscreenchange', clear)
 
   document.addEventListener('pointerdown', event => {
     if (event.button !== 2 && !active?.menu?.contains(event.target)) clear()
