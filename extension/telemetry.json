@@ -1,0 +1,11 @@
+[
+  {
+    "id": 1,
+    "priority": 1,
+    "action": { "type": "block" },
+    "condition": {
+      "requestDomains": ["x.com", "twitter.com"],
+      "regexFilter": "^https://[^/]+/(i/api/)?1\\.1/(jot/client_event|graphql/(user_flow|error_log))\\.json([?#]|$)"
+    }
+  }
+]

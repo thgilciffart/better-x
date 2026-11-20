@@ -1,0 +1,9 @@
+html[data-better-x-ads="true"] :is(
+  [data-testid="cellInnerDiv"]:has([data-testid="top-impression-pixel"]),
+  [data-testid="placementTracking"]:has([data-testid$="-impression-pixel"]),
+  [id^="urt"] > ul > li:has([class^="group-has-[[data-ad-disclosure"]),
+  :is([data-testid="UserCell"], [data-testid="eventHero"], [data-testid="trend"]):has(path[d$="10H8.996V8h7v7z"]),
+  [data-testid="trend"]:has(a[href*="src=promoted_trend_click"])
+) {
+  display: none !important;
+}
