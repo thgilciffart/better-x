@@ -45,6 +45,8 @@ Reload 𝕏 after you change **Block ads** or **Skip 18+ interstitials**. Posts 
 
 **Quiet Mode** shows 𝕏 as lowercase text without icons. It hides the right sidebar, the account switcher, and the floating Grok and Chat buttons. Unread badges become numbers. Posts show a summary of likes, reposts, and replies, and the actions appear on hover. 𝕏's columns stay in place.
 
+Select **Search** in Quiet Mode or press **/** to open the search overlay. Press **Enter** to view the results on 𝕏.
+
 These settings work with Quiet Mode on or off. Reset a field to let 𝕏 choose its default, or to use the Quiet Mode default when Quiet Mode is on.
 
 - **Theme** forces 𝕏's dark or light theme. 𝕏's own setting does not change. Reload 𝕏 after you change it.
