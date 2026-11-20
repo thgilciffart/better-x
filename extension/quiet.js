@@ -27,6 +27,31 @@
   }
 
   const searchInput = 'input[data-testid="SearchBox_Search_Input"], form[role="search"] input[role="combobox"]'
+  let searchForm
+  let profileResult
+
+  function markProfileResult(option) {
+    if (option === profileResult) return
+    profileResult?.removeAttribute('data-better-x-go-to-profile')
+    profileResult = option
+    profileResult?.setAttribute('data-better-x-go-to-profile', '')
+  }
+
+  function updateSearchResults() {
+    const options = searchForm.querySelectorAll('[role="listbox"] > [role="option"]')
+    markProfileResult([...options].find(option => /^go to\s+@/i.test(option.textContent.trim())))
+  }
+
+  const searchResultsObserver = new MutationObserver(updateSearchResults)
+
+  function watchSearchResults({ target }) {
+    if (!(target instanceof HTMLInputElement) || !target.matches(searchInput) ||
+        !target.form || target.form === searchForm) return
+    searchResultsObserver.disconnect()
+    searchForm = target.form
+    searchResultsObserver.observe(searchForm, { childList: true, subtree: true, characterData: true })
+    updateSearchResults()
+  }
 
   function closeNativeSearch(restoreFocus = false) {
     if (!nativeSearch) return
@@ -254,6 +279,8 @@
     syncStyle()
     if (settings.quiet) {
       window.addEventListener('keydown', handleSearchKey, true)
+      window.addEventListener('focusin', watchSearchResults, true)
+      watchSearchResults({ target: document.activeElement })
       window.navigation?.addEventListener('currententrychange', queueUpdate)
       observer.observe(root, {
         childList: true, subtree: true, characterData: true,
@@ -263,6 +290,10 @@
       return
     }
     window.removeEventListener('keydown', handleSearchKey, true)
+    window.removeEventListener('focusin', watchSearchResults, true)
+    searchResultsObserver.disconnect()
+    searchForm = undefined
+    markProfileResult(undefined)
     window.navigation?.removeEventListener('currententrychange', queueUpdate)
     for (const button of searchButtons.values()) button.remove()
     closeNativeSearch()

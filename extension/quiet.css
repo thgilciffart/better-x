@@ -383,9 +383,20 @@ html[data-better-x-quiet="true"] {
   }
 
   & form[role="search"]:not(.better-x-search):has(:is(input[data-testid="SearchBox_Search_Input"], input[role="combobox"])) {
-    & [data-testid="SearchBox_Search_Input_label"] {
-      border-color: var(--quiet-edge) !important;
+    & > div:first-child > div:has([data-testid="SearchBox_Search_Input_label"]) {
+      border: 1px solid var(--quiet-edge) !important;
+      border-radius: 999px;
       background: var(--quiet-menu) !important;
+      box-shadow: none !important;
+      outline: none !important;
+      overflow: hidden;
+
+      &:focus-within { border-color: var(--quiet-soft) !important; }
+    }
+
+    & [data-testid="SearchBox_Search_Input_label"] {
+      border: 0 !important;
+      background: transparent !important;
       box-shadow: none !important;
     }
 
@@ -398,7 +409,7 @@ html[data-better-x-quiet="true"] {
       font-family: var(--quiet-font);
     }
 
-    & :focus-within[data-testid="SearchBox_Search_Input_label"] { border-color: var(--quiet-soft) !important; }
+    & [data-testid="SearchBox_Search_Input_label"] input:focus { outline: none !important; }
   }
 
   & :is([id^="typeaheadDropdown"], [data-testid="typeaheadDropdownWrapper"]) {
@@ -433,6 +444,13 @@ html[data-better-x-quiet="true"] {
     max-height: 70dvh !important;
     overflow-y: auto !important;
     overscroll-behavior: contain;
+  }
+
+  & [role="listbox"]:has(> [data-better-x-go-to-profile]) {
+    display: flex;
+    flex-direction: column;
+
+    & > [data-better-x-go-to-profile] { order: -1; }
   }
 
   & :is(header[role="banner"] nav, [data-testid="BottomBar"]) :is(a, button) [aria-live] {
