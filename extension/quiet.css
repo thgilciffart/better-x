@@ -79,7 +79,7 @@ html[data-better-x-quiet="true"] {
     & a[data-better-x-current] > div:has(> [dir]) { background: var(--quiet-dot) no-repeat; }
     & :is(a, button):is(:hover, :focus-visible) > div > [dir] {
       color: var(--quiet-fg) !important;
-      text-decoration: underline 1px;
+      text-decoration: underline 2px var(--quiet-accent);
       text-underline-offset: 4px;
     }
     & :is(a, button) > div > div:first-child > div:empty { display: none; }
@@ -127,7 +127,7 @@ html[data-better-x-quiet="true"] {
     &:is(:hover, :focus-visible) {
       color: var(--quiet-fg);
 
-      &::before { text-decoration: underline 1px; text-underline-offset: 4px; }
+      &::before { text-decoration: underline 2px var(--quiet-accent); text-underline-offset: 4px; }
     }
 
     &[data-testid="AppTabBar_Home_Link"]::before { content: "home"; }
