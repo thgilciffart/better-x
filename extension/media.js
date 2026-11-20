@@ -7,8 +7,10 @@
   const viewer = /\/(?:photo|video)\/\d+$/
   const posts = new Map()
   const lookup = new Map()
-  let menu
-  let label
+  const menuSelector = '[role="menu"], [data-testid="Dropdown"], [data-testid="sheetDialog"], [data-testid$="ContextMenu" i]'
+  const itemSelector = '[role="menuitem"], button, [role="button"], [tabindex="0"]'
+  const photoActions = /^(?:copy (?:photo|image) (?:link|address)|post photo)$/i
+  const videoActions = /^(?:copy (?:video|gif) (?:link|address)|copy link at current time|post (?:video|gif))$/i
   let active
 
   function mediaUrl(value) {
@@ -138,43 +140,19 @@
     return null
   }
 
-  function build() {
-    const ns = 'http://www.w3.org/2000/svg'
-    const icon = document.createElementNS(ns, 'svg')
-    const path = document.createElementNS(ns, 'path')
-    const button = document.createElement('button')
-    menu = document.createElement('div')
-    label = document.createElement('span')
-    icon.setAttribute('viewBox', '0 0 24 24')
-    icon.setAttribute('aria-hidden', 'true')
-    path.setAttribute('d', 'M12 4v11m-5-4 5 5 5-5M5 20h14')
-    icon.append(path)
-    button.type = 'button'
-    button.setAttribute('role', 'menuitem')
-    button.append(icon, label)
-    button.addEventListener('click', event => {
-      if (event.isTrusted) download()
-    })
-    menu.className = 'better-x-media-menu'
-    menu.setAttribute('role', 'menu')
-    menu.setAttribute('aria-label', 'Better X')
-    menu.append(button)
+  function visible(element) {
+    return element.checkVisibility({ checkVisibilityCSS: true }) && !element.closest('[aria-hidden="true"]')
   }
 
-  function close() {
+  function clear() {
     if (!active) return
-    const { controller, origin } = active
-    const focused = menu.contains(document.activeElement)
+    active.observer.disconnect()
+    clearTimeout(active.timer)
+    active.button?.remove()
     active = null
-    controller.abort()
-    menu.remove()
-    if (focused && origin?.isConnected) origin.focus({ preventScroll: true })
   }
 
-  async function download() {
-    if (!active) return
-    const { kind, url, filename } = active.media
-    close()
+  async function download({ kind, url, filename }) {
     if (!BetterX.settings.downloads) return
     let reply
     try {
@@ -183,39 +161,63 @@
     if (!reply?.ok) BetterX.notice(reply?.error || `Could not download ${names[kind]}`)
   }
 
-  function dismiss(event) {
-    if (!menu.contains(event.target)) close()
+  function appendDownload(menu, actions, request) {
+    const last = actions.reduce((bottom, item) =>
+      item.getBoundingClientRect().bottom >= bottom.getBoundingClientRect().bottom ? item : bottom)
+    let row = last
+    while (row.parentElement !== menu && !actions.some(action => action !== last && row.parentElement.contains(action))) {
+      row = row.parentElement
+    }
+
+    const button = document.createElement('button')
+    button.type = 'button'
+    button.setAttribute('role', 'menuitem')
+    button.className = 'better-x-media-download'
+    button.textContent = `Download ${names[request.media.kind]}`
+    const label = Array.from(last.querySelectorAll('span, [dir]')).findLast(element => element.textContent.trim()) || last
+    const style = getComputedStyle(label)
+    button.style.font = `${style.fontWeight} ${style.fontSize}/${style.lineHeight} ${style.fontFamily}`
+    button.style.color = style.color
+    button.style.minHeight = `${last.getBoundingClientRect().height}px`
+    button.addEventListener('keydown', event => {
+      if (event.key === 'Enter' || event.key === ' ') event.stopPropagation()
+    })
+    button.addEventListener('click', async event => {
+      event.stopPropagation()
+      if (!event.isTrusted || active !== request || button.hasAttribute('aria-busy')) return
+      button.setAttribute('aria-busy', 'true')
+      try {
+        await download(request.media)
+      } finally {
+        button.removeAttribute('aria-busy')
+      }
+    })
+    if (getComputedStyle(row.parentElement).flexDirection === 'column-reverse') row.before(button)
+    else row.after(button)
+    Object.assign(request, { menu, button, last })
+    clearTimeout(request.timer)
   }
 
-  function press(event) {
-    if (!event.isTrusted) return
-    const { key } = event
-    if (key === 'Enter' || key === ' ') download()
-    else if (key === 'Escape') close()
-    else if (!/^(?:Arrow|Home|End|Page)/.test(key)) {
-      if (!/^(?:Shift|Control|Alt|Meta)$/.test(key)) close()
+  function scan(request) {
+    if (active !== request) return
+    if (request.menu && (!request.menu.isConnected || (request.last.isConnected && !visible(request.last)))) {
+      clear()
       return
     }
-    event.preventDefault()
-    event.stopImmediatePropagation()
-  }
+    if (request.button?.isConnected && request.last.isConnected) return
+    request.button?.remove()
 
-  function open(event, media) {
-    if (!menu) build()
-    label.textContent = `Download ${names[media.kind]}`
-    document.documentElement.append(menu)
-    const { clientWidth, clientHeight } = document.documentElement
-    menu.style.left = `${Math.max(8, Math.min(event.clientX, clientWidth - menu.offsetWidth - 8))}px`
-    menu.style.top = `${Math.max(8, Math.min(event.clientY, clientHeight - menu.offsetHeight - 8))}px`
-    const controller = new AbortController()
-    const options = { capture: true, signal: controller.signal }
-    active = { media, controller, origin: document.activeElement }
-    addEventListener('pointerdown', dismiss, options)
-    addEventListener('scroll', dismiss, options)
-    addEventListener('resize', close, options)
-    addEventListener('blur', event => { if (event.target === window) close() }, options)
-    addEventListener('keydown', press, options)
-    menu.firstChild.focus({ preventScroll: true })
+    const labels = request.media.kind === 'photo' ? photoActions : videoActions
+    for (const menu of document.querySelectorAll(menuSelector)) {
+      if (request.previous.has(menu)) continue
+      const actions = [...new Set(Array.from(menu.querySelectorAll(itemSelector))
+        .filter(item => labels.test(item.textContent.trim().replace(/\s+/g, ' ')) && visible(item))
+        .map(item => item.closest('[role="menuitem"]') || item))]
+        .filter(item => menu.contains(item))
+      if (!actions.length) continue
+      appendDownload(menu, actions, request)
+      break
+    }
   }
 
   document.addEventListener('better-x:media', event => {
@@ -225,16 +227,39 @@
   })
 
   addEventListener('contextmenu', event => {
-    if (menu?.contains(event.target)) {
-      event.preventDefault()
-      return
-    }
-    close()
+    const reused = active?.menu
+    clear()
     if (!event.isTrusted || !BetterX.settings.downloads || event.shiftKey || !(event.target instanceof Element)) return
     const media = find(event)
     if (!media) return
-    event.preventDefault()
-    event.stopImmediatePropagation()
-    open(event, media)
+
+    const previous = new Set(Array.from(document.querySelectorAll(menuSelector))
+      .filter(menu => menu !== reused && visible(menu)))
+    const observer = new MutationObserver(() => scan(request))
+    const request = { media, previous, observer, timer: setTimeout(clear, 1500) }
+    active = request
+    setTimeout(() => {
+      if (active !== request) return
+      if (!event.defaultPrevented) {
+        clear()
+        return
+      }
+      observer.observe(document, {
+        childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'hidden', 'class', 'aria-hidden'],
+      })
+      scan(request)
+    }, 0)
   }, true)
+
+  document.addEventListener('pointerdown', event => {
+    if (event.button !== 2 && !active?.menu?.contains(event.target)) clear()
+  }, true)
+
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') clear()
+  }, true)
+
+  chrome.storage.onChanged.addListener(() => {
+    if (!BetterX.settings.downloads) clear()
+  })
 })()
