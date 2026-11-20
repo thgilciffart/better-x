@@ -353,7 +353,6 @@ html[data-better-x-quiet="true"] {
         }
 
         & [data-better-x-goto] { order: -1; }
-        & [data-better-x-overflow] { display: none !important; }
       }
     }
 
@@ -477,18 +476,7 @@ html[data-better-x-quiet="true"] {
 
     & [role="option"] [data-testid^="UserAvatar-Container"] { flex: none; width: 40px; height: 40px; }
 
-    & [data-better-x-slot]::after {
-      content: "⌃⇧" attr(data-better-x-slot);
-      align-self: center;
-      margin-inline-start: auto;
-      padding: 1px 5px;
-      border: 1px solid var(--quiet-edge);
-      border-radius: 4px;
-      color: var(--quiet-soft);
-      font-size: var(--quiet-small);
-      font-variant-numeric: tabular-nums;
-      line-height: 1.3;
-    }
+    & [role="option"] img { opacity: 1 !important; }
 
     & :is(span, [dir]) { font-size: var(--quiet-label); }
 
