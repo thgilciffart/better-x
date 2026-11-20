@@ -1,7 +1,7 @@
 (() => {
   const { settings, notice, postLink, postSelector, copyPostImage } = BetterX
   const menuSelector = '[role="menu"], [data-testid="Dropdown"], [data-testid="sheetDialog"]'
-  const shareSelector = '[data-testid="share"], button[aria-label*="share" i], [role="button"][aria-label*="share" i]'
+  const shareSelector = '[data-engagement-action="share"], [data-testid="share"], button[aria-label*="share" i], [role="button"][aria-label*="share" i]'
   const copyLabel = /^copy link(?: to (?:post|tweet))?$/i
   let active
   let timer
@@ -17,15 +17,6 @@
     clearTimeout(timer)
   }
 
-  function closeMenu(menu, copy) {
-    const event = new KeyboardEvent('keydown', {
-      key: 'Escape', code: 'Escape', keyCode: 27, bubbles: true,
-    })
-    if (!menu.contains(document.activeElement)) copy.focus({ preventScroll: true })
-    const target = menu.contains(document.activeElement) ? document.activeElement : menu
-    target.dispatchEvent(event)
-  }
-
   function placeLast() {
     const native = [...active.menu.querySelectorAll('[role="menuitem"]')]
       .filter(item => item !== active.image && visible(item))
@@ -36,7 +27,10 @@
     while (row.parentElement !== active.menu && !native.some(item => item !== last && row.parentElement.contains(item))) {
       row = row.parentElement
     }
-    const reverse = getComputedStyle(row.parentElement).flexDirection === 'column-reverse'
+    const style = getComputedStyle(row.parentElement)
+    const reverse = style.flexDirection === 'column-reverse'
+    const order = /flex|grid/.test(style.display) ? (reverse ? '-2147483647' : '2147483647') : ''
+    if (active.image.style.order !== order) active.image.style.order = order
     if (reverse && row.previousElementSibling !== active.image) row.before(active.image)
     if (!reverse && row.nextElementSibling !== active.image) row.after(active.image)
   }
@@ -136,45 +130,24 @@
   function start(trigger) {
     const post = trigger.closest(postSelector) || trigger.closest('[role="dialog"]')?.querySelector('article')
     const link = post && postLink(post)
-    if (!link || (!settings.cleanLinks && !settings.copyImage)) return
+    if (!link || !settings.copyImage) return
     const previous = new Set(Array.from(document.querySelectorAll(menuSelector)).filter(visible))
-    active = { post, link, previous }
+    active = { trigger, post, link, previous }
     timer = setTimeout(clear, 1800)
   }
 
   function handle(event) {
     const target = event.target
-    if (!(target instanceof Element)) return
-    if (active?.copy?.contains(target) && settings.cleanLinks && active.post.isConnected) {
-      event.preventDefault()
-      event.stopImmediatePropagation()
-      const { link, menu, copy } = active
-      const url = new URL(link)
-      url.hostname = settings.linkHost
-      navigator.clipboard.writeText(url.href).then(
-        () => {
-          if (!document.querySelector('[data-testid="toast"]')?.getClientRects().length) notice('Copied link')
-        },
-        () => notice('Could not copy link'),
-      )
-      closeMenu(menu, copy)
-      return
-    }
-    if (active?.menu?.contains(target)) return
+    if (!(target instanceof Element) || active?.menu?.contains(target)) return
     const trigger = target.closest(shareSelector) || target.closest('[role="group"] [aria-haspopup="menu"]:not([data-testid])')
+    if (trigger && active?.trigger === trigger) return
     clear()
     if (trigger) start(trigger)
   }
 
-  function blockNativeCopy(event) {
-    if (!settings.cleanLinks || !active?.post.isConnected || !active.copy?.contains(event.target)) return
-    if ('button' in event && event.button !== 0) return
-    event.stopImmediatePropagation()
-  }
-
-  for (const type of ['pointerdown', 'pointerup', 'mousedown', 'mouseup']) {
-    window.addEventListener(type, blockNativeCopy, true)
-  }
+  window.addEventListener('pointerdown', event => {
+    if (event.button === 0) handle(event)
+  }, true)
   window.addEventListener('click', handle, true)
   window.addEventListener('keydown', event => {
     if (event.key === 'Escape') clear()

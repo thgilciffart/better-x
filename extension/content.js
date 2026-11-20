@@ -5,6 +5,8 @@
     ads: 'data-better-x-ads',
     ageWarning: 'data-better-x-age-warning',
     quiet: 'data-better-x-quiet',
+    cleanLinks: 'data-better-x-clean-links',
+    linkHost: 'data-better-x-link-host',
   }
   const origins = new Set(['https://x.com', 'https://twitter.com', 'https://www.x.com', 'https://www.twitter.com'])
   const postSelector = 'article, [data-testid="quoteTweet"], div[role="link"]:has([data-testid="User-Name"])'

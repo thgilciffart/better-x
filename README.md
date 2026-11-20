@@ -19,7 +19,7 @@ Xeet's source and bundled reference fonts have separate license terms. [Xeet lic
 ## Use
 
 - **Privacy** blocks promoted timeline entries and known X event and error-reporting endpoints. Turn on **Skip 18+ interstitials** to suppress the client prompt in supported timelines and post views.
-- **Sharing** replaces **Copy link** with a clean status URL. Enter your preferred **Link domain**, such as x.com, vxtwitter.com, or fxtwitter.com. **Copy as image** puts a locally rendered PNG on your clipboard and keeps the share menu open.
+- **Sharing** cleans the status URL that X's **Copy link** puts on your clipboard and applies your **Link domain**, such as x.com, vxtwitter.com, or fxtwitter.com. **Copy as image** puts a locally rendered PNG on your clipboard and keeps the share menu open.
 - **Image Export** sets the PNG's layout, width, pixel density, and theme. **Auto** follows the X page theme. **Expanded Text** uses the full text available to the browser. **Auto-expand “Show more”** also does this for posts with a visible expansion link.
 - **Direct downloads** adds media actions to X’s right-click menu. X delivers animated GIFs as MP4, so the download uses that format.
 - **Quiet Mode** uses a dark, single-feed layout with quieter navigation and post actions.
@@ -27,7 +27,7 @@ Xeet's source and bundled reference fonts have separate license terms. [Xeet lic
 
 Reload X after changing the ad or age-interstitial setting if you want to refetch already loaded posts. The age toggle affects the client prompt. X's server-side eligibility rules still apply.
 
-Telemetry blocking covers `jot/client_event.json`, `graphql/user_flow.json`, and `graphql/error_log.json` on X and Twitter API hosts. Clean links drop the query and fragment, including the `a` and `s` share parameters.
+Telemetry blocking covers `jot/client_event.json`, `graphql/user_flow.json`, and `graphql/error_log.json` on X and Twitter API hosts. Clean links drop the query and fragment, including the `a` and `s` share parameters. Links copied at a video's current time keep only the timestamp and stay on x.com.
 
 The extension renders images locally using post content already on the page and media from X's image CDN. It uses media URLs already delivered to the browser for downloads. X can change its menus and feed data, so availability can vary with language, layout, and account.
 
