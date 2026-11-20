@@ -68,7 +68,7 @@
     const inline = inputs.find(input => input.form && input.getClientRects().length)
     if (inline) {
       inline.focus({ preventScroll: true })
-      return document.activeElement === inline
+      if (document.activeElement === inline) return true
     }
     const sidebar = inputs.find(input => input.closest('[data-testid="sidebarColumn"]'))
     if (openNativeSearch(sidebar, opener)) return true

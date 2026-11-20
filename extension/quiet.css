@@ -291,6 +291,9 @@ html[data-better-x-quiet="true"] {
           box-shadow: none !important;
           outline: none !important;
         }
+
+        & svg { display: none; }
+        & :is(button, [role="button"]) svg { display: unset; }
       }
 
       & input {
@@ -303,18 +306,17 @@ html[data-better-x-quiet="true"] {
         &::placeholder { color: var(--quiet-muted); }
       }
 
-      & svg { display: none; }
-      & :is(button, [role="button"]) svg { display: unset; }
-
       &::backdrop { pointer-events: none; }
 
       & [id^="typeaheadDropdown"] {
         position: static !important;
         width: auto !important;
+
+        & > div { height: auto !important; }
       }
 
       & [role="listbox"] {
-        max-height: min(70dvh, calc(100dvh - var(--quiet-search-top) - 80px));
+        max-height: min(70dvh, calc(100dvh - var(--quiet-search-top) - 80px)) !important;
       }
     }
 
@@ -423,8 +425,8 @@ html[data-better-x-quiet="true"] {
     [data-testid="typeaheadDropdownWrapper"]:not(:has([role="listbox"]))
   ) {
     height: auto !important;
-    max-height: 70dvh;
-    overflow-y: auto;
+    max-height: 70dvh !important;
+    overflow-y: auto !important;
     overscroll-behavior: contain;
   }
 
