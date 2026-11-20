@@ -142,3 +142,52 @@ select {
   color: #ffc3af;
   font-size: 12px;
 }
+
+#image-export select { width: 140px; }
+
+#image-export #image-preset { width: 174px; }
+
+#image-export input[type="number"] {
+  width: 68px;
+  padding: 3px 5px;
+  border: 1px solid #464646;
+  border-radius: 4px;
+  background: #181818;
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+}
+
+.font-scale {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.font-scale input { width: 96px; accent-color: #bbb; }
+
+.image-variant-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.image-variant-actions button {
+  padding: 5px 8px;
+  border: 1px solid #464646;
+  border-radius: 4px;
+  background: #181818;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.image-variant-actions button:hover:enabled { background: #252525; }
+
+.image-export-status {
+  margin: 8px 0 0;
+  color: #ffc3af;
+  font-size: 12px;
+}

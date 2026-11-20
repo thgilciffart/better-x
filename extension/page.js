@@ -141,13 +141,21 @@
       (ageOperations.has(operation) || /(?:Timeline|Tweets|Media)$/.test(operation))
     const age = enabled(ageAttribute, false) && ageOperations.has(operation)
     const records = new Map()
+    const notes = new Map()
     let changed = false
     walk(data, node => {
       if (ads && pruneInstructions(node)) changed = true
       if (age && clearAgePrompt(node)) changed = true
       collectMedia(node, records)
+      const note = node.note_tweet?.note_tweet_results?.result?.text
+      if (typeof note === 'string' && typeof node.rest_id === 'string' && /^\d+$/.test(node.rest_id)) {
+        notes.set(node.rest_id, note.slice(0, 24000))
+      }
     })
     announceMedia(records)
+    if (notes.size) {
+      document.dispatchEvent(new CustomEvent('better-x:post-text', { detail: JSON.stringify([...notes]) }))
+    }
     return changed
   }
 

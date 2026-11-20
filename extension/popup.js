@@ -59,7 +59,7 @@ function setValue(control, value) {
 async function hydrate() {
   saved = await load()
   for (const [key, value] of Object.entries(saved)) {
-    setValue(form.elements[key], value)
+    if (form.elements[key]) setValue(form.elements[key], value)
   }
   updateLinkDomain()
 }

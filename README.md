@@ -11,7 +11,8 @@ Better X is a Manifest V3 extension for X on Chrome 120+ and compatible Chromium
 ## Use
 
 - **Privacy** blocks promoted timeline entries and known X event and error-reporting endpoints. Turn on **Skip 18+ interstitials** to suppress the client prompt in supported timelines and post views.
-- **Sharing** replaces **Copy link** with a clean status URL. Set **Link domain** to x.com, vxtwitter.com, or fxtwitter.com. **Copy as image** puts a locally rendered PNG on your clipboard.
+- **Sharing** replaces **Copy link** with a clean status URL. Set **Link domain** to x.com, vxtwitter.com, or fxtwitter.com. **Copy as image** puts a locally rendered PNG on your clipboard and keeps the share menu open.
+- **Image Export** sets the PNG's layout, width, pixel density, theme, and font scale. Pick a preset or save your settings as a variant. **Expanded Text** uses the full text available to the browser. **Auto-expand “Show more”** also does this for posts with a visible expansion link.
 - **Downloads** appear when you right-click a supported post photo, video, or animated GIF. X delivers animated GIFs as MP4, so the download uses that format.
 - **Quiet Mode** uses a dark, single-feed layout with quieter navigation and post actions.
 - **Navigation** shows or hides each supported sidebar item. These settings also work with Quiet Mode off.
