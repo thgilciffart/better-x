@@ -261,10 +261,11 @@ html[data-better-x-quiet="true"] {
     max-width: none;
     margin: 0 auto;
     padding: 8px;
-    border: 1px solid var(--quiet-edge);
+    border: 1px solid var(--quiet-edge) !important;
     border-radius: 16px;
-    background: var(--quiet-menu);
-    box-shadow: 0 18px 45px var(--quiet-shadow);
+    background: var(--quiet-menu) !important;
+    box-shadow: 0 18px 45px var(--quiet-shadow) !important;
+    outline: none;
     color: var(--quiet-fg);
     font: 400 var(--quiet-label)/1.4 var(--quiet-font);
     overscroll-behavior: contain;
@@ -278,17 +279,24 @@ html[data-better-x-quiet="true"] {
 
       & > div:first-child {
         padding: 4px 8px;
+        border: 0 !important;
         border-bottom: 1px solid var(--quiet-edge) !important;
+        outline: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
 
         & :is(div, input) {
           border-color: transparent !important;
           background: transparent !important;
           box-shadow: none !important;
+          outline: none !important;
         }
       }
 
       & input {
         padding: 8px 4px;
+        border: 0 !important;
+        outline: none !important;
         color: var(--quiet-fg);
         font: 400 17px var(--quiet-font);
         &::placeholder { color: var(--quiet-muted); }
@@ -313,7 +321,7 @@ html[data-better-x-quiet="true"] {
           box-shadow: none !important;
         }
 
-        & [role="listbox"] {
+        &:is([role="listbox"]), & [role="listbox"] {
           display: flex;
           flex-direction: column;
           height: auto !important;
@@ -344,19 +352,6 @@ html[data-better-x-quiet="true"] {
 
         & [data-better-x-goto] { order: -1; }
         & [data-better-x-overflow] { display: none !important; }
-
-        & [data-better-x-slot]::after {
-          content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='23' height='15' viewBox='0 0 36 24' fill='none' stroke='%2371767b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m18 15-6-6-6 6' transform='translate(1 4) scale(0.8)'/%3E%3Cpath transform='translate(17 3) scale(0.85)' d='M9 19a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-6a1 1 0 0 1 1-1h3.293a.707.707 0 0 0 .5-1.207l-7.086-7.086a1 1 0 0 0-1.414 0l-7.086 7.086a.707.707 0 0 0 .5 1.207H8a1 1 0 0 1 1 1z'/%3E%3C/svg%3E") " " attr(data-better-x-slot);
-          display: inline-flex;
-          align-items: center;
-          gap: 3px;
-          margin-inline-start: auto;
-          align-self: center;
-          color: var(--quiet-faint);
-          font-size: var(--quiet-small);
-          font-variant-numeric: tabular-nums;
-          line-height: 1;
-        }
       }
     }
 
@@ -426,7 +421,8 @@ html[data-better-x-quiet="true"] {
   & [data-better-x-hide] { display: none !important; }
 
   & form[role="search"]:not(.better-x-native-search) :is(div, input) {
-    border-color: var(--quiet-edge) !important;
+    border-color: transparent !important;
+    background: transparent !important;
     box-shadow: none !important;
     outline: none !important;
   }
@@ -440,7 +436,43 @@ html[data-better-x-quiet="true"] {
     font-family: var(--quiet-font);
 
     & :is(ul, li) { margin: 0; padding: 0; list-style: none; }
-    & :is([role="option"], [data-testid="typeaheadResult"]) { min-height: 0; padding-block: 8px; }
+
+    & :is([role="option"], [data-testid="typeaheadResult"]) {
+      min-height: 0;
+      padding-block: 8px;
+      align-items: center !important;
+      justify-content: flex-start !important;
+      text-align: left;
+    }
+
+    & [role="option"] div {
+      min-height: 0 !important;
+      justify-content: flex-start !important;
+      margin-inline: 0 !important;
+    }
+
+    & [role="option"] :is(button, [role="presentation"]) {
+      min-height: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+      background: transparent !important;
+      justify-content: flex-start !important;
+    }
+
+    & [role="option"] [data-testid^="UserAvatar-Container"] { flex: none; }
+
+    & [data-better-x-slot]::after {
+      content: "⌃⇧" attr(data-better-x-slot);
+      align-self: center;
+      margin-inline-start: auto;
+      padding: 1px 5px;
+      border: 1px solid var(--quiet-edge);
+      border-radius: 4px;
+      color: var(--quiet-soft);
+      font-size: var(--quiet-small);
+      font-variant-numeric: tabular-nums;
+      line-height: 1.3;
+    }
 
     & :is(span, [dir]) { font-size: var(--quiet-label); }
 

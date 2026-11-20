@@ -50,8 +50,7 @@
     if (restoreFocus) opener?.focus({ preventScroll: true })
   }
 
-  function openNativeSearch(opener) {
-    const input = document.querySelector('input[data-testid="SearchBox_Search_Input"]')
+  function openNativeSearch(input, opener) {
     const form = input?.form
     if (!form || form.hasAttribute('popover')) return false
 
@@ -142,7 +141,7 @@
   function openSearch(opener) {
     if (root.dataset.betterXQuiet !== 'true' || document.querySelector('dialog[open], [aria-modal="true"]')) return false
     if (nativeSearch) return false
-    if (openNativeSearch(opener)) return true
+    if (openNativeSearch(document.querySelector(combobox), opener)) return true
     if (!searchDialog) {
       searchDialog = document.createElement('dialog')
       searchDialog.className = 'better-x-search'
@@ -196,6 +195,20 @@
     if (after && after.nextElementSibling !== button) after.after(button)
     else if (button.parentElement !== parent) parent.append(button)
   }
+
+  function activateSearchField(event, interrupt) {
+    if (nativeSearch || root.dataset.betterXQuiet !== 'true') return
+    const input = event.target instanceof Element ? event.target.closest(combobox) : null
+    if (!input || !input.isConnected) return
+    if (!openNativeSearch(input, input)) return
+    if (interrupt) {
+      event.preventDefault()
+      event.stopPropagation()
+    }
+  }
+
+  const onFieldPointer = event => activateSearchField(event, true)
+  const onFieldFocus = event => activateSearchField(event, false)
 
   function searchShortcut(event) {
     const modifier = event.metaKey ? !event.ctrlKey : !mac && event.ctrlKey
@@ -279,6 +292,8 @@
     syncStyle()
     if (settings.quiet) {
       window.addEventListener('keydown', searchShortcut, true)
+      window.addEventListener('pointerdown', onFieldPointer, true)
+      window.addEventListener('focusin', onFieldFocus, true)
       observer.observe(root, {
         childList: true, subtree: true, characterData: true,
         attributeFilter: ['role', 'data-testid', 'data-better-x-summary'],
@@ -287,6 +302,8 @@
       return
     }
     window.removeEventListener('keydown', searchShortcut, true)
+    window.removeEventListener('pointerdown', onFieldPointer, true)
+    window.removeEventListener('focusin', onFieldFocus, true)
     for (const button of searchButtons.values()) button.remove()
     closeNativeSearch()
     searchDialog?.close()
