@@ -6,6 +6,11 @@
   let active
   let timer
 
+  function visible(item) {
+    return item.getClientRects().length && item.checkVisibility({ checkVisibilityCSS: true }) &&
+      !item.closest('[aria-hidden="true"]')
+  }
+
   function clear() {
     active?.image?.remove()
     active = undefined
@@ -32,6 +37,7 @@
     const image = document.createElement('button')
     image.type = 'button'
     image.setAttribute('role', 'menuitem')
+    image.setAttribute('aria-label', 'Copy as image')
     image.className = 'better-x-copy-image'
     const nativeLabel = Array.from(active.copy.querySelectorAll('span, [dir]'))
       .findLast(element => element.textContent.trim()) || active.copy
@@ -39,10 +45,18 @@
     image.style.font = `${style.fontWeight} ${style.fontSize}/${style.lineHeight} ${style.fontFamily}`
     image.style.color = style.color
     image.style.minHeight = `${active.copy.getBoundingClientRect().height}px`
-    const icon = document.createElement('span')
-    icon.className = 'better-x-clipboard'
+    const ns = 'http://www.w3.org/2000/svg'
+    const icon = document.createElementNS(ns, 'svg')
+    const outline = document.createElementNS(ns, 'path')
+    outline.setAttribute('d', 'M8 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2 M9 3h6a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z')
+    icon.append(outline)
+    icon.setAttribute('viewBox', '0 0 24 24')
+    icon.setAttribute('class', 'better-x-clipboard')
     icon.setAttribute('aria-hidden', 'true')
-    image.append(icon, 'Copy as image')
+    const status = document.createElement('span')
+    status.className = 'better-x-copy-status'
+    status.setAttribute('role', 'status')
+    image.append(icon, 'Copy as image', status)
     image.addEventListener('keydown', event => {
       if (event.key === 'Enter' || event.key === ' ') event.stopPropagation()
     })
@@ -55,23 +69,30 @@
         return
       }
       image.setAttribute('aria-busy', 'true')
+      status.textContent = ''
       try {
         await copyPostImage(post, link)
-        notice('Copied post image')
+        image.dataset.copied = 'true'
+        status.textContent = 'Copied post image'
+        setTimeout(() => { delete image.dataset.copied }, 1600)
       } catch {
         notice('Could not copy post image')
       } finally {
         image.removeAttribute('aria-busy')
       }
     })
-    if (getComputedStyle(active.copy.parentElement).flexDirection === 'column-reverse') active.copy.before(image)
-    else active.copy.after(image)
+    let row = active.copy
+    while (row.parentElement !== active.menu && row.parentElement.querySelectorAll('[role="menuitem"]').length === 1) {
+      row = row.parentElement
+    }
+    if (getComputedStyle(row.parentElement).flexDirection === 'column-reverse') row.before(image)
+    else row.after(image)
     active.image = image
   }
 
   function findMenu() {
     if (!active) return
-    if (active.menu && !active.menu.isConnected) {
+    if (active.menu && (!active.menu.isConnected || (active.copy.isConnected && !visible(active.copy)))) {
       clear()
       return
     }
@@ -84,7 +105,7 @@
       const items = Array.from(menu.querySelectorAll('[role="menuitem"]'))
       const copy = items.find(item => copyLabel.test(item.textContent.trim().replace(/\s+/g, ' '))) ||
         items.find(item => item.querySelector('svg path[d^="M18.36 5.64"], svg path[d^="M11.96 14.945"]'))
-      if (!copy || !copy.getClientRects().length || active.previous.has(menu)) continue
+      if (!copy || !visible(copy) || active.previous.has(menu)) continue
       Object.assign(active, { menu, copy })
       clearTimeout(timer)
       syncImage()
@@ -96,7 +117,7 @@
     const post = trigger.closest(postSelector) || trigger.closest('[role="dialog"]')?.querySelector('article')
     const link = post && postLink(post)
     if (!link || (!settings.cleanLinks && !settings.copyImage)) return
-    const previous = new Set(Array.from(document.querySelectorAll(menuSelector)).filter(menu => menu.getClientRects().length))
+    const previous = new Set(Array.from(document.querySelectorAll(menuSelector)).filter(visible))
     active = { post, link, previous }
     timer = setTimeout(clear, 1800)
   }
@@ -111,7 +132,9 @@
       const url = new URL(link)
       url.hostname = settings.linkHost
       navigator.clipboard.writeText(url.href).then(
-        () => notice('Copied link'),
+        () => {
+          if (!document.querySelector('[data-testid="toast"]')?.getClientRects().length) notice('Copied link')
+        },
         () => notice('Could not copy link'),
       )
       closeMenu(menu)
@@ -128,6 +151,8 @@
     if (event.key === 'Escape') clear()
     if (event.key === 'Enter' || event.key === ' ') handle(event)
   }, true)
-  new MutationObserver(findMenu).observe(document, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'hidden'] })
+  new MutationObserver(findMenu).observe(document, {
+    childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'hidden', 'aria-hidden', 'class'],
+  })
   chrome.storage.onChanged.addListener(syncImage)
 })()
