@@ -6,7 +6,6 @@
   const navigationSelector = 'header[role="banner"], [data-testid="BottomBar"]'
   const menuSelector = '[role="menu"]'
   const observedSelector = `${groupSelector}, ${navigationSelector}, ${menuSelector}`
-  const mac = /^Mac/.test(navigator.platform)
   const searchButtons = new Map()
   let searchDialog
   let nativeSearch
@@ -116,14 +115,14 @@
       searchDialog.innerHTML = `
         <form action="/search" method="get" role="search">
           <div class="better-x-search-field">
-            <label for="better-x-search-query" id="better-x-search-label">Search 𝕏</label>
-            <input id="better-x-search-query" type="search" name="q" placeholder="Search 𝕏"
+            <label for="better-x-search-query" id="better-x-search-label">search 𝕏</label>
+            <input id="better-x-search-query" type="search" name="q" placeholder="search 𝕏"
               inputmode="search" enterkeyhint="search" autocomplete="off" autocapitalize="none"
               spellcheck="false" required autofocus>
             <button type="button" aria-label="Close Search"><kbd aria-hidden="true">Esc</kbd></button>
           </div>
           <input type="hidden" name="src" value="typed_query">
-          <button type="submit">Search <kbd aria-hidden="true">↵</kbd></button>
+          <button type="submit">search <kbd aria-hidden="true">↵</kbd></button>
         </form>`
       const form = searchDialog.querySelector('form')
       const input = form.elements.q
@@ -161,8 +160,8 @@
       button = document.createElement('button')
       button.type = 'button'
       button.className = 'better-x-search-trigger'
-      button.setAttribute('aria-keyshortcuts', mac ? 'Meta+/' : 'Meta+/ Control+/')
-      button.innerHTML = '<span>Search</span> <kbd aria-hidden="true">⌘/</kbd>'
+      button.setAttribute('aria-keyshortcuts', '/')
+      button.innerHTML = '<span>search</span> <kbd aria-hidden="true">/</kbd>'
       button.addEventListener('click', () => openSearch(button))
       searchButtons.set(slot, button)
     }
@@ -178,8 +177,7 @@
       }, 0)
       return
     }
-    const modifier = event.metaKey ? !event.ctrlKey : !mac && event.ctrlKey
-    if (event.key !== '/' || !modifier || event.altKey || event.shiftKey ||
+    if (event.key !== '/' || event.ctrlKey || event.metaKey || event.altKey ||
         event.isComposing || event.repeat || event.defaultPrevented) return
     if (event.composedPath().some(target => target instanceof Element &&
         (target.isContentEditable || target.matches('input, textarea, select, [role="textbox"]')))) return

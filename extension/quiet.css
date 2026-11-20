@@ -335,7 +335,7 @@ html[data-better-x-quiet="true"] {
         color: var(--quiet-fg);
         caret-color: var(--quiet-fg);
         font: 400 17px var(--quiet-font);
-        &::placeholder { color: var(--quiet-muted); }
+        &::placeholder { color: var(--quiet-muted); text-transform: lowercase; }
       }
 
       &::backdrop { pointer-events: none; }
@@ -450,6 +450,8 @@ html[data-better-x-quiet="true"] {
       box-shadow: none !important;
       color: var(--quiet-fg);
       font-family: var(--quiet-font);
+
+      &::placeholder { text-transform: lowercase; }
     }
 
     & [data-testid="SearchBox_Search_Input_label"] input:focus { outline: none !important; }
