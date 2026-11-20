@@ -25,6 +25,11 @@ html[data-better-x-quiet="true"] {
     --quiet-underline-out: none;
   }
 
+  &[data-better-x-quiet-starting] {
+    --quiet-underline-in: none;
+    --quiet-underline-out: none;
+  }
+
   &[data-theme="light"] {
     --quiet-bg: #fff;
     --quiet-menu: #fff;

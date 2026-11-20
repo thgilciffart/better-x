@@ -54,7 +54,14 @@
   })
 
   async function syncStyle() {
-    if (settings.quiet && !stylesheet) {
+    if (!settings.quiet) {
+      root.dataset.betterXQuiet = 'false'
+      if (stylesheet && document.adoptedStyleSheets.includes(stylesheet)) {
+        document.adoptedStyleSheets = document.adoptedStyleSheets.filter(sheet => sheet !== stylesheet)
+      }
+      return
+    }
+    if (!stylesheet) {
       loadingStyle ??= chrome.runtime.sendMessage({ type: 'quiet-style' }).then(css => {
         if (!css) throw new Error('Quiet Mode stylesheet is unavailable')
         stylesheet = new CSSStyleSheet()
@@ -62,12 +69,12 @@
       }).catch(console.error).finally(() => { loadingStyle = undefined })
       await loadingStyle
     }
-    if (!stylesheet) return
-    const active = document.adoptedStyleSheets.includes(stylesheet)
-    if (settings.quiet && !active) document.adoptedStyleSheets.push(stylesheet)
-    if (!settings.quiet && active) {
-      document.adoptedStyleSheets = document.adoptedStyleSheets.filter(sheet => sheet !== stylesheet)
-    }
+    if (!settings.quiet || !stylesheet || document.adoptedStyleSheets.includes(stylesheet)) return
+    root.dataset.betterXQuietStarting = ''
+    document.adoptedStyleSheets.push(stylesheet)
+    root.dataset.betterXQuiet = 'true'
+    void root.offsetHeight
+    delete root.dataset.betterXQuietStarting
   }
 
   function sync() {
@@ -86,6 +93,6 @@
     frame = 0
   }
 
-  new MutationObserver(sync).observe(root, { attributes: true, attributeFilter: ['data-better-x-quiet'] })
+  new MutationObserver(sync).observe(root, { attributeFilter: ['data-better-x-quiet-requested'] })
   sync()
 })()

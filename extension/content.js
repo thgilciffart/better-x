@@ -4,7 +4,7 @@
   const attributes = {
     ads: 'data-better-x-ads',
     ageWarning: 'data-better-x-age-warning',
-    quiet: 'data-better-x-quiet',
+    quiet: 'data-better-x-quiet-requested',
     quietFont: 'data-better-x-quiet-font',
     quietTheme: 'data-better-x-quiet-theme',
     cleanLinks: 'data-better-x-clean-links',
