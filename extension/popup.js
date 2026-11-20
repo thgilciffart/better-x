@@ -1,7 +1,6 @@
 const form = document.querySelector('form')
 const statusMessage = document.querySelector('#status')
 const { linkDomain, load, navigation } = BetterXSettings
-const saving = new Set()
 let saved
 
 const navigationItems = document.querySelector('#navigation-items')
@@ -42,10 +41,6 @@ for (const [index, tab] of tabs.entries()) {
   })
 }
 
-function updateLinkDomain() {
-  form.elements.linkHost.disabled = saving.has('linkHost') || !form.elements.cleanLinks.checked
-}
-
 function report(message) {
   statusMessage.textContent = message
   statusMessage.hidden = !message
@@ -61,7 +56,6 @@ async function hydrate() {
   for (const [key, value] of Object.entries(saved)) {
     if (form.elements[key]) setValue(form.elements[key], value)
   }
-  updateLinkDomain()
 }
 
 hydrate().then(() => {
@@ -77,9 +71,7 @@ form.addEventListener('change', async ({ target }) => {
     return
   }
   target.removeAttribute('aria-invalid')
-  saving.add(name)
   target.disabled = true
-  updateLinkDomain()
   try {
     await chrome.storage.local.set({ [name]: value })
     saved[name] = value
@@ -89,9 +81,7 @@ form.addEventListener('change', async ({ target }) => {
     setValue(target, saved[name])
     report('That change could not be saved.')
   } finally {
-    saving.delete(name)
     target.disabled = false
-    updateLinkDomain()
   }
 })
 

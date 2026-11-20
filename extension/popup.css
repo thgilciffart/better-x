@@ -192,8 +192,6 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 input[aria-invalid="true"] { border-bottom-color: #f39b83; }
 
-.domain:has(:disabled) { color: var(--muted); }
-
 :disabled { opacity: 0.6; }
 
 :focus-visible {

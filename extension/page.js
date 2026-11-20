@@ -34,13 +34,18 @@
   }
 
   function cleanCopiedLink(text) {
-    if (typeof text !== 'string' || !enabled('data-better-x-clean-links', true)) return text
-    const match = text.trim().match(/^https:\/\/(?:www\.|mobile\.)?(?:x|twitter)\.com\/(\w+|i\/web)\/status\/(\d+)(?:[?#]\S*)?$/i)
+    if (typeof text !== 'string') return text
+    const match = text.trim().match(/^https:\/\/(?:www\.|mobile\.)?(?:x|twitter)\.com\/(?:\w+|i\/web)\/status\/\d+(?:[?#]\S*)?$/i)
     if (!match) return text
-    const time = new URL(match[0]).searchParams.get('t')
-    if (/^\d+$/.test(time || '')) return `https://x.com/${match[1]}/status/${match[2]}?t=${time}`
-    const host = document.documentElement?.getAttribute('data-better-x-link-host') || 'x.com'
-    return `https://${host}/${match[1]}/status/${match[2]}`
+    const url = new URL(match[0])
+    const time = url.searchParams.get('t')
+    const timed = /^\d+$/.test(time || '')
+    url.hostname = timed ? 'x.com' : document.documentElement?.getAttribute('data-better-x-link-host') || 'x.com'
+    if (enabled('data-better-x-clean-links', true)) {
+      url.search = timed ? `t=${time}` : ''
+      url.hash = ''
+    }
+    return url.href
   }
 
   const writeText = globalThis.Clipboard?.prototype.writeText

@@ -19,7 +19,7 @@ Xeet's source and bundled reference fonts have separate license terms. [Xeet lic
 ## Use
 
 - **Privacy** blocks promoted timeline entries and known X event and error-reporting endpoints. Turn on **Skip 18+ interstitials** to suppress the client prompt in supported timelines and post views.
-- **Sharing** cleans the status URL that X's **Copy link** puts on your clipboard and applies your **Link domain**, such as x.com, vxtwitter.com, or fxtwitter.com. **Copy as image** puts a locally rendered PNG on your clipboard and keeps the share menu open.
+- **Sharing** rewrites the status URL that X's **Copy link** puts on your clipboard to your **Link domain**, such as x.com, vxtwitter.com, or fxtwitter.com. **Clean copied links** also strips X's tracking parameters. **Copy as image** puts a locally rendered PNG on your clipboard and keeps the share menu open.
 - **Image Export** sets the PNG's layout, width, pixel density, and theme. **Auto** follows the X page theme. **Expanded Text** uses the full text available to the browser. **Auto-expand “Show more”** also does this for posts with a visible expansion link.
 - **Direct downloads** adds media actions to X’s right-click menu. Photos that open the browser's own menu get **Download photo** there. X delivers animated GIFs as MP4, so the download uses that format.
 - **Quiet Mode** uses a dark, single-feed layout with quieter navigation and post actions.
