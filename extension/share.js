@@ -1,5 +1,5 @@
 (() => {
-  const { settings, notice, postLink, postSelector, copyPostImage, downloadVideo, closeMenu } = BetterX
+  const { settings, notice, postLink, postSelector, copyPostImage, downloadVideo, closeMenu, menuChanged } = BetterX
   const menuSelector = '[role="menu"], [data-testid="Dropdown"], [data-testid="sheetDialog"]'
   const shareSelector = '[data-engagement-action="share"], [data-testid="share"], button[aria-label*="share" i], [role="button"][aria-label*="share" i]'
   const copyLabel = /^copy link(?: to (?:post|tweet))?$/i
@@ -8,8 +8,7 @@
   let timer
 
   function visible(item) {
-    return item.getClientRects().length && item.checkVisibility({ checkVisibilityCSS: true }) &&
-      !item.closest('[aria-hidden="true"]')
+    return item.checkVisibility({ checkVisibilityCSS: true }) && !item.closest('[aria-hidden="true"]')
   }
 
   function clear() {
@@ -24,8 +23,14 @@
     const native = [...active.menu.querySelectorAll('[role="menuitem"]')]
       .filter(item => item !== active.image && visible(item))
     if (!native.length) return
-    const last = native.reduce((bottom, item) =>
-      item.getBoundingClientRect().bottom >= bottom.getBoundingClientRect().bottom ? item : bottom)
+    let last
+    let bottom = -Infinity
+    for (const item of native) {
+      const edge = item.getBoundingClientRect().bottom
+      if (edge < bottom) continue
+      last = item
+      bottom = edge
+    }
     let row = last
     while (row.parentElement !== active.menu && !native.some(item => item !== last && row.parentElement.contains(item))) {
       row = row.parentElement
@@ -119,10 +124,11 @@
     }
 
     for (const menu of document.querySelectorAll(menuSelector)) {
+      if (active.previous.has(menu)) continue
       const items = Array.from(menu.querySelectorAll('[role="menuitem"]'))
       const copy = items.find(item => copyLabel.test(item.textContent.trim().replace(/\s+/g, ' '))) ||
         items.find(item => item.querySelector('svg path[d^="M18.36 5.64"], svg path[d^="M11.96 14.945"]'))
-      if (!copy || !visible(copy) || active.previous.has(menu)) continue
+      if (!copy || !visible(copy)) continue
       Object.assign(active, { menu, copy })
       clearTimeout(timer)
       syncImage()
@@ -176,6 +182,8 @@
     if (event.key === 'Escape') clear()
     if ((event.key === 'Enter' || event.key === ' ') && !runDownload(event)) handle(event)
   }, true)
-  const observer = new MutationObserver(findMenu)
+  const observer = new MutationObserver(records => {
+    if (active && menuChanged(records, menuSelector, active.menu, active.image)) findMenu()
+  })
   chrome.storage.onChanged.addListener(syncImage)
 })()

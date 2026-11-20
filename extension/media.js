@@ -81,16 +81,11 @@
 
   function locate(el) {
     const anchor = el.closest('a[href*="/status/"]')
+    const linked = anchor?.origin === location.origin && anchor.pathname.match(route)
+    if (linked) return { author: linked[1], id: linked[2] }
     const viewing = el.closest('[aria-modal="true"]') && viewer.test(location.pathname)
-    const paths = [
-      anchor?.origin === location.origin && anchor.pathname,
-      (viewing || el.closest('article')) && BetterX.postLink(el)?.pathname,
-    ]
-    for (const path of paths) {
-      const found = path && path.match(route)
-      if (found) return { author: found[1], id: found[2] }
-    }
-    return {}
+    const found = (viewing || el.closest('article')) && BetterX.postLink(el)?.pathname.match(route)
+    return found ? { author: found[1], id: found[2] } : {}
   }
 
   function directMedia(sources, { id, author }, video) {
@@ -143,6 +138,14 @@
     if (!layer) return null
     const player = event.target.closest('[data-testid="videoPlayer"], [data-slot="xds-context-menu-trigger"]')
     let video = player?.querySelector('video') || event.target.closest('video')
+    if (!video && event.target instanceof HTMLImageElement) {
+      const source = event.target.currentSrc || event.target.src
+      const url = mediaUrl(source)
+      if (url?.hostname === 'pbs.twimg.com' && url.pathname.startsWith('/media/')) {
+        const photo = resolve(event.target, [source])
+        if (photo?.kind === 'photo') return { ...photo, address: source, video: null }
+      }
+    }
     for (const el of document.elementsFromPoint(event.clientX, event.clientY)) {
       if (layerOf(el) !== layer) continue
       if (!video && el instanceof HTMLVideoElement) video = el
@@ -267,11 +270,6 @@
     return item.textContent.trim().replace(/\s+/g, ' ')
   }
 
-  function lastItem(items) {
-    return items.reduce((bottom, item) =>
-      item.getBoundingClientRect().bottom >= bottom.getBoundingClientRect().bottom ? item : bottom)
-  }
-
   function placeActions(menu, items, last, addons) {
     let row = last
     while (row.parentElement !== menu && !items.some(item => item !== last && row.parentElement.contains(item))) {
@@ -308,19 +306,17 @@
     })
   }
 
-  function appendActions(items, request) {
-    const shown = items.filter(item => !item.hasAttribute(hidden))
-    const last = lastItem(shown.length ? shown : items)
+  function appendActions(rows, request, { item: last, height }) {
     const label = Array.from(last.querySelectorAll('span, [dir]')).findLast(element => element.textContent.trim()) || last
     const style = getComputedStyle(label)
     const addons = document.createElement('div')
     addons.className = 'better-x-media-actions'
     addons.setAttribute('role', 'presentation')
-    const native = new Set(items.filter(item => !replaced.test(text(item))).map(item => text(item).toLowerCase()))
+    const native = new Set(rows.filter(row => !row.replace).map(row => row.label.toLowerCase()))
     for (const button of actionButtons(request, () => BetterX.closeMenu(request.menu), native)) {
       button.style.font = `${style.fontWeight} ${style.fontSize}/${style.lineHeight} ${style.fontFamily}`
       button.style.color = style.color
-      button.style.minHeight = `${last.getBoundingClientRect().height}px`
+      button.style.minHeight = `${height}px`
       addons.append(button)
     }
     request.addons = addons
@@ -360,12 +356,27 @@
       if (request.previous.has(menu)) continue
       const items = [...new Set(Array.from(menu.querySelectorAll(itemSelector), item => item.closest('[role="menuitem"]') || item))]
         .filter(item => menu.contains(item) && !request.addons?.contains(item) && (item.hasAttribute(hidden) || visible(item)))
-      if (!items.some(item => labels.test(text(item)))) continue
-      if (!mounted) appendActions(items, request)
-      for (const item of items) if (request.media.url && replaced.test(text(item))) item.setAttribute(hidden, '')
-      const shown = items.filter(item => !item.hasAttribute(hidden))
-      Object.assign(request, { menu, last: shown.length ? lastItem(shown) : menu })
-      placeActions(menu, items, lastItem(items), request.addons)
+      const rows = items.map(item => {
+        const label = text(item)
+        return { item, label, replace: replaced.test(label) }
+      })
+      if (!rows.some(row => labels.test(row.label))) continue
+      let last
+      let remaining
+      for (const row of rows) {
+        if (row.item.hasAttribute(hidden)) continue
+        const { height, bottom } = row.item.getBoundingClientRect()
+        const measured = { item: row.item, height, bottom }
+        if (!last || bottom >= last.bottom) last = measured
+        if ((!row.replace || !request.media.url) && (!remaining || bottom >= remaining.bottom)) remaining = measured
+      }
+      const tail = remaining || last || { item: items.at(-1), height: 0 }
+      if (!mounted) appendActions(rows, request, last || tail)
+      Object.assign(request, { menu, last: remaining?.item || menu })
+      placeActions(menu, items, tail.item, request.addons)
+      for (const { item, replace } of rows) {
+        if (request.media.url && replace && !item.hasAttribute(hidden)) item.setAttribute(hidden, '')
+      }
       return
     }
     if (request.menu && !request.menu.isConnected) clear()
@@ -390,7 +401,9 @@
     const media = find(event)
     if (!media) return
 
-    const observer = new MutationObserver(() => scan(request))
+    const observer = new MutationObserver(records => {
+      if (BetterX.menuChanged(records, menuSelector, request.menu, request.addons)) scan(request)
+    })
     const request = { event, media, observer, timer: setTimeout(clear, 1500) }
     active = request
     if (document.fullscreenElement?.contains(event.target)) {

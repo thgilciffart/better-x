@@ -85,7 +85,27 @@
     target.click()
   }
 
-  globalThis.BetterX = { settings, notice, postLink, postSelector, closeMenu }
+  function menuChanged(records, selector, menu, addon) {
+    for (const { type, target, addedNodes, removedNodes } of records) {
+      if (addon?.contains(target)) continue
+      const inside = menu ? menu.contains(target) : target.closest?.(selector)
+      if (type === 'attributes') {
+        if (inside || (menu ? target.contains(menu) : target.querySelector(selector))) return true
+        continue
+      }
+      for (const nodes of [addedNodes, removedNodes]) {
+        for (const node of nodes) {
+          if (node === addon) continue
+          if (inside) return true
+          if (node.nodeType !== Node.ELEMENT_NODE) continue
+          if (menu ? node.contains(menu) : node.matches(selector) || node.querySelector(selector)) return true
+        }
+      }
+    }
+    return false
+  }
+
+  globalThis.BetterX = { settings, notice, postLink, postSelector, closeMenu, menuChanged }
 
   if (document.documentElement) {
     apply()
