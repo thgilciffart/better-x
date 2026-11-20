@@ -47,9 +47,21 @@
     image.style.minHeight = `${active.copy.getBoundingClientRect().height}px`
     const ns = 'http://www.w3.org/2000/svg'
     const icon = document.createElementNS(ns, 'svg')
-    const outline = document.createElementNS(ns, 'path')
-    outline.setAttribute('d', 'M8 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2 M9 3h6a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z')
-    icon.append(outline)
+    const clip = document.createElementNS(ns, 'rect')
+    for (const [key, value] of Object.entries({ width: 8, height: 4, x: 8, y: 2, rx: 1, ry: 1 })) {
+      clip.setAttribute(key, value)
+    }
+    icon.append(clip)
+    for (const d of [
+      'M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2',
+      'M16 4h2a2 2 0 0 1 2 2v4',
+      'M21 14H11',
+      'm15 10-4 4 4 4',
+    ]) {
+      const path = document.createElementNS(ns, 'path')
+      path.setAttribute('d', d)
+      icon.append(path)
+    }
     icon.setAttribute('viewBox', '0 0 24 24')
     icon.setAttribute('class', 'better-x-clipboard')
     icon.setAttribute('aria-hidden', 'true')
@@ -75,8 +87,8 @@
         image.dataset.copied = 'true'
         status.textContent = 'Copied post image'
         setTimeout(() => { delete image.dataset.copied }, 1600)
-      } catch {
-        notice('Could not copy post image')
+      } catch (error) {
+        notice(error instanceof Error ? error.message : 'Could not copy post image')
       } finally {
         image.removeAttribute('aria-busy')
       }

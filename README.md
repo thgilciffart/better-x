@@ -12,7 +12,7 @@ Better X is a Manifest V3 extension for X on Chrome 120+ and compatible Chromium
 
 Run `npm ci` and `npm run setup:xeet` from the repository with Node 20 or newer. Reload Better X at `chrome://extensions` and refresh X.
 
-Setup installs the pinned Xeet WebAssembly build and its font packs into your local extension folder. Image export uses Xeet when that bundle is present. A checkout without the bundle uses the Canvas renderer. Both render locally using data X has already loaded.
+Setup installs the pinned Xeet WebAssembly build and its font packs into your local extension folder. **Copy as image** uses that bundle to render locally using data X has already loaded. If the bundle is missing, the copy action tells you how to set it up.
 
 Xeet's source and bundled reference fonts have separate license terms. [Xeet license notes](https://github.com/rauchg/xeet#license)
 

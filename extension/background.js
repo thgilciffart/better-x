@@ -22,6 +22,25 @@ chrome.storage.onChanged.addListener((changes, area) => {
 })
 
 const xOrigins = new Set(['https://x.com', 'https://twitter.com'])
+let creatingXeetDocument
+
+async function renderWithXeet(message) {
+  creatingXeetDocument ??= (async () => {
+    const contexts = await chrome.runtime.getContexts({
+      contextTypes: ['OFFSCREEN_DOCUMENT'],
+      documentUrls: [chrome.runtime.getURL('xeet.html')],
+    })
+    if (!contexts.length) {
+      await chrome.offscreen.createDocument({
+        url: 'xeet.html',
+        reasons: ['BLOBS'],
+        justification: 'Render and encode a PNG for the clipboard',
+      })
+    }
+  })().finally(() => { creatingXeetDocument = undefined })
+  await creatingXeetDocument
+  return chrome.runtime.sendMessage({ type: 'xeet:render', post: message.post, options: message.options })
+}
 
 async function downloadMedia({ url, filename }) {
   const media = URL.canParse(url) ? new URL(url) : null
@@ -38,7 +57,12 @@ async function downloadMedia({ url, filename }) {
 }
 
 chrome.runtime.onMessage.addListener((message, sender, reply) => {
-  if (message?.type !== 'download' || !xOrigins.has(sender.origin) || sender.frameId !== 0) return
+  if (!xOrigins.has(sender.origin) || sender.frameId !== 0) return
+  if (message?.type === 'render-xeet') {
+    renderWithXeet(message).then(reply, () => reply({ error: 'Xeet could not start. Reload Better X and try again.' }))
+    return true
+  }
+  if (message?.type !== 'download') return
   downloadMedia(message).then(
     () => reply({ ok: true }),
     () => reply({ error: 'Could not start download' }),

@@ -27,5 +27,27 @@
     return { xeet: bind(wasm), fonts }
   }
 
-  BetterX.xeet = () => engine ??= load()
+  async function render(post, options) {
+    const loaded = await (engine ??= load())
+    if (!loaded) return { error: 'Set up Xeet with npm run setup:xeet, then reload Better X.' }
+    const { xeet, fonts } = loaded
+    await fonts.ensure({ post, options })
+    const blob = new Blob([xeet.renderPng(post, options)], { type: 'image/png' })
+    const png = await new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(reader.result.split(',')[1])
+      reader.onerror = () => reject(reader.error)
+      reader.readAsDataURL(blob)
+    })
+    return { png }
+  }
+
+  chrome.runtime.onMessage.addListener((message, sender, reply) => {
+    if (message?.type !== 'xeet:render' || sender.id !== chrome.runtime.id || sender.tab) return
+    render(message.post, message.options).then(reply, error => {
+      console.error(error)
+      reply({ error: 'Xeet could not render this post.' })
+    })
+    return true
+  })
 })()
