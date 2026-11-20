@@ -20,3 +20,7 @@
 .better-x-media-action[aria-busy="true"] {
   cursor: progress;
 }
+
+[data-better-x-hidden] {
+  display: none !important;
+}

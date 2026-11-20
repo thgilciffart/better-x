@@ -11,6 +11,8 @@
   const itemSelector = '[role="menuitem"], button, [role="button"], [tabindex="0"]'
   const photoActions = /^(?:copy (?:photo|image) (?:link|address)|post photo)$/i
   const videoActions = /^(?:copy (?:video|gif) (?:link|address)|copy link at current time|post (?:video|gif))$/i
+  const replaced = /^(?:copy photo link|copy (?:video|gif) address)$/i
+  const hidden = 'data-better-x-hidden'
   let active
 
   function mediaUrl(value) {
@@ -253,11 +255,16 @@
         ['Open image in new tab', () => window.open(media.address, '_blank', 'noopener,noreferrer')],
       )
     } else {
+      if (media.url) actions.push([`Copy ${names[media.kind]} address`, () => navigator.clipboard.writeText(media.url), `Copied ${names[media.kind]} address`])
       if (media.video) actions.push(['Copy video frame', () => copyPng(videoPng(media)), 'Copied video frame'])
       if (media.url) actions.push(['Open video in new tab', () => window.open(media.url, '_blank', 'noopener,noreferrer')])
     }
     if (media.url) actions.push([`Download ${names[media.kind]}`, () => download(media)])
     return actions
+  }
+
+  function text(item) {
+    return item.textContent.trim().replace(/\s+/g, ' ')
   }
 
   function lastItem(items) {
@@ -275,14 +282,15 @@
     if (!reverse && row.nextElementSibling !== addons) row.after(addons)
   }
 
-  function appendActions(menu, items, request) {
-    const last = lastItem(items)
+  function appendActions(items, request) {
+    const shown = items.filter(item => !item.hasAttribute(hidden))
+    const last = lastItem(shown.length ? shown : items)
     const label = Array.from(last.querySelectorAll('span, [dir]')).findLast(element => element.textContent.trim()) || last
     const style = getComputedStyle(label)
     const addons = document.createElement('div')
     addons.className = 'better-x-media-actions'
     addons.setAttribute('role', 'presentation')
-    const native = new Set(items.map(item => item.textContent.trim().toLowerCase()))
+    const native = new Set(items.filter(item => !replaced.test(text(item))).map(item => text(item).toLowerCase()))
     for (const [title, run, success] of mediaActions(request.media)) {
       if (native.has(title.toLowerCase())) continue
       const button = document.createElement('button')
@@ -311,8 +319,7 @@
       })
       addons.append(button)
     }
-    placeActions(menu, items, last, addons)
-    Object.assign(request, { menu, addons, last })
+    request.addons = addons
     clearTimeout(request.timer)
   }
 
@@ -329,17 +336,14 @@
     const menus = mounted ? [request.menu] : document.querySelectorAll(menuSelector)
     for (const menu of menus) {
       if (request.previous.has(menu)) continue
-      const items = [...new Set(Array.from(menu.querySelectorAll(itemSelector))
-        .filter(item => !request.addons?.contains(item) && visible(item))
-        .map(item => item.closest('[role="menuitem"]') || item))]
-        .filter(item => menu.contains(item))
-      if (!items.some(item => labels.test(item.textContent.trim().replace(/\s+/g, ' ')))) continue
-      if (mounted) {
-        request.last = lastItem(items)
-        placeActions(menu, items, request.last, request.addons)
-      } else {
-        appendActions(menu, items, request)
-      }
+      const items = [...new Set(Array.from(menu.querySelectorAll(itemSelector), item => item.closest('[role="menuitem"]') || item))]
+        .filter(item => menu.contains(item) && !request.addons?.contains(item) && (item.hasAttribute(hidden) || visible(item)))
+      if (!items.some(item => labels.test(text(item)))) continue
+      if (!mounted) appendActions(items, request)
+      for (const item of items) if (request.media.url && replaced.test(text(item))) item.setAttribute(hidden, '')
+      const shown = items.filter(item => !item.hasAttribute(hidden))
+      Object.assign(request, { menu, last: shown.length ? lastItem(shown) : menu })
+      placeActions(menu, items, lastItem(items), request.addons)
       break
     }
   }
