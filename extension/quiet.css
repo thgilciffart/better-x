@@ -236,6 +236,12 @@ html[data-better-x-quiet="true"] {
     text-transform: lowercase;
   }
 
+  & a:is([href$="/analytics"], [href$="/following"], [href$="/followers"], [href$="/verified_followers"]) {
+    text-decoration: none !important;
+
+    &:hover span:not(:has(span)) { text-decoration: underline; }
+  }
+
   & article {
     & :is([data-testid="tweetText"], [data-testid="tweetText"] span, [data-testid="User-Name"] span) {
       font-size: var(--quiet-size);
