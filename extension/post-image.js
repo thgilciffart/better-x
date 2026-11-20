@@ -1,4 +1,5 @@
 (() => {
+  const { postSelector } = BetterX
   const mediaHost = 'pbs.twimg.com'
   const wordSegments = new Intl.Segmenter(undefined, { granularity: 'word' })
   const characters = new Intl.Segmenter(undefined, { granularity: 'grapheme' })
@@ -62,16 +63,22 @@
     context.restore()
   }
 
+  function ownElements(post, selector) {
+    return Array.from(post.querySelectorAll(selector)).filter(element => element.closest(postSelector) === post)
+  }
+
   async function render(post, link) {
-    const heading = post.querySelector('[data-testid="User-Name"]')
+    const [heading] = ownElements(post, '[data-testid="User-Name"]')
     const handle = link.pathname.split('/')[1]
     const profile = heading?.querySelector('a[href="/' + handle + '"]')
     const name = content(profile) || (handle === 'i' ? 'X post' : handle)
-    const time = content(post.querySelector('time'))
-    const text = content(post.querySelector('[data-testid="tweetText"]')).slice(0, 12000)
-    const avatar = post.querySelector('[data-testid^="UserAvatar-Container"] img')?.src
+    const time = content(ownElements(post, 'time')[0])
+    const text = content(ownElements(post, '[data-testid="tweetText"]')[0]).slice(0, 12000)
+    const avatar = ownElements(post, '[data-testid^="UserAvatar-Container"] img')[0]?.src
+    const quote = Array.from(post.querySelectorAll(postSelector)).find(element => element.parentElement.closest(postSelector) === post)
+    const quoteText = quote && content(ownElements(quote, '[data-testid="tweetText"]')[0]).slice(0, 800)
     const media = [...new Set(Array.from(
-      post.querySelectorAll('[data-testid="tweetPhoto"] img, [data-testid="videoPlayer"] video[poster]'),
+      ownElements(post, '[data-testid="tweetPhoto"] img, [data-testid="videoPlayer"] video[poster]'),
       element => element instanceof HTMLVideoElement ? element.poster : element.currentSrc || element.src,
     ))].slice(0, 4)
     const [avatarImage, ...candidates] = await Promise.all([avatar, ...media].map(loadImage))
@@ -85,6 +92,7 @@
     const font = 'system-ui, sans-serif'
     context.font = '16px ' + font
     const lines = text ? wrap(context, text, innerWidth).slice(0, 110) : []
+    const quoteLines = quoteText ? wrap(context, quoteText, innerWidth - 24) : []
     const columns = images.length > 1 ? 2 : 1
     const gap = 5
     const imageWidth = (innerWidth - gap * (columns - 1)) / columns
@@ -92,7 +100,8 @@
       ? Math.round(Math.min(440, imageWidth * images[0].height / images[0].width))
       : 150
     const rows = Math.ceil(images.length / columns)
-    const height = 90 + lines.length * 23 + (rows ? rows * (imageHeight + gap) + 12 : 0)
+    const contentHeight = 90 + lines.length * 23 + (rows ? rows * (imageHeight + gap) + 12 : 0)
+    const height = contentHeight + (quoteLines.length ? 42 + quoteLines.length * 21 : 0)
     canvas.width = width * 2
     canvas.height = height * 2
     context.scale(2, 2)
@@ -118,6 +127,18 @@
       mediaY + Math.floor(index / columns) * (imageHeight + gap),
       imageWidth, imageHeight, 8,
     ))
+    if (quoteLines.length) {
+      context.fillStyle = '#242425'
+      context.beginPath()
+      context.roundRect(padding, contentHeight - 12, innerWidth, 42 + quoteLines.length * 21, 8)
+      context.fill()
+      context.font = '600 13px ' + font
+      context.fillStyle = '#a2a2a2'
+      context.fillText('Quoted post', padding + 12, contentHeight + 10)
+      context.font = '15px ' + font
+      context.fillStyle = '#ededeb'
+      quoteLines.forEach((line, index) => context.fillText(line, padding + 12, contentHeight + 32 + index * 21))
+    }
     for (const image of [avatarImage, ...images]) image?.close()
     return new Promise((resolve, reject) => {
       canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Could not render post image')), 'image/png')

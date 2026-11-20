@@ -38,6 +38,11 @@
       event.stopPropagation()
       if (!settings.copyImage || !active?.post.isConnected) return
       const { post, link, menu } = active
+      if (postLink(post)?.href !== link.href) {
+        notice('Could not locate post')
+        closeMenu(menu)
+        return
+      }
       copyPostImage(post, link).then(
         () => notice('Copied post image'),
         () => notice('Could not copy post image'),

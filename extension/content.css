@@ -6,8 +6,8 @@
   max-width: calc(100vw - 48px);
   padding: 10px 16px;
   border-radius: 10px;
-  background: #172522;
-  color: #eefaf5;
+  background: #1a1a1a;
+  color: #eeeeee;
   box-shadow: 0 4px 24px #0005;
   font: 600 14px/1.35 system-ui, sans-serif;
   pointer-events: none;

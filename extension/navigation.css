@@ -1,4 +1,4 @@
-html[data-better-x-hidden-tabs~="home"] :where(header[role="banner"], [data-testid="BottomBar" i]) :is([data-testid="AppTabBar_Home_Link"], a[href="/home"]),
+html[data-better-x-hidden-tabs~="home"] :is(header[role="banner"] nav, [data-testid="BottomBar" i]) :is([data-testid="AppTabBar_Home_Link"], a[href="/home"]),
 html[data-better-x-hidden-tabs~="explore"] :where(header[role="banner"], [data-testid="BottomBar" i]) :is([data-testid="AppTabBar_Explore_Link"], a[href="/explore"]),
 html[data-better-x-hidden-tabs~="notifications"] :where(header[role="banner"], [data-testid="BottomBar" i]) :is([data-testid="AppTabBar_Notifications_Link"], a[href="/notifications"]),
 html[data-better-x-hidden-tabs~="follow"] :where(header[role="banner"], [data-testid="BottomBar" i]) :is([data-testid="AppTabBar_Connect_Link"], a[href="/i/connect_people"]),
