@@ -66,8 +66,8 @@
       button.type = 'button'
       button.className = 'better-x-search-trigger'
       button.setAttribute('aria-haspopup', 'dialog')
-      button.setAttribute('aria-keyshortcuts', '/')
-      button.innerHTML = 'Search <kbd aria-hidden="true">/</kbd>'
+      button.setAttribute('aria-keyshortcuts', 'Control+/')
+      button.innerHTML = 'Search <kbd aria-hidden="true">Ctrl+/</kbd>'
       button.addEventListener('click', openSearch)
       searchButtons.set(slot, button)
     }
@@ -76,7 +76,7 @@
   }
 
   function searchShortcut(event) {
-    if (event.key !== '/' || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey ||
+    if (event.key !== '/' || !event.ctrlKey || event.altKey || event.metaKey || event.shiftKey ||
         event.isComposing || event.repeat || event.defaultPrevented) return
     if (event.composedPath().some(target => target instanceof Element &&
         (target.isContentEditable || target.matches('input, textarea, select, [role="textbox"]')))) return

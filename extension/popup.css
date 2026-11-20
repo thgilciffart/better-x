@@ -81,8 +81,25 @@ legend {
 .emoji-font-row select { min-width: 0; max-width: 100%; }
 
 .emoji-library { border-top: 1px solid var(--edge); }
-.emoji-library summary { padding: 9px 0; cursor: pointer; }
-.emoji-library summary::marker { color: var(--muted); }
+.emoji-library summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 0;
+  cursor: pointer;
+}
+
+.emoji-library summary::after {
+  width: 6px;
+  height: 6px;
+  margin-inline-end: 5px;
+  border: solid var(--muted);
+  border-width: 0 1px 1px 0;
+  rotate: -45deg;
+  content: "";
+}
+
+.emoji-library[open] summary::after { rotate: 45deg; }
 
 .text-button {
   min-height: 28px;
