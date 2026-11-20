@@ -1,0 +1,171 @@
+html[data-better-x-quiet="true"] {
+  color-scheme: dark;
+  --better-x-quiet-bg: #0b0b0c;
+  --better-x-quiet-fg: #e6e5e3;
+  --better-x-quiet-muted: #a2a1a1;
+  --better-x-quiet-line: #252526;
+  background: var(--better-x-quiet-bg) !important;
+}
+
+html[data-better-x-quiet="true"] :is(body, #react-root, main[role="main"], [data-testid="primaryColumn"]) {
+  background: var(--better-x-quiet-bg) !important;
+  color: var(--better-x-quiet-fg) !important;
+}
+
+html[data-better-x-quiet="true"] :is([data-testid="sidebarColumn"], [data-testid="GrokDrawer"], [data-testid="DMDrawer"]) {
+  display: none !important;
+}
+
+html[data-better-x-quiet="true"] [data-testid="primaryColumn"] {
+  border-inline-color: transparent !important;
+}
+
+html[data-better-x-quiet="true"] [data-testid="cellInnerDiv"] {
+  border-color: var(--better-x-quiet-line) !important;
+}
+
+html[data-better-x-quiet="true"] [data-testid="tweetText"],
+html[data-better-x-quiet="true"] [data-testid="tweetText"] :is(span, a),
+html[data-better-x-quiet="true"] [data-testid="User-Name"] a {
+  color: var(--better-x-quiet-fg) !important;
+}
+
+html[data-better-x-quiet="true"] :is(time, [data-testid="socialContext"]) {
+  color: var(--better-x-quiet-muted) !important;
+}
+
+html[data-better-x-quiet="true"] [data-testid="tweetText"] {
+  line-height: 1.5 !important;
+}
+
+html[data-better-x-quiet="true"] :is([data-testid="tweetPhoto"], [data-testid="videoPlayer"], [data-testid="card.wrapper"]) {
+  border-color: var(--better-x-quiet-line) !important;
+  border-radius: 9px !important;
+}
+
+html[data-better-x-quiet="true"] article[data-testid="tweet"] :is(
+  [data-testid="caret"],
+  [role="group"] :is(button, [role="button"], a)
+) {
+  color: var(--better-x-quiet-muted) !important;
+}
+
+@media (hover: hover) {
+  html[data-better-x-quiet="true"] article[data-testid="tweet"]:not(:hover, :focus-within) [role="group"] {
+    opacity: 0.52;
+  }
+}
+
+@media (min-width: 1024px) {
+  html[data-better-x-quiet="true"] #react-root div:has(> header[role="banner"]):has(> main[role="main"]) {
+    max-width: 960px !important;
+    margin-inline: auto !important;
+    justify-content: center !important;
+  }
+
+  html[data-better-x-quiet="true"] header[role="banner"] {
+    flex: 0 0 180px !important;
+    min-width: 0 !important;
+  }
+
+  html[data-better-x-quiet="true"] header[role="banner"] > div,
+  html[data-better-x-quiet="true"] header[role="banner"] > div > div {
+    width: 180px !important;
+  }
+
+  html[data-better-x-quiet="true"] header[role="banner"] nav :is(a, [role="button"], button):has([dir="ltr"]) {
+    min-height: 28px !important;
+    height: auto !important;
+    padding-block: 0 !important;
+  }
+
+  html[data-better-x-quiet="true"] header[role="banner"] nav :is(a, [role="button"], button):has([dir="ltr"]) svg {
+    display: none !important;
+  }
+
+  html[data-better-x-quiet="true"] header[role="banner"] nav :is(a, [role="button"], button):hover {
+    color: var(--better-x-quiet-fg) !important;
+  }
+
+  html[data-better-x-quiet="true"] header[role="banner"] nav :is(a, [role="button"], button) [dir="ltr"] {
+    margin: 0 !important;
+    color: var(--better-x-quiet-muted) !important;
+    font-size: 14px !important;
+    font-weight: 450 !important;
+    text-transform: lowercase;
+  }
+
+  html[data-better-x-quiet="true"] header[role="banner"] nav [aria-current="page"] [dir="ltr"],
+  html[data-better-x-quiet="true"] header[role="banner"] nav :hover > [dir="ltr"] {
+    color: var(--better-x-quiet-fg) !important;
+  }
+
+  html[data-better-x-quiet="true"] [data-testid="SideNav_NewTweet_Button"] {
+    width: fit-content !important;
+    min-width: 0 !important;
+    min-height: 28px !important;
+    padding: 0 10px !important;
+    border: 1px solid var(--better-x-quiet-line) !important;
+    border-radius: 6px !important;
+    background: transparent !important;
+    color: var(--better-x-quiet-fg) !important;
+  }
+
+  html[data-better-x-quiet="true"] [data-testid="SideNav_NewTweet_Button"] span {
+    color: inherit !important;
+    font-size: 14px !important;
+    text-transform: lowercase;
+  }
+}
+
+html[data-better-x-quiet="true"] {
+  article[data-testid="tweet"] [role="group"] {
+    & :is(button, [role="button"])[data-testid]:has(svg) {
+      min-width: 0 !important;
+    }
+
+    & :is([data-testid="reply"], [data-testid="retweet"], [data-testid="unretweet"],
+          [data-testid="like"], [data-testid="unlike"], [data-testid="bookmark"],
+          [data-testid="removeBookmark"], [aria-label*="Share" i])::after {
+      margin-inline: 4px;
+      font-size: 12px;
+    }
+
+    & [data-testid="reply"]::after { content: "reply"; }
+    & [data-testid="retweet"]::after { content: "repost"; }
+    & [data-testid="unretweet"]::after { content: "reposted"; }
+    & [data-testid="like"]::after { content: "like"; }
+    & [data-testid="unlike"]::after { content: "liked"; }
+    & [data-testid="bookmark"]::after { content: "keep"; }
+    & [data-testid="removeBookmark"]::after { content: "kept"; }
+    & [aria-label*="Share" i]::after { content: "share"; }
+  }
+
+  .better-x-quiet-counts { display: none; }
+
+  @media (hover: hover) and (min-width: 768px) {
+    article[data-testid="tweet"] {
+      & :is([data-testid="reply"], [data-testid="retweet"], [data-testid="unretweet"],
+            [data-testid="like"], [data-testid="unlike"], [data-testid="bookmark"],
+            [data-testid="removeBookmark"], [aria-label*="Share" i]) svg {
+        display: none !important;
+      }
+
+      &:not(:hover, :focus-within) [role="group"]:has(> .better-x-quiet-counts) {
+        position: relative;
+        opacity: 1;
+
+        & > :not(.better-x-quiet-counts) { opacity: 0; }
+
+        & > .better-x-quiet-counts {
+          position: absolute;
+          display: block;
+          inset-inline-start: 0;
+          color: var(--better-x-quiet-muted);
+          font-size: 12px;
+          pointer-events: none;
+        }
+      }
+    }
+  }
+}
