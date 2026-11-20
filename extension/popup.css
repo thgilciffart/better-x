@@ -127,6 +127,12 @@ input[type="number"] {
   border-bottom-color: #4a4a4a;
 }
 
+input[type="text"]:focus-visible,
+input[type="number"]:focus-visible {
+  outline: none;
+  border-bottom-color: #8c8c8c;
+}
+
 select {
   appearance: none;
   width: max-content;
