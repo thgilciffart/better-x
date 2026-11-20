@@ -45,7 +45,7 @@ Reload 𝕏 after you change **Block ads** or **Skip 18+ interstitials**. Posts 
 
 **Quiet Mode** shows 𝕏 as lowercase text without icons. It hides the right sidebar, the account switcher, and the floating Grok and Chat buttons. Unread badges become numbers. Posts show a summary of likes, reposts, and replies, and the actions appear on hover. 𝕏's columns stay in place.
 
-Select **Search** in Quiet Mode or press **⌘/**. **Ctrl+/** also works on keyboards without Command. The overlay shows 𝕏's search suggestions when its search box is available. Press **Enter** to view results.
+Select **Search** in Quiet Mode or press **⌘/**. **Ctrl+/** also works on keyboards without Command. The overlay shows 𝕏's search suggestions when its search box is available. Press **Enter** to view results, or **Ctrl+Shift+1–9** to open a suggestion directly.
 
 These settings work with Quiet Mode on or off. Reset a field to let 𝕏 choose its default, or to use the Quiet Mode default when Quiet Mode is on.
 

@@ -322,6 +322,14 @@ html[data-better-x-quiet="true"] {
 
         & [data-better-x-goto] { order: -1; }
         & [data-better-x-overflow] { display: none !important; }
+
+        & [data-better-x-slot]::after {
+          content: "⌃⇧ " attr(data-better-x-slot);
+          margin-inline-start: auto;
+          align-self: center;
+          color: var(--quiet-faint);
+          font-size: var(--quiet-small);
+        }
       }
     }
 

@@ -44,13 +44,21 @@
     form.popover = 'auto'
     const options = () => [...form.querySelectorAll('[role="option"]')]
     const stamp = () => {
-      let slot = 0
+      let slot = 0, gotoOption
       for (const option of options()) {
         const goto = /^go to @/i.test(option.textContent.trim())
+        if (goto) gotoOption = option
         option.toggleAttribute('data-better-x-goto', goto)
         option.toggleAttribute('data-better-x-overflow', !goto && slot >= 9)
+        option.removeAttribute('data-better-x-slot')
         slot++
       }
+      const visible = options().filter(option => !option.hasAttribute('data-better-x-overflow'))
+      visible.sort((a, b) => (a === gotoOption ? -1 : b === gotoOption ? 1 : 0))
+      visible.forEach((option, index) => {
+        if (index < 9) option.setAttribute('data-better-x-slot', index + 1)
+        else option.removeAttribute('data-better-x-slot')
+      })
     }
     const observer = new MutationObserver(stamp)
     observer.observe(form, { childList: true, subtree: true })
