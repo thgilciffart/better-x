@@ -5,6 +5,7 @@
   const groupSelector = 'article [role="group"]'
   const navigationSelector = 'header[role="banner"], [data-testid="BottomBar"]'
   const menuSelector = '[role="menu"]'
+  const modalSelector = 'dialog[open], [aria-modal="true"], [data-testid="confirmationSheetDialog"]'
   const observedSelector = `${groupSelector}, ${navigationSelector}, ${menuSelector}`
   const searchButtons = new Map()
   let searchDialog
@@ -97,7 +98,8 @@
   }
 
   function openSearch(opener) {
-    if (root.dataset.betterXQuiet !== 'true' || document.querySelector('dialog[open], [aria-modal="true"]')) return false
+    if (root.dataset.betterXQuiet !== 'true' ||
+        [...document.querySelectorAll(modalSelector)].some(modal => modal.checkVisibility({ checkVisibilityCSS: true }))) return false
     if (nativeSearch) return false
     const inputs = [...document.querySelectorAll(searchInput)]
     const inline = inputs.find(input => input.form && input.checkVisibility({ checkVisibilityCSS: true }))
@@ -227,7 +229,22 @@
     frame ||= requestAnimationFrame(update)
   }
 
+  function opensModal(record) {
+    if (record.type === 'attributes') {
+      return record.target.matches(modalSelector) && record.target.checkVisibility({ checkVisibilityCSS: true })
+    }
+    for (const node of record.addedNodes) {
+      if (node.nodeType !== Node.ELEMENT_NODE) continue
+      if (node.matches(modalSelector) && node.checkVisibility({ checkVisibilityCSS: true })) return true
+      for (const modal of node.querySelectorAll(modalSelector)) {
+        if (modal.checkVisibility({ checkVisibilityCSS: true })) return true
+      }
+    }
+    return false
+  }
+
   const observer = new MutationObserver(records => {
+    if (nativeSearch && records.some(opensModal)) closeNativeSearch()
     if (!pending) return
     for (const record of records) {
       const target = record.target
@@ -283,7 +300,7 @@
       window.navigation?.addEventListener('currententrychange', queueUpdate)
       observer.observe(root, {
         childList: true, subtree: true, characterData: true,
-        attributeFilter: ['role', 'data-testid'],
+        attributeFilter: ['role', 'data-testid', 'aria-modal', 'open'],
       })
       queueUpdate()
       return
