@@ -75,9 +75,11 @@
   }
 
   function walk(node, visit) {
-    if (!node || typeof node !== 'object') return
     visit(node)
-    for (const value of Object.values(node)) walk(value, visit)
+    for (const key of Object.keys(node)) {
+      const value = node[key]
+      if (value && typeof value === 'object') walk(value, visit)
+    }
   }
 
   function isPromoted(entry) {
@@ -213,11 +215,12 @@
     const records = new Map()
     const posts = new Map()
     let changed = false
+    if (!data || typeof data !== 'object') return false
     walk(data, node => {
-      if (ads && pruneInstructions(node)) changed = true
+      if (ads && node.instructions && pruneInstructions(node)) changed = true
       if (age && clearAgePrompt(node)) changed = true
-      collectMedia(node, records)
-      collectPost(node, posts)
+      if (node.legacy || node.extended_entities) collectMedia(node, records)
+      if (node.rest_id) collectPost(node, posts)
     })
     announceMedia(records)
     if (posts.size) {
