@@ -4,11 +4,10 @@
   z-index: 2147483647;
   translate: -50%;
   max-width: calc(100vw - 48px);
-  padding: 10px 16px;
-  border-radius: 10px;
-  background: #1a1a1a;
-  color: #eeeeee;
-  box-shadow: 0 4px 24px #0005;
-  font: 600 14px/1.35 system-ui, sans-serif;
+  padding: 12px 24px;
+  border-radius: 4px;
+  background: #1d9bf0;
+  color: #fff;
+  font: 400 15px/20px TwitterChirp, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   pointer-events: none;
 }
