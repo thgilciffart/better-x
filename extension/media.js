@@ -306,15 +306,14 @@
       })
       button.addEventListener('click', async event => {
         event.stopPropagation()
-        if (!event.isTrusted || active !== request || button.hasAttribute('aria-busy')) return
-        button.setAttribute('aria-busy', 'true')
+        if (!event.isTrusted || active !== request) return
+        const pending = (async () => run())()
+        BetterX.closeMenu(request.menu)
         try {
-          await run()
+          await pending
           if (success) BetterX.notice(success)
         } catch {
           BetterX.notice(title === 'Copy video frame' ? 'Could not copy the frame. Play the video and try again.' : `Could not ${title.toLowerCase()}`)
-        } finally {
-          button.removeAttribute('aria-busy')
         }
       })
       addons.append(button)

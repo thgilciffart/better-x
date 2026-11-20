@@ -60,7 +60,15 @@
     toastTimer = setTimeout(() => toast.remove(), 2600)
   }
 
-  globalThis.BetterX = { settings, notice, postLink, postSelector }
+  function closeMenu(menu) {
+    const mask = document.elementFromPoint(0, 0)
+    const box = mask?.getBoundingClientRect()
+    const covers = mask?.closest('#layers') && !menu.contains(mask) && box.width >= innerWidth && box.height >= innerHeight
+    const target = covers ? mask : document.body
+    target.click()
+  }
+
+  globalThis.BetterX = { settings, notice, postLink, postSelector, closeMenu }
 
   if (document.documentElement) {
     apply()

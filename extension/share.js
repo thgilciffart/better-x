@@ -1,5 +1,5 @@
 (() => {
-  const { settings, notice, postLink, postSelector, copyPostImage, downloadVideo } = BetterX
+  const { settings, notice, postLink, postSelector, copyPostImage, downloadVideo, closeMenu } = BetterX
   const menuSelector = '[role="menu"], [data-testid="Dropdown"], [data-testid="sheetDialog"]'
   const shareSelector = '[data-engagement-action="share"], [data-testid="share"], button[aria-label*="share" i], [role="button"][aria-label*="share" i]'
   const copyLabel = /^copy link(?: to (?:post|tweet))?$/i
@@ -157,9 +157,7 @@
   function runDownload(event) {
     if (!blockDownload(event)) return false
     const { link, menu } = active
-    const mask = document.elementFromPoint(0, 0)
-    const box = mask?.getBoundingClientRect()
-    if (mask?.closest('#layers') && !menu.contains(mask) && box.width >= innerWidth && box.height >= innerHeight) mask.click()
+    closeMenu(menu)
     downloadVideo(link)
     return true
   }
