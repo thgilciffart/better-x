@@ -20,12 +20,25 @@
     }).join(' · ')
   }
 
+  const combobox = ':is(input[data-testid="SearchBox_Search_Input"], input[role="combobox"])'
+  function hideEmptyTypeaheads() {
+    for (const dd of document.querySelectorAll('[id^="typeahead"], [data-testid*="typeahead" i]')) {
+      if (dd.matches('input, form, [role="combobox"]') || dd.querySelector(combobox)) continue
+      const owner = (dd.id && document.querySelector(
+        `[aria-owns~="${CSS.escape(dd.id)}"], [aria-controls~="${CSS.escape(dd.id)}"]`))
+        || dd.closest('form')?.querySelector(combobox)
+      dd.toggleAttribute('data-better-x-hide', owner instanceof HTMLInputElement
+        ? !owner.value.trim() : !dd.querySelector('[role="option"]'))
+    }
+  }
+
   function closeNativeSearch() {
     if (!nativeSearch) return
     const { form, opener, events, observer } = nativeSearch
     nativeSearch = undefined
     events.abort()
     observer?.disconnect()
+    for (const dd of document.querySelectorAll('[data-better-x-hide]')) dd.removeAttribute('data-better-x-hide')
     const restoreFocus = form.contains(document.activeElement) || document.activeElement === document.body
     form.removeAttribute('popover')
     form.classList.remove('better-x-search', 'better-x-native-search')
@@ -60,13 +73,32 @@
         else option.removeAttribute('data-better-x-slot')
       })
     }
-    const observer = new MutationObserver(stamp)
-    observer.observe(form, { childList: true, subtree: true })
+    const observer = new MutationObserver(() => { stamp(); hideEmptyDropdown() })
+    observer.observe(document.body, { childList: true, subtree: true })
     nativeSearch.observer = observer
     stamp()
-    const markEmpty = () => form.toggleAttribute('data-better-x-empty', !input.value)
-    input.addEventListener('input', markEmpty, { signal })
-    markEmpty()
+    let xpathChecked = 0
+    const marked = new Set()
+    function hideEmptyDropdown() {
+      const empty = !input.value
+      form.toggleAttribute('data-better-x-empty', empty)
+      hideEmptyTypeaheads()
+      if (empty && Date.now() - xpathChecked > 500) {
+        xpathChecked = Date.now()
+        const hit = document.evaluate('//*[contains(text(),"Try searching")]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue
+        let box = hit
+        while (box?.parentElement?.children.length === 1 && box.parentElement.tagName !== 'BODY'
+               && !box.parentElement.contains(input)) box = box.parentElement
+        if (box instanceof Element && !box.contains(input) && !box.matches('input, form, [role="combobox"], [role="main"]')
+            && box.textContent.trim().length < 200) marked.add(box)
+      }
+      for (const el of marked) {
+        if (!el.isConnected) marked.delete(el)
+        else el.toggleAttribute('data-better-x-hide', empty)
+      }
+    }
+    input.addEventListener('input', hideEmptyDropdown, { signal })
+    hideEmptyDropdown()
     form.addEventListener('toggle', event => {
       if (event.newState === 'closed') closeNativeSearch()
     }, { signal })
@@ -174,6 +206,7 @@
   function update() {
     frame = 0
     if (nativeSearch && (!nativeSearch.form.isConnected || nativeSearch.url !== location.href)) closeNativeSearch()
+    hideEmptyTypeaheads()
     for (const group of pending || document.querySelectorAll(groupSelector)) {
       if (pending && (!root.contains(group) || !group.matches(groupSelector))) continue
       const text = summary(group)

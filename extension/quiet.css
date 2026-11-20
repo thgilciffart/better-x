@@ -297,8 +297,6 @@ html[data-better-x-quiet="true"] {
       & svg { display: none; }
       & :is(button, [role="button"]) svg { display: unset; }
 
-      &[data-better-x-empty] [id^="typeaheadDropdown"] { display: none; }
-
       & [id^="typeaheadDropdown"] {
         position: static !important;
         width: auto !important;
@@ -395,6 +393,8 @@ html[data-better-x-quiet="true"] {
       }
     }
   }
+
+  & [data-better-x-hide] { display: none !important; }
 
   & :is([id^="typeaheadDropdown"], [data-testid="typeaheadDropdownWrapper"]) {
     border: 1px solid var(--quiet-edge) !important;
