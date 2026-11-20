@@ -23,8 +23,7 @@
     chat: 'Chat',
     calls: 'Calls',
     grok: 'Grok',
-    history: 'History',
-    bookmarks: 'Bookmarks',
+    bookmarks: 'History / Bookmarks',
     studio: 'Creator Studio',
     premium: 'Premium',
     profile: 'Profile',
@@ -94,7 +93,8 @@
   }
 
   async function load() {
-    const saved = await chrome.storage.local.get(Object.keys(defaults))
+    const saved = await chrome.storage.local.get([...Object.keys(defaults), 'nav:history'])
+    saved['nav:bookmarks'] ??= saved['nav:history']
     return Object.fromEntries(Object.keys(defaults).map(key => [key, normalize(key, saved[key])]))
   }
 
