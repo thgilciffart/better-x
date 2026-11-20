@@ -10,6 +10,10 @@ html[data-better-x-quiet="true"] {
   --quiet-hover: #141414;
   --quiet-shadow: rgb(0 0 0 / 0.5);
   --quiet-font: TwitterChirp, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --quiet-width: var(--better-x-quiet-width, 600px);
+  --quiet-size: var(--better-x-quiet-size, 15px);
+  --quiet-label: calc(var(--quiet-size) - 1px);
+  --quiet-small: calc(var(--quiet-size) - 2px);
   background: var(--quiet-bg);
 
   &[data-theme="light"] {
@@ -24,6 +28,11 @@ html[data-better-x-quiet="true"] {
     --quiet-hover: #f3f5f6;
     --quiet-shadow: rgb(15 20 25 / 0.12);
   }
+
+  &[data-better-x-quiet-font="system"] { --quiet-font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  &[data-better-x-quiet-font="serif"] { --quiet-font: ui-serif, Georgia, "Times New Roman", serif; }
+  &[data-better-x-quiet-font="mono"] { --quiet-font: ui-monospace, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace; }
+  &:not([data-better-x-quiet-font="x"]) :is(body, body *) { font-family: var(--quiet-font) !important; }
 
   & :is(body, #react-root, main[role="main"], header[role="banner"]) {
     background-color: var(--quiet-bg) !important;
@@ -60,8 +69,8 @@ html[data-better-x-quiet="true"] {
       & > [dir] {
         margin: 0;
         color: var(--quiet-soft) !important;
-        font-size: 14px;
-        line-height: 18px;
+        font-size: var(--quiet-label);
+        line-height: 1.3;
         text-transform: lowercase;
       }
     }
@@ -87,7 +96,7 @@ html[data-better-x-quiet="true"] {
 
     & > div > div :is(div:has(nav), div:has(> [data-testid="SideNav_NewTweet_Button"]), nav) { width: auto; padding-inline-end: 0; align-items: stretch; }
     & > div > div div:has(> h1) { align-self: flex-start; }
-    & :is(nav :is(a, button), [data-testid="SideNav_NewTweet_Button"]) { padding: 5px 6px; font: 400 clamp(10px, 11.5cqi, 14px)/18px var(--quiet-font); }
+    & :is(nav :is(a, button), [data-testid="SideNav_NewTweet_Button"]) { padding: 5px 6px; font: 400 clamp(10px, 11.5cqi, var(--quiet-label))/1.3 var(--quiet-font); }
   }
 
   & :is(header[role="banner"]:has(nav):not(:has(nav :is(a, button) > div > [dir])), [data-testid="BottomBar"]) nav :is(a, button) {
@@ -123,7 +132,7 @@ html[data-better-x-quiet="true"] {
     flex: 1 1 auto;
     justify-content: center;
     padding-inline: 4px;
-    font: 400 13px/18px var(--quiet-font);
+    font: 400 var(--quiet-small)/1.3 var(--quiet-font);
   }
 
   & header[role="banner"] [data-testid="SideNav_NewTweet_Button"] {
@@ -140,7 +149,7 @@ html[data-better-x-quiet="true"] {
     background: transparent !important;
     box-shadow: none;
     color: var(--quiet-soft);
-    font: 400 14px/18px var(--quiet-font);
+    font: 400 var(--quiet-label)/1.3 var(--quiet-font);
 
     & > div { display: none; }
     &::before { content: "post"; }
@@ -156,20 +165,23 @@ html[data-better-x-quiet="true"] {
     border: 0;
     background: none;
     color: var(--quiet-fg) !important;
-    font-size: 13px;
+    font-size: var(--quiet-small);
     font-weight: 400;
-    line-height: 18px;
+    line-height: 1.3;
   }
 
   & [data-testid="primaryColumn"] {
+    max-width: var(--quiet-width);
     border-color: transparent !important;
+
+    & div:has(> section[role="region"]) { max-width: none; }
 
     & [data-testid="cellInnerDiv"] > div { border-color: var(--quiet-line); }
     & article div[role="link"]:has([data-testid="User-Name"]) { border-color: var(--quiet-edge); }
 
     & h2[role="heading"] > span {
       color: var(--quiet-soft);
-      font-size: 15px;
+      font-size: var(--quiet-size);
       font-weight: 400;
       text-transform: lowercase;
     }
@@ -184,7 +196,7 @@ html[data-better-x-quiet="true"] {
 
   & [role="tab"] {
     & > div { padding-inline: 0; }
-    & [dir] { color: var(--quiet-muted) !important; font-size: 14px; font-weight: 400; text-transform: lowercase; }
+    & [dir] { color: var(--quiet-muted) !important; font-size: var(--quiet-label); font-weight: 400; text-transform: lowercase; }
     &[aria-selected="true"] [dir] { color: var(--quiet-fg) !important; }
     &:hover [dir] { color: var(--quiet-soft) !important; }
     & svg { width: 0; margin: 0; visibility: hidden; }
@@ -205,7 +217,7 @@ html[data-better-x-quiet="true"] {
     background: transparent !important;
     box-shadow: none;
 
-    & span { color: var(--quiet-fg) !important; font-size: 14px; font-weight: 400; text-transform: lowercase; }
+    & span { color: var(--quiet-fg) !important; font-size: var(--quiet-label); font-weight: 400; text-transform: lowercase; }
     &[aria-disabled="true"] span { color: var(--quiet-faint) !important; }
   }
 
@@ -215,7 +227,7 @@ html[data-better-x-quiet="true"] {
     border-radius: 6px;
     background: transparent !important;
 
-    & :is([dir], span) { color: var(--quiet-fg) !important; font-size: 14px; font-weight: 500; text-transform: lowercase; }
+    & :is([dir], span) { color: var(--quiet-fg) !important; font-size: var(--quiet-label); font-weight: 500; text-transform: lowercase; }
     &:hover { background: var(--quiet-hover) !important; }
   }
 
@@ -226,6 +238,11 @@ html[data-better-x-quiet="true"] {
   }
 
   & article {
+    & :is([data-testid="tweetText"], [data-testid="tweetText"] span, [data-testid="User-Name"] span) {
+      font-size: var(--quiet-size);
+      line-height: 1.35;
+    }
+
     & :is(time, [data-testid="tweet-text-show-more-link"], a[href$="/analytics"], [data-testid="socialContext"]:not(a *)) {
       text-transform: lowercase;
     }
@@ -246,12 +263,12 @@ html[data-better-x-quiet="true"] {
 
         & > [dir] {
           color: var(--quiet-muted) !important;
-          font-size: 13px;
-          line-height: 18px;
+          font-size: var(--quiet-small);
+          line-height: 1.3;
 
           & > div:first-child { display: none; }
           & > div:has(> [data-testid="app-text-transition-container"]) { padding-inline-start: 5px; }
-          & [data-testid="app-text-transition-container"] { font-size: 13px; }
+          & [data-testid="app-text-transition-container"] { font-size: var(--quiet-small); }
         }
 
         &:is(:hover, :focus-visible) > [dir] { color: var(--quiet-fg) !important; }
@@ -279,8 +296,8 @@ html[data-better-x-quiet="true"] {
 
     &:not([tabindex="-1"]) [role="group"] {
       justify-content: flex-end;
-      font-size: 13px;
-      line-height: 18px;
+      font-size: var(--quiet-small);
+      line-height: 1.3;
 
       &::after {
         content: attr(data-better-x-summary);
@@ -315,10 +332,10 @@ html[data-better-x-quiet="true"] {
         align-items: center;
         gap: 14px;
 
-        & :is(span, [dir]) { color: var(--quiet-muted) !important; font-size: 13px; font-weight: 400; text-transform: lowercase; }
+        & :is(span, [dir]) { color: var(--quiet-muted) !important; font-size: var(--quiet-small); font-weight: 400; text-transform: lowercase; }
         & :is(button, a):hover :is(span, [dir]) { color: var(--quiet-fg) !important; }
         & a svg { display: none; }
-        & button::before { content: "sort"; margin-inline-end: 6px; color: var(--quiet-muted); font: 13px var(--quiet-font); }
+        & button::before { content: "sort"; margin-inline-end: 6px; color: var(--quiet-muted); font: var(--quiet-small) var(--quiet-font); }
       }
     }
   }
@@ -345,9 +362,9 @@ html[data-better-x-quiet="true"] {
 
     & :is(span, [dir], .better-x-copy-image, .better-x-media-action) {
       color: var(--quiet-soft) !important;
-      font-size: 14px !important;
+      font-size: var(--quiet-label) !important;
       font-weight: 400 !important;
-      line-height: 18px !important;
+      line-height: 1.3 !important;
       text-transform: lowercase;
     }
 

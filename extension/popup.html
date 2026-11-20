@@ -61,6 +61,23 @@
           <span>Quiet Mode</span>
           <input name="quiet" type="checkbox" role="switch">
         </label>
+        <label class="row">
+          <span>Feed width (px)</span>
+          <input name="quietWidth" type="number" min="480" max="1000" step="10" required>
+        </label>
+        <label class="row">
+          <span>Font size (px)</span>
+          <input name="quietSize" type="number" min="12" max="20" step="1" required>
+        </label>
+        <label class="row">
+          <span>Font</span>
+          <select name="quietFont">
+            <option value="x">X default</option>
+            <option value="system">System</option>
+            <option value="serif">Serif</option>
+            <option value="mono">Mono</option>
+          </select>
+        </label>
       </fieldset>
       <p id="status" role="status" hidden></p>
     </div>

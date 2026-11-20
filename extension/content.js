@@ -5,9 +5,11 @@
     ads: 'data-better-x-ads',
     ageWarning: 'data-better-x-age-warning',
     quiet: 'data-better-x-quiet',
+    quietFont: 'data-better-x-quiet-font',
     cleanLinks: 'data-better-x-clean-links',
     linkHost: 'data-better-x-link-host',
   }
+  const lengths = { quietWidth: '--better-x-quiet-width', quietSize: '--better-x-quiet-size' }
   const origins = new Set(['https://x.com', 'https://twitter.com', 'https://www.x.com', 'https://www.twitter.com'])
   const postSelector = 'article, [data-testid="quoteTweet"], div[role="link"]:has([data-testid="User-Name"])'
 
@@ -16,6 +18,9 @@
     if (!root) return
     for (const [key, attribute] of Object.entries(attributes)) {
       root.setAttribute(attribute, String(settings[key]))
+    }
+    for (const [key, property] of Object.entries(lengths)) {
+      root.style.setProperty(property, `${settings[key]}px`)
     }
     root.dataset.betterXHiddenTabs = Object.keys(navigation)
       .filter(key => !settings[`nav:${key}`])

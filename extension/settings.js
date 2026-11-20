@@ -3,6 +3,8 @@
     surface: 'ios-timeline', width: 430, dpr: 3, theme: 'auto', expanded: false,
   }
   const surfaces = new Set(['web-timeline', 'web-detail', 'ios-timeline', 'ios-detail'])
+  const ranges = { quietWidth: [480, 1000], quietSize: [12, 20] }
+  const fonts = new Set(['x', 'system', 'serif', 'mono'])
   const navigation = {
     home: 'Home',
     explore: 'Explore',
@@ -29,6 +31,9 @@
     copyImage: true,
     imageExport: { ...imageDefaults, autoExpand: true },
     quiet: false,
+    quietWidth: 600,
+    quietSize: 15,
+    quietFont: 'x',
     ...Object.fromEntries(Object.keys(navigation).map(key => [`nav:${key}`, true])),
   }
 
@@ -60,6 +65,11 @@
   function normalize(key, value) {
     if (key === 'linkHost') return linkDomain(value) ?? defaults.linkHost
     if (key === 'imageExport') return normalizeImageExport(value)
+    if (key === 'quietFont') return fonts.has(value) ? value : defaults[key]
+    if (ranges[key]) {
+      const [min, max] = ranges[key]
+      return Number.isInteger(value) && value >= min && value <= max ? value : defaults[key]
+    }
     return typeof value === 'boolean' ? value : defaults[key]
   }
 

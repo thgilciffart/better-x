@@ -64,7 +64,14 @@ hydrate().then(() => {
 
 form.addEventListener('change', async ({ target }) => {
   const { name } = target
-  const value = name === 'linkHost' ? linkDomain(target.value) : target.checked
+  if (!target.checkValidity()) {
+    target.reportValidity()
+    setValue(target, saved[name])
+    return
+  }
+  const value = name === 'linkHost' ? linkDomain(target.value) :
+    target.type === 'checkbox' ? target.checked :
+    target.type === 'number' ? Number(target.value) : target.value
   if (value === null) {
     target.setAttribute('aria-invalid', 'true')
     report('Enter a domain like vxtwitter.com.')
@@ -87,5 +94,5 @@ form.addEventListener('change', async ({ target }) => {
 
 form.addEventListener('submit', event => {
   event.preventDefault()
-  form.elements.linkHost.blur()
+  document.activeElement?.blur()
 })
