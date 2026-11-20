@@ -55,6 +55,14 @@
     }
   }
 
+  window.addEventListener('copy', event => {
+    const text = String(document.getSelection())
+    const cleaned = cleanCopiedLink(text)
+    if (cleaned === text || !event.clipboardData) return
+    event.clipboardData.setData('text/plain', cleaned)
+    event.preventDefault()
+  }, true)
+
   function graphqlOperation(value) {
     if (!value) return null
     try {
