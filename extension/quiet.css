@@ -437,6 +437,78 @@ html[data-better-x-quiet="true"] {
     & [data-testid="SearchBox_Search_Input_label"] input:focus { outline: none !important; }
   }
 
+  & form[role="search"]:has(> div:first-child [data-testid="SearchBox_Search_Input_label"]) {
+    & > div:first-child + div > div:has(:is([data-testid="typeaheadRecentSearchesHeader"], [data-testid="typeaheadEmptySearch"])) {
+      min-height: 0 !important;
+      background: var(--quiet-menu) !important;
+      box-shadow: none !important;
+
+      & [role="listbox"] {
+        padding: 4px 8px 8px;
+        border: 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+      }
+    }
+
+    &.better-x-native-search > div:first-child + div > div:has(:is([data-testid="typeaheadRecentSearchesHeader"], [data-testid="typeaheadEmptySearch"])) {
+      position: static !important;
+      width: auto !important;
+      border: 0 !important;
+      border-top: 1px solid var(--quiet-line) !important;
+      border-radius: 0 !important;
+      background: transparent !important;
+    }
+
+    &:not(.better-x-search) {
+      &:has(> div:first-child + div > div :is([data-testid="typeaheadRecentSearchesHeader"], [data-testid="typeaheadEmptySearch"]))
+        > div:first-child > div:has([data-testid="SearchBox_Search_Input_label"]) {
+        border-color: var(--quiet-edge) !important;
+        border-radius: 12px 12px 0 0 !important;
+      }
+
+      & > div:first-child + div > div:has(:is([data-testid="typeaheadRecentSearchesHeader"], [data-testid="typeaheadEmptySearch"])) {
+        border: 1px solid var(--quiet-edge) !important;
+        border-top: 0 !important;
+        border-radius: 0 0 12px 12px !important;
+      }
+    }
+  }
+
+  & [data-testid="typeaheadRecentSearchesHeader"] {
+    padding: 4px 10px !important;
+
+    & > :first-child {
+      color: var(--quiet-soft) !important;
+      font: 500 var(--quiet-small)/1.35 var(--quiet-font) !important;
+      text-transform: lowercase;
+    }
+  }
+
+  & [data-testid="typeaheadRecentSearchesItem"] {
+    padding: 4px 10px !important;
+    border-radius: 7px;
+
+    &:not(:has(img, [data-testid^="UserAvatar-Container"])) svg:not(button *) {
+      width: 14px;
+      height: 14px;
+      color: var(--quiet-muted) !important;
+      fill: currentColor;
+    }
+  }
+
+  & :is([data-testid="typeaheadRecentSearchesHeader"], [data-testid="typeaheadRecentSearchesItem"]) button {
+    min-height: 28px;
+    border: 0;
+    background: transparent;
+    color: var(--quiet-soft) !important;
+    text-transform: lowercase;
+
+    &:is(:hover, :focus-visible) { color: var(--quiet-fg) !important; }
+    & :is(span, svg) { color: inherit !important; }
+    & svg { fill: currentColor; }
+  }
+
   & :is([id^="typeaheadDropdown"], [data-testid="typeaheadDropdownWrapper"]) {
     border-color: var(--quiet-edge) !important;
     border-radius: 8px;
