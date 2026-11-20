@@ -388,7 +388,7 @@ html[data-better-x-quiet="true"] {
 
         & :is(span, [dir]) { color: var(--quiet-muted) !important; font-size: var(--quiet-small); font-weight: 400; text-transform: lowercase; }
         & :is(button, a):hover :is(span, [dir]) { color: var(--quiet-fg) !important; }
-        & a svg { display: none; }
+        & :is(a, button) svg { display: none; }
         & button::before { content: "sort"; margin-inline-end: 6px; color: var(--quiet-muted); font: var(--quiet-small) var(--quiet-font); }
       }
     }

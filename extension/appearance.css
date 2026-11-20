@@ -4,8 +4,13 @@ html[data-better-x-quiet-font]:not([data-better-x-quiet-font=""]) :is(body, body
 
 html[data-better-x-emoji-ready] img[data-better-x-emoji-image] {
   content: var(--better-x-emoji-image);
-  width: 1.2em;
-  height: 1.2em;
+}
+
+html[data-better-x-emoji-ready] img[data-better-x-emoji-image],
+:is([data-testid="tweetText"], [data-testid="User-Name"], [data-testid="UserName"], [data-testid="UserDescription"])
+  img[alt]:is([src^="https://abs-0.twimg.com/emoji/"], [src^="https://abs.twimg.com/emoji/"]) {
+  width: 1.3em;
+  height: 1.3em;
 }
 
 html[data-better-x-appearance~="quietWidth"] [data-testid="primaryColumn"] {
