@@ -328,6 +328,7 @@ html[data-better-x-quiet="true"] {
           max-height: calc(100dvh - var(--quiet-search-top) - 96px);
           overflow-y: auto;
           scrollbar-gutter: stable;
+          padding-inline-end: 10px;
         }
 
         & [role="option"] {
@@ -439,27 +440,36 @@ html[data-better-x-quiet="true"] {
 
     & :is([role="option"], [data-testid="typeaheadResult"]) {
       min-height: 0;
-      padding-block: 8px;
+      padding: 8px 16px !important;
       align-items: center !important;
       justify-content: flex-start !important;
       text-align: left;
     }
 
-    & [role="option"] div {
-      min-height: 0 !important;
-      justify-content: flex-start !important;
+    & [role="option"] > :is(button, [role="presentation"], div) {
+      width: 100% !important;
       margin-inline: 0 !important;
+    }
+
+    & [role="option"] div:not([data-testid^="UserAvatar-Container"], [data-testid^="UserAvatar-Container"] *) {
+      min-height: 0 !important;
+      height: auto !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      justify-content: flex-start !important;
+      text-align: left !important;
     }
 
     & [role="option"] :is(button, [role="presentation"]) {
       min-height: 0 !important;
+      height: auto !important;
       padding: 0 !important;
       border: 0 !important;
       background: transparent !important;
       justify-content: flex-start !important;
     }
 
-    & [role="option"] [data-testid^="UserAvatar-Container"] { flex: none; }
+    & [role="option"] [data-testid^="UserAvatar-Container"] { flex: none; width: 40px; height: 40px; }
 
     & [data-better-x-slot]::after {
       content: "⌃⇧" attr(data-better-x-slot);
