@@ -56,6 +56,9 @@
     observer.observe(form, { childList: true, subtree: true })
     nativeSearch.observer = observer
     stamp()
+    const markEmpty = () => form.toggleAttribute('data-better-x-empty', !input.value)
+    input.addEventListener('input', markEmpty, { signal })
+    markEmpty()
     form.addEventListener('toggle', event => {
       if (event.newState === 'closed') closeNativeSearch()
     }, { signal })
@@ -66,7 +69,7 @@
         closeNativeSearch()
         return
       }
-      if (!(event.ctrlKey || event.altKey) || event.metaKey || event.shiftKey || !/^[1-9]$/.test(event.key)) return
+      if (!event.ctrlKey || !event.shiftKey || event.metaKey || event.altKey || !/^[1-9]$/.test(event.key)) return
       const all = [...form.querySelectorAll('[role="option"]')]
       const goto = all.find(option => option.hasAttribute('data-better-x-goto'))
       const visible = [...(goto ? [goto] : []), ...all.filter(option => option !== goto && !option.hasAttribute('data-better-x-overflow'))]
