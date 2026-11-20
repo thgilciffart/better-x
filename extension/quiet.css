@@ -306,53 +306,15 @@ html[data-better-x-quiet="true"] {
       & svg { display: none; }
       & :is(button, [role="button"]) svg { display: unset; }
 
+      &::backdrop { pointer-events: none; }
+
       & [id^="typeaheadDropdown"] {
         position: static !important;
         width: auto !important;
-        height: auto !important;
-        border: 0 !important;
-        border-radius: 0 !important;
-        background: transparent !important;
-        box-shadow: none !important;
+      }
 
-        & > div {
-          height: auto !important;
-          border: 0 !important;
-          background: transparent !important;
-          box-shadow: none !important;
-        }
-
-        &:is([role="listbox"]), & [role="listbox"] {
-          display: flex;
-          flex-direction: column;
-          height: auto !important;
-          max-height: calc(100dvh - var(--quiet-search-top) - 96px);
-          overflow-y: auto;
-          scrollbar-gutter: stable;
-          padding-inline-end: 10px;
-        }
-
-        & [role="option"] {
-          display: flex !important;
-          align-items: center !important;
-          height: auto !important;
-          min-height: 0 !important;
-          padding-block: 9px !important;
-          background-color: transparent !important;
-          transition: none !important;
-
-          & :is(div, span) {
-            min-height: 0 !important;
-            background-color: transparent !important;
-            transition: none !important;
-          }
-        }
-
-        & [role="option"]:is(:hover, :focus-within, [aria-selected="true"]) {
-          background-color: var(--quiet-hover) !important;
-        }
-
-        & [data-better-x-goto] { order: -1; }
+      & [role="listbox"] {
+        max-height: min(70dvh, calc(100dvh - var(--quiet-search-top) - 80px));
       }
     }
 
@@ -419,77 +381,51 @@ html[data-better-x-quiet="true"] {
     }
   }
 
-  & [data-better-x-hide] { display: none !important; }
+  & form[role="search"]:not(.better-x-search):has(:is(input[data-testid="SearchBox_Search_Input"], input[role="combobox"])) {
+    & [data-testid="SearchBox_Search_Input_label"] {
+      border-color: var(--quiet-edge) !important;
+      background: var(--quiet-menu) !important;
+      box-shadow: none !important;
+    }
 
-  & form[role="search"]:not(.better-x-native-search) :is(div, input) {
-    border-color: transparent !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    outline: none !important;
-  }
+    & :is(input[data-testid="SearchBox_Search_Input"], input[role="combobox"]) {
+      border: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      color: var(--quiet-fg);
+      font-family: var(--quiet-font);
+    }
 
-  & form[role="search"]:not(.better-x-native-search) input {
-    appearance: none !important;
-    border-width: 0 !important;
+    & :focus-within[data-testid="SearchBox_Search_Input_label"] { border-color: var(--quiet-soft) !important; }
   }
 
   & :is([id^="typeaheadDropdown"], [data-testid="typeaheadDropdownWrapper"]) {
-    border: 1px solid var(--quiet-edge) !important;
-    border-radius: 8px !important;
+    border-color: var(--quiet-edge) !important;
+    border-radius: 8px;
     background-color: var(--quiet-menu) !important;
-    box-shadow: 0 8px 24px var(--quiet-shadow) !important;
     color: var(--quiet-fg);
     font-family: var(--quiet-font);
-
-    & :is(ul, li) { margin: 0; padding: 0; list-style: none; }
-
-    & :is([role="option"], [data-testid="typeaheadResult"]) {
-      min-height: 0;
-      padding: 8px 16px !important;
-      align-items: center !important;
-      justify-content: flex-start !important;
-      text-align: left;
-    }
-
-    & [role="option"] > :is(button, [role="presentation"], div) {
-      width: 100% !important;
-      margin-inline: 0 !important;
-    }
-
-    & [role="option"] div:not([data-testid^="UserAvatar-Container"], [data-testid^="UserAvatar-Container"] *) {
-      min-height: 0 !important;
-      height: auto !important;
-      padding: 0 !important;
-      margin: 0 !important;
-      justify-content: flex-start !important;
-      text-align: left !important;
-    }
-
-    & [role="option"] :is(button, [role="presentation"]) {
-      min-height: 0 !important;
-      height: auto !important;
-      padding: 0 !important;
-      border: 0 !important;
-      background: transparent !important;
-      justify-content: flex-start !important;
-    }
-
-    & [role="option"] [data-testid^="UserAvatar-Container"] { flex: none; width: 40px; height: 40px; }
-
-    & [role="option"] img { opacity: 1 !important; }
-
-    & :is(span, [dir]) { font-size: var(--quiet-label); }
 
     & :is([role="option"], [data-testid="typeaheadResult"]):is(:hover, :focus-within, [aria-selected="true"]) {
       background-color: var(--quiet-hover) !important;
     }
 
-    & :is([role="option"], [data-testid="typeaheadResult"]):not(:has(img)) :is(span, [dir]) {
-      color: var(--quiet-soft) !important;
-      text-transform: lowercase;
+    & :is([role="option"], [data-testid="typeaheadResult"]) img {
+      opacity: 1 !important;
+      visibility: visible !important;
     }
+  }
 
-    & svg { display: none; }
+  & :is(
+    [id^="typeaheadDropdown"]:is([role="listbox"]),
+    [id^="typeaheadDropdown"] [role="listbox"],
+    [data-testid="typeaheadDropdownWrapper"] [role="listbox"],
+    [data-testid="typeaheadDropdownWrapper"]:not(:has([role="listbox"]))
+  ) {
+    height: auto !important;
+    max-height: 70dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   & :is(header[role="banner"] nav, [data-testid="BottomBar"]) :is(a, button) [aria-live] {
@@ -684,9 +620,7 @@ html[data-better-x-quiet="true"] {
     }
   }
 
-  & [data-testid="cellInnerDiv"]:is(:hover, :focus-within),
-  & article:is(:hover, :focus-within),
-  & article:is(:hover, :focus-within) > div {
+  & :is([data-testid="cellInnerDiv"], article, article > div) {
     background-color: transparent !important;
   }
 

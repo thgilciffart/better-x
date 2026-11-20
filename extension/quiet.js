@@ -20,34 +20,17 @@
     }).join(' · ')
   }
 
-  const combobox = ':is(input[data-testid="SearchBox_Search_Input"], input[role="combobox"])'
-  function hideEmptyTypeaheads() {
-    const overlayInput = nativeSearch?.form.querySelector(combobox)
-    for (const dd of document.querySelectorAll('[id^="typeahead"], [data-testid*="typeahead" i], [role="listbox"]')) {
-      if (dd.matches('input, form, [role="combobox"]') || dd.querySelector(combobox)) continue
-      const owner = (dd.id && document.querySelector(
-        `[aria-owns~="${CSS.escape(dd.id)}"], [aria-controls~="${CSS.escape(dd.id)}"]`))
-        || dd.closest('form')?.querySelector(combobox)
-        || null
-      let hide
-      if (owner) hide = owner === overlayInput ? !overlayInput.value.trim() : true
-      else if (!dd.matches('[role="listbox"]') || dd.closest('form[role="search"]')) hide = true
-      else continue
-      dd.toggleAttribute('data-better-x-hide', hide)
-    }
-  }
+  const searchInput = 'input[data-testid="SearchBox_Search_Input"], form[role="search"] input[role="combobox"]'
 
-  function closeNativeSearch() {
+  function closeNativeSearch(restoreFocus = false) {
     if (!nativeSearch) return
-    const { form, opener, events, observer } = nativeSearch
+    const { form, opener, events } = nativeSearch
     nativeSearch = undefined
     events.abort()
-    observer?.disconnect()
-    for (const dd of document.querySelectorAll('[data-better-x-hide]')) dd.removeAttribute('data-better-x-hide')
-    const restoreFocus = form.contains(document.activeElement) || document.activeElement === document.body
+    if (form.matches(':popover-open')) form.hidePopover()
     form.removeAttribute('popover')
     form.classList.remove('better-x-search', 'better-x-native-search')
-    if (restoreFocus) opener?.focus({ preventScroll: true })
+    if (restoreFocus && opener?.isConnected) opener.focus({ preventScroll: true })
   }
 
   function openNativeSearch(input, opener) {
@@ -59,37 +42,6 @@
     nativeSearch = { form, opener, events, url: location.href }
     form.classList.add('better-x-search', 'better-x-native-search')
     form.popover = 'auto'
-    const stamp = () => {
-      for (const option of form.querySelectorAll('[role="option"]')) {
-        option.toggleAttribute('data-better-x-goto', /^go to @/i.test(option.textContent.trim()))
-      }
-    }
-    const observer = new MutationObserver(() => { stamp(); hideEmptyDropdown() })
-    observer.observe(document.body, { childList: true, subtree: true })
-    nativeSearch.observer = observer
-    stamp()
-    let xpathChecked = 0
-    const marked = new Set()
-    function hideEmptyDropdown() {
-      const empty = !input.value
-      form.toggleAttribute('data-better-x-empty', empty)
-      hideEmptyTypeaheads()
-      if (empty && Date.now() - xpathChecked > 500) {
-        xpathChecked = Date.now()
-        const hit = document.evaluate('//*[contains(text(),"Try searching")]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue
-        let box = hit
-        while (box?.parentElement?.children.length === 1 && box.parentElement.tagName !== 'BODY'
-               && !box.parentElement.contains(input)) box = box.parentElement
-        if (box instanceof Element && !box.contains(input) && !box.matches('input, form, [role="combobox"], [role="main"]')
-            && box.textContent.trim().length < 200) marked.add(box)
-      }
-      for (const el of marked) {
-        if (!el.isConnected) marked.delete(el)
-        else el.toggleAttribute('data-better-x-hide', empty)
-      }
-    }
-    input.addEventListener('input', hideEmptyDropdown, { signal })
-    hideEmptyDropdown()
     form.addEventListener('toggle', event => {
       if (event.newState === 'closed') closeNativeSearch()
     }, { signal })
@@ -97,7 +49,7 @@
       if (event.key !== 'Escape') return
       event.preventDefault()
       event.stopPropagation()
-      closeNativeSearch()
+      closeNativeSearch(true)
     }, { capture: true, signal })
     form.showPopover()
     input.focus({ preventScroll: true })
@@ -112,10 +64,18 @@
   function openSearch(opener) {
     if (root.dataset.betterXQuiet !== 'true' || document.querySelector('dialog[open], [aria-modal="true"]')) return false
     if (nativeSearch) return false
-    if (openNativeSearch(document.querySelector(combobox), opener)) return true
+    const inputs = [...document.querySelectorAll(searchInput)]
+    const inline = inputs.find(input => input.form && input.getClientRects().length)
+    if (inline) {
+      inline.focus({ preventScroll: true })
+      return document.activeElement === inline
+    }
+    const sidebar = inputs.find(input => input.closest('[data-testid="sidebarColumn"]'))
+    if (openNativeSearch(sidebar, opener)) return true
     if (!searchDialog) {
       searchDialog = document.createElement('dialog')
       searchDialog.className = 'better-x-search'
+      searchDialog.setAttribute('closedby', 'any')
       searchDialog.setAttribute('aria-labelledby', 'better-x-search-label')
       searchDialog.innerHTML = `
         <form action="/search" method="get" role="search">
@@ -132,6 +92,13 @@
       const form = searchDialog.querySelector('form')
       const input = form.elements.q
       form.querySelector('[type="button"]').addEventListener('click', () => searchDialog.close())
+      searchDialog.addEventListener('click', event => {
+        if (event.target !== searchDialog) return
+        const { left, right, top, bottom } = searchDialog.getBoundingClientRect()
+        if (event.clientX < left || event.clientX > right || event.clientY < top || event.clientY > bottom) {
+          searchDialog.close()
+        }
+      })
       form.addEventListener('submit', event => {
         input.value = input.value.trim()
         if (!input.value) {
@@ -167,20 +134,6 @@
     else if (button.parentElement !== parent) parent.append(button)
   }
 
-  function activateSearchField(event, interrupt) {
-    if (nativeSearch || root.dataset.betterXQuiet !== 'true') return
-    const input = event.target instanceof Element ? event.target.closest(combobox) : null
-    if (!input || !input.isConnected) return
-    if (!openNativeSearch(input, input)) return
-    if (interrupt) {
-      event.preventDefault()
-      event.stopPropagation()
-    }
-  }
-
-  const onFieldPointer = event => activateSearchField(event, true)
-  const onFieldFocus = event => activateSearchField(event, false)
-
   function searchShortcut(event) {
     const modifier = event.metaKey ? !event.ctrlKey : !mac && event.ctrlKey
     if (event.key !== '/' || !modifier || event.altKey || event.shiftKey ||
@@ -195,7 +148,6 @@
   function update() {
     frame = 0
     if (nativeSearch && (!nativeSearch.form.isConnected || nativeSearch.url !== location.href)) closeNativeSearch()
-    hideEmptyTypeaheads()
     for (const group of pending || document.querySelectorAll(groupSelector)) {
       if (pending && (!root.contains(group) || !group.matches(groupSelector))) continue
       const text = summary(group)
@@ -263,8 +215,6 @@
     syncStyle()
     if (settings.quiet) {
       window.addEventListener('keydown', searchShortcut, true)
-      window.addEventListener('pointerdown', onFieldPointer, true)
-      window.addEventListener('focusin', onFieldFocus, true)
       observer.observe(root, {
         childList: true, subtree: true, characterData: true,
         attributeFilter: ['role', 'data-testid', 'data-better-x-summary'],
@@ -273,8 +223,6 @@
       return
     }
     window.removeEventListener('keydown', searchShortcut, true)
-    window.removeEventListener('pointerdown', onFieldPointer, true)
-    window.removeEventListener('focusin', onFieldFocus, true)
     for (const button of searchButtons.values()) button.remove()
     closeNativeSearch()
     searchDialog?.close()
