@@ -1,4 +1,4 @@
-importScripts('settings.js', 'emoji-fonts.js')
+importScripts('settings.js', 'emoji-fonts.js', 'links.js')
 
 const { normalize } = BetterXSettings
 let telemetryUpdate = Promise.resolve()
@@ -59,10 +59,10 @@ chrome.contextMenus.onClicked.addListener(async info => {
   await downloadMedia({ url: url.href, filename: `x-${id || 'photo'}.${extension}` }).catch(console.error)
 })
 
-let creatingXeetDocument
+let creatingOffscreenDocument
 
-async function renderWithXeet(message) {
-  creatingXeetDocument ??= (async () => {
+function ensureOffscreenDocument() {
+  creatingOffscreenDocument ??= (async () => {
     const contexts = await chrome.runtime.getContexts({
       contextTypes: ['OFFSCREEN_DOCUMENT'],
       documentUrls: [chrome.runtime.getURL('xeet.html')],
@@ -70,14 +70,29 @@ async function renderWithXeet(message) {
     if (!contexts.length) {
       await chrome.offscreen.createDocument({
         url: 'xeet.html',
-        reasons: ['BLOBS'],
-        justification: 'Render and encode a PNG for the clipboard',
+        reasons: ['BLOBS', 'CLIPBOARD'],
+        justification: 'Render post images and copy page links to the clipboard',
       })
     }
-  })().finally(() => { creatingXeetDocument = undefined })
-  await creatingXeetDocument
+  })().finally(() => { creatingOffscreenDocument = undefined })
+  return creatingOffscreenDocument
+}
+
+async function renderWithXeet(message) {
+  await ensureOffscreenDocument()
   return chrome.runtime.sendMessage({ type: 'xeet:render', post: message.post, options: message.options })
 }
+
+async function copyPageLink(command, tab) {
+  if (command !== 'copy-page-link' || !tab?.url) return
+  const { linkHost, cleanLinks } = await chrome.storage.local.get(['linkHost', 'cleanLinks'])
+  const text = BetterXLinks.cleanCopiedLink(tab.url, normalize('linkHost', linkHost), normalize('cleanLinks', cleanLinks))
+  await ensureOffscreenDocument()
+  const { copied } = await chrome.runtime.sendMessage({ type: 'clipboard:copy-link', text })
+  if (!copied) throw new Error('Could not copy the page link')
+}
+
+chrome.commands.onCommand.addListener((command, tab) => copyPageLink(command, tab).catch(console.error))
 
 async function downloadMedia({ url, filename }) {
   const media = URL.canParse(url) ? new URL(url) : null

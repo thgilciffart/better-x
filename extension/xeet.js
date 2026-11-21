@@ -60,7 +60,18 @@
   }
 
   chrome.runtime.onMessage.addListener((message, sender, reply) => {
-    if (message?.type !== 'xeet:render' || sender.id !== chrome.runtime.id || sender.tab) return
+    if (sender.id !== chrome.runtime.id || sender.tab) return
+    if (message?.type === 'clipboard:copy-link' && typeof message.text === 'string') {
+      const input = document.createElement('textarea')
+      input.value = message.text
+      document.body.append(input)
+      input.select()
+      const copied = document.execCommand('copy')
+      input.remove()
+      reply({ copied })
+      return
+    }
+    if (message?.type !== 'xeet:render') return
     render(message.post, message.options).then(reply, error => {
       console.error(error)
       reply({ error: 'Xeet could not render this post.' })

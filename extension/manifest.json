@@ -7,6 +7,7 @@
   "homepage_url": "https://github.com/thgilciffart/better-x",
   "description": "Privacy, sharing, and appearance controls for 𝕏.",
   "permissions": [
+    "activeTab",
     "storage",
     "fontSettings",
     "clipboardWrite",
@@ -25,6 +26,11 @@
     "default_title": "better 𝕏",
     "default_popup": "popup.html"
   },
+  "commands": {
+    "copy-page-link": {
+      "description": "Copy current page link"
+    }
+  },
   "content_scripts": [
     {
       "matches": [
@@ -32,6 +38,7 @@
         "https://twitter.com/*"
       ],
       "js": [
+        "links.js",
         "page.js"
       ],
       "run_at": "document_start",

@@ -34,6 +34,7 @@ Reload 𝕏 after you change **Block ads** or **Skip 18+ interstitials**. Posts 
 
 - **Link domain** sets the host of links that 𝕏's **Copy link** puts on the clipboard, for example `vxtwitter.com` or `fxtwitter.com`.
 - **Clean copied links** removes the query and fragment from those links, including the `a` and `s` tracking parameters. A link copied at a video's current time keeps `t` and stays on `x.com`.
+- **Copy current page link** is an optional keyboard shortcut in `chrome://extensions/shortcuts`. It uses the same link settings for supported 𝕏 post URLs and copies other page addresses as shown.
 - **Share** and **More** open 𝕏's native menus. With **Direct downloads** enabled, Share downloads videos through Better 𝕏.
 - **Copy posts as images** adds **Copy as image** at the end of Share. The PNG uses post data that 𝕏 has already loaded.
 - **Direct downloads** enables better 𝕏's media menu in the timeline, viewer, and fullscreen. Shift-right-click opens the original menu.

@@ -25,6 +25,7 @@
   const promotedKeys = ['promotedMetadata', 'promoted_metadata']
   const entryLists = ['entries', 'moduleItems']
   const mediaKinds = { photo: 'photo', video: 'video', animated_gif: 'gif' }
+  const { cleanCopiedLink: rewriteLink } = BetterXLinks
 
   function enabled(attribute, fallback) {
     const value = document.documentElement?.getAttribute(attribute)
@@ -34,18 +35,8 @@
   }
 
   function cleanCopiedLink(text) {
-    if (typeof text !== 'string') return text
-    const match = text.trim().match(/^https:\/\/(?:www\.|mobile\.)?(?:x|twitter)\.com\/(?:\w+|i\/web)\/status\/\d+(?:[?#]\S*)?$/i)
-    if (!match) return text
-    const url = new URL(match[0])
-    const time = url.searchParams.get('t')
-    const timed = /^\d+$/.test(time || '')
-    url.hostname = timed ? 'x.com' : document.documentElement?.getAttribute('data-better-x-link-host') || 'x.com'
-    if (enabled('data-better-x-clean-links', true)) {
-      url.search = timed ? `t=${time}` : ''
-      url.hash = ''
-    }
-    return url.href
+    const host = document.documentElement?.getAttribute('data-better-x-link-host') || 'x.com'
+    return rewriteLink(text, host, enabled('data-better-x-clean-links', true))
   }
 
   const writeText = globalThis.Clipboard?.prototype.writeText
