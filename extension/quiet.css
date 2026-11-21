@@ -494,6 +494,8 @@ html[data-better-x-quiet="true"] {
     }
   }
 
+  & [data-testid="typeaheadEmptySearch"] { translate: 0 -4px; }
+
   & [data-testid="typeaheadRecentSearchesHeader"] {
     padding: 4px 10px !important;
 

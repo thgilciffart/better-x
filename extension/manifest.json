@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "minimum_chrome_version": "120",
   "name": "better 𝕏",
-  "version": "0.3",
+  "version": "0.3.1",
   "author": "thgilciffart",
   "homepage_url": "https://github.com/thgilciffart/better-x",
   "description": "Privacy, sharing, and appearance controls for 𝕏.",
