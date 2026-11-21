@@ -881,6 +881,7 @@ html[data-better-x-quiet="true"] {
 
     & :is(span, [dir], .better-x-menu-item) {
       color: var(--quiet-soft) !important;
+      font-family: var(--quiet-font) !important;
       font-size: var(--quiet-label) !important;
       font-weight: 400 !important;
       line-height: 1.3 !important;
