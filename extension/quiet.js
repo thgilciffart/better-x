@@ -84,6 +84,13 @@
     form.addEventListener('toggle', event => {
       if (event.newState === 'closed') closeNativeSearch()
     }, { signal })
+    form.addEventListener('click', event => {
+      const button = event.target.closest?.('[data-testid="typeaheadRecentSearchesHeader"] :is(button, [role="button"])')
+      if (!button || button.matches(':disabled, [aria-disabled="true"]')) return
+      requestAnimationFrame(() => {
+        if (!signal.aborted) closeNativeSearch()
+      })
+    }, { capture: true, signal })
     form.addEventListener('keydown', event => {
       if (event.key !== 'Escape') return
       event.preventDefault()
