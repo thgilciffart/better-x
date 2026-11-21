@@ -5,7 +5,6 @@
   const select = document.querySelector('#emoji-font')
   const clear = document.querySelector('#clear-fonts')
   const storageEmoji = document.querySelector('#storage-emoji')
-  const storageImage = document.querySelector('#storage-image')
   const storageTotal = document.querySelector('#storage-total')
   const storageStatus = document.querySelector('#font-storage-status')
   const selectionStatus = document.querySelector('#emoji-status')
@@ -62,10 +61,9 @@
     select.disabled = Boolean(pending) || options.length === 1
     const storage = state?.storage
     const placeholder = pending ? 'Loading' : 'Unavailable'
-    clear.disabled = Boolean(pending) || !storage || emojiBytes + storage.imageFonts === 0
+    clear.disabled = Boolean(pending) || !storage || emojiBytes === 0
     storageEmoji.textContent = state ? formatBytes(emojiBytes) : placeholder
-    storageImage.textContent = storage ? formatBytes(storage.imageFonts) : placeholder
-    storageTotal.textContent = storage ? formatBytes(storage.settings + emojiBytes + storage.imageFonts) : placeholder
+    storageTotal.textContent = typeof storage === 'number' ? formatBytes(storage + emojiBytes) : placeholder
   }
 
   async function request(type, font, message = '') {

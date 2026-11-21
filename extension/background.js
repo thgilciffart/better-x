@@ -23,7 +23,6 @@ chrome.storage.onChanged.addListener((changes, area) => {
 
 const xOrigins = new Set(['https://x.com', 'https://twitter.com'])
 const photoMenuId = 'better-x-download-photo'
-const xeetFontCache = 'better-x-xeet-fonts'
 const emoji = BetterXEmojiFonts
 let fontChanges = Promise.resolve()
 
@@ -108,16 +107,6 @@ async function downloadMedia({ url, filename }) {
   await chrome.downloads.download({ url: media.href, filename, conflictAction: 'uniquify' })
 }
 
-async function imageFontBytes() {
-  const cache = await caches.open(xeetFontCache)
-  const responses = await cache.matchAll()
-  const sizes = await Promise.all(responses.map(async response => {
-    const size = response.headers.get('content-length')
-    return size === null ? (await response.blob()).size : Number(size)
-  }))
-  return sizes.reduce((total, size) => total + size, 0)
-}
-
 const fontActions = {
   'emoji-library': async () => {},
   'emoji-download': async font => {
@@ -130,17 +119,14 @@ const fontActions = {
   },
   'fonts-clear': async () => {
     await chrome.storage.local.remove('emojiFont')
-    await Promise.all([caches.delete(emoji.cacheName), caches.delete(xeetFontCache)])
+    await caches.delete(emoji.cacheName)
   },
 }
 
 async function fontState(includeStorage) {
   const [fonts, { emojiFont }] = await Promise.all([emoji.list(), chrome.storage.local.get('emojiFont')])
   const state = { fonts, selected: fonts[emojiFont]?.downloaded ? emojiFont : '' }
-  if (includeStorage) {
-    const [settings, imageFonts] = await Promise.all([chrome.storage.local.getBytesInUse(null), imageFontBytes()])
-    state.storage = { settings, imageFonts }
-  }
+  if (includeStorage) state.storage = await chrome.storage.local.getBytesInUse(null)
   return state
 }
 

@@ -1,6 +1,6 @@
 (() => {
   const url = name => chrome.runtime.getURL('vendor/xeet/' + name)
-  const fontHost = 'https://xeet-rs.vercel.app/wasm/d8cf89a6dde754d6/fonts/'
+  const packHost = 'https://cdn.jsdelivr.net/npm/@xeet/core@0.1.2/wasm/fonts/'
   let engine
 
   async function read(name) {
@@ -9,18 +9,21 @@
     return response
   }
 
-  async function pack(name, manifest, sha256Hex) {
-    const address = fontHost + name + '.bin'
+  async function download(name) {
     const cache = await caches.open('better-x-xeet-fonts')
+    const address = packHost + name + '.bin'
     const cached = await cache.match(address)
     if (cached) return new Uint8Array(await cached.arrayBuffer())
     const response = await fetch(address)
     if (!response.ok) throw new Error('Xeet font pack is unavailable: ' + name)
     const bytes = new Uint8Array(await response.arrayBuffer())
-    if (await sha256Hex(bytes) === manifest.packs[name]?.sha256) {
-      await cache.put(address, new Response(bytes, { headers: { 'Content-Length': String(bytes.length) } }))
-    }
+    await cache.put(address, new Response(bytes.slice()))
     return bytes
+  }
+
+  async function pack(name) {
+    const local = await fetch(url('fonts/' + name + '.bin')).catch(() => null)
+    return local?.ok ? new Uint8Array(await local.arrayBuffer()) : download(name)
   }
 
   async function load() {
@@ -34,7 +37,7 @@
     await wasm.default()
     const fonts = createFontPacks({
       manifest,
-      read: name => pack(name, manifest, sha256Hex),
+      read: pack,
       hash: sha256Hex,
       register: wasm.register_font,
       missingPacks: wasm.missing_packs,
