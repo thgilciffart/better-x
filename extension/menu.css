@@ -18,6 +18,21 @@
   color: var(--better-x-menu-fg);
 }
 
+.better-x-copy-image {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding-inline: 16px;
+  font-weight: 700;
+}
+
+.better-x-copy-image svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+
 .better-x-menu {
   --better-x-menu-fg: #e7e9ea;
   position: fixed;
