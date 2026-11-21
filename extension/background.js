@@ -55,7 +55,17 @@ chrome.contextMenus.onClicked.addListener(async info => {
   const format = (url.searchParams.get('format') || url.pathname.split('.').at(-1)).toLowerCase()
   const extension = /^(?:jpg|jpeg|png|webp|gif|avif)$/.test(format) ? format : 'jpg'
   url.searchParams.set('name', 'orig')
-  await downloadMedia({ url: url.href, filename: `x-${id || 'photo'}.${extension}` }).catch(console.error)
+  await downloadMedia({ url: url.href, filename: `x-${id || 'photo'}.${extension}`, tabId: info.tab?.id }).catch(console.error)
+})
+
+const downloadTabs = new Map()
+
+chrome.downloads.onChanged.addListener(async delta => {
+  if (delta.state?.current !== 'complete' && delta.state?.current !== 'interrupted') return
+  const tabId = downloadTabs.get(delta.id)
+  if (tabId === undefined) return
+  downloadTabs.delete(delta.id)
+  await chrome.tabs.sendMessage(tabId, { type: 'download-state', state: delta.state.current }).catch(() => {})
 })
 
 let creatingOffscreenDocument
@@ -93,7 +103,7 @@ async function copyPageLink(command, tab) {
 
 chrome.commands.onCommand.addListener((command, tab) => copyPageLink(command, tab).catch(console.error))
 
-async function downloadMedia({ url, filename }) {
+async function downloadMedia({ url, filename, tabId }) {
   const media = URL.canParse(url) ? new URL(url) : null
   if (!media || media.protocol !== 'https:' || media.port || media.username || media.password) {
     throw new Error('Unsupported media URL')
@@ -104,7 +114,8 @@ async function downloadMedia({ url, filename }) {
   if (typeof filename !== 'string' || !/^[a-zA-Z0-9_][a-zA-Z0-9_-]{0,100}\.(?:jpg|jpeg|png|webp|gif|mp4|avif)$/i.test(filename)) {
     throw new Error('Unsupported media filename')
   }
-  await chrome.downloads.download({ url: media.href, filename, conflictAction: 'uniquify' })
+  const id = await chrome.downloads.download({ url: media.href, filename, conflictAction: 'uniquify' })
+  if (Number.isInteger(tabId)) downloadTabs.set(id, tabId)
 }
 
 const fontActions = {
@@ -160,7 +171,7 @@ chrome.runtime.onMessage.addListener((message, sender, reply) => {
     return true
   }
   if (message?.type !== 'download') return
-  downloadMedia(message).then(
+  downloadMedia({ ...message, tabId: sender.tab?.id }).then(
     () => reply({ ok: true }),
     () => reply({ error: 'Could not start download' }),
   )

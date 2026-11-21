@@ -156,6 +156,7 @@
 
   async function download({ kind, url, filename }) {
     if (!BetterX.settings.downloads) return
+    BetterX.downloading()
     let reply
     try {
       reply = await chrome.runtime.sendMessage({ type: 'download', url, filename })
@@ -227,6 +228,7 @@
   }
 
   function copyPng(bytes) {
+    BetterX.notice.progress('Copying')
     return navigator.clipboard.write([new ClipboardItem({ 'image/png': bytes })])
   }
 

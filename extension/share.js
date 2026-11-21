@@ -39,12 +39,15 @@
       }
       button.setAttribute('aria-busy', 'true')
       dismissLayer()
+      const settle = notice.progress('Copying')
+      const stalled = setTimeout(() => settle('Could not copy post image'), 30000)
       try {
         await copyPostImage(post, link)
-        notice('Copied post image')
+        settle('Copied post image')
       } catch (error) {
-        notice(error?.message || 'Could not copy post image')
+        settle(error?.message || 'Could not copy post image')
       } finally {
+        clearTimeout(stalled)
         button.removeAttribute('aria-busy')
       }
     })

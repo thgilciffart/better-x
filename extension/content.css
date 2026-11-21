@@ -1,3 +1,24 @@
+.better-x-notice[data-pending]::after {
+  display: inline-block;
+  min-width: 1.1em;
+  content: "";
+  animation: better-x-dots 1.2s steps(1, end) infinite;
+}
+
+@keyframes better-x-dots {
+  0% { content: ""; }
+  25% { content: "."; }
+  50% { content: ".."; }
+  75% { content: "..."; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .better-x-notice[data-pending]::after {
+    content: "\2026";
+    animation: none;
+  }
+}
+
 .better-x-notice {
   position: fixed;
   inset: auto auto 24px 50%;

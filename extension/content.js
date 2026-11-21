@@ -63,19 +63,52 @@
 
   let toast
   let toastTimer
-  function notice(message) {
+  let toastId = 0
+
+  function show(message, pending) {
     if (!toast) {
       toast = document.createElement('div')
       toast.className = 'better-x-notice'
       toast.setAttribute('role', 'status')
       toast.setAttribute('aria-live', 'polite')
     }
+    const id = ++toastId
+    toast.removeAttribute('data-pending')
+    toast.removeAttribute('aria-busy')
     toast.textContent = ''
     if (!toast.isConnected) document.body.append(toast)
-    requestAnimationFrame(() => { toast.textContent = message })
+    requestAnimationFrame(() => { if (id === toastId) toast.textContent = message })
     clearTimeout(toastTimer)
-    toastTimer = setTimeout(() => toast.remove(), 2600)
+    if (pending) {
+      toast.setAttribute('data-pending', '')
+      toast.setAttribute('aria-busy', 'true')
+      return
+    }
+    toastTimer = setTimeout(() => {
+      if (id === toastId) toast.remove()
+    }, 2600)
   }
+
+  function notice(message) {
+    show(message, false)
+  }
+
+  notice.progress = message => {
+    show(message, true)
+    return text => notice(text)
+  }
+
+  let settleDownload
+  function downloading() {
+    settleDownload = notice.progress('Downloading')
+  }
+
+  chrome.runtime.onMessage.addListener(message => {
+    if (message?.type !== 'download-state' || !settleDownload) return
+    const settle = settleDownload
+    settleDownload = undefined
+    settle(message.state === 'complete' ? 'Downloaded' : 'Download failed')
+  })
 
   let activeMenu
 
@@ -162,7 +195,7 @@
     closeMenu(true)
   }, true)
 
-  globalThis.BetterX = { settings, notice, postLink, postSelector, closeMenu, openMenu, dismissLayer }
+  globalThis.BetterX = { settings, notice, postLink, postSelector, closeMenu, openMenu, dismissLayer, downloading }
 
   if (document.documentElement) {
     apply()
