@@ -48,8 +48,7 @@
         "media.js",
         "quiet.js",
         "emoji.js",
-        "post-image.js",
-        "share.js"
+        "post-image.js"
       ],
       "css": [
         "content.css",
