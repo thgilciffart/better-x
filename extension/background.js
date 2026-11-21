@@ -79,7 +79,7 @@ function ensureOffscreenDocument() {
 
 async function renderWithXeet(message) {
   await ensureOffscreenDocument()
-  return chrome.runtime.sendMessage({ type: 'xeet:render', post: message.post, options: message.options })
+  return chrome.runtime.sendMessage({ type: 'xeet:render', post: message.post, options: message.options, badge: message.badge })
 }
 
 async function copyPageLink(command, tab) {

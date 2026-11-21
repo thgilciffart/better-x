@@ -188,6 +188,16 @@
     return grokText(await response.text()) || null
   }
 
+  const scriptLanguages = [
+    [/[\u3040-\u30ff]/, 'ja'], [/[\uac00-\ud7af\u1100-\u11ff]/, 'ko'], [/[\u4e00-\u9fff]/, 'zh'],
+    [/[\u0600-\u06ff]/, 'ar'], [/[\u0590-\u05ff]/, 'he'], [/[\u0400-\u04ff]/, 'ru'],
+    [/[\u0e00-\u0e7f]/, 'th'], [/[\u0900-\u097f]/, 'hi'], [/[\u0370-\u03ff]/, 'el'],
+  ]
+
+  function guessLanguage(text) {
+    return scriptLanguages.find(([pattern]) => pattern.test(text))?.[1] ?? ''
+  }
+
   function sameLanguage(source, language) {
     if (!source || !language) return false
     return source.toLowerCase().split('-')[0] === language.toLowerCase().split('-')[0]
@@ -195,6 +205,7 @@
 
   async function translateMany(texts, language) {
     const translated = []
+    let detected = ''
     for (let start = 0; start < texts.length; start += 24) {
       const query = new URLSearchParams({ client: 'gtx', sl: 'auto', tl: language })
       for (const text of texts.slice(start, start + 24)) query.append('q', text)
@@ -204,9 +215,13 @@
       if (!Array.isArray(body) || body.length !== Math.min(24, texts.length - start)) {
         throw new Error('Translation returned an unexpected result')
       }
-      for (const entry of body) translated.push(Array.isArray(entry) ? String(entry[0]) : '')
+      for (const entry of body) {
+        if (!Array.isArray(entry)) continue
+        if (!detected && typeof entry[1] === 'string') detected = entry[1]
+        translated.push(String(entry[0]))
+      }
     }
-    return translated
+    return { translated, detected }
   }
 
   async function translate(text, language) {
@@ -227,25 +242,31 @@
       part.text = core
       if (core) pending.push(part)
     }
-    if (!pending.length) return text
-    const translated = await translateMany(pending.map(part => part.text), language)
+    if (!pending.length) return { text, language: '' }
+    const { translated, detected } = await translateMany(pending.map(part => part.text), language)
     pending.forEach((part, index) => { part.text = translated[index] })
-    return parts.map(part => (part.lead ?? '') + part.text + (part.trail ?? '')).join('')
+    return { text: parts.map(part => (part.lead ?? '') + part.text + (part.trail ?? '')).join(''), language: detected }
   }
 
   async function translatePost(input, language) {
-    if (!input || typeof input.text !== 'string' || !input.text.trim()) return input
+    if (!input || typeof input.text !== 'string' || !input.text.trim()) return { input }
     const id = input[postId]
-    if (sameLanguage(postData.get(id)?.lang, language)) return input
-    const translated = await grokTranslation(id, language).catch(() => null) ||
-      await translate(input.text, language).catch(() => null)
-    return translated ? { ...input, text: translated } : input
+    const source = postData.get(id)?.lang
+    if (sameLanguage(source, language)) return { input }
+    const grok = await grokTranslation(id, language).catch(() => null)
+    if (grok) return { input: { ...input, text: grok }, badge: { provider: 'x', language: source || guessLanguage(input.text) } }
+    const google = await translate(input.text, language).catch(() => null)
+    if (google?.text) {
+      return { input: { ...input, text: google.text }, badge: { provider: 'google', language: google.language || source || guessLanguage(input.text) } }
+    }
+    return { input }
   }
 
   async function localized(input, language) {
-    if (!language) return input
-    const translated = await translatePost(input, language)
-    return { ...translated, quote: await translatePost(translated.quote, language) }
+    if (!language) return { input }
+    const main = await translatePost(input, language)
+    const quote = await translatePost(main.input.quote, language)
+    return { input: { ...main.input, quote: quote.input }, badge: main.badge }
   }
 
   function pageTheme(post) {
@@ -266,9 +287,9 @@
     const shouldExpand = expanded || (autoExpand && Boolean(ownElements(post, showMore).length))
     const [, handle] = link.pathname.split('/')
     const id = link.pathname.split('/').at(-1)
-    const input = await localized(await xeetInput(post, id, handle, shouldExpand), language)
+    const { input, badge } = await localized(await xeetInput(post, id, handle, shouldExpand), language)
     const options = { surface, width, dpr, theme: theme === 'auto' ? pageTheme(post) : theme, expanded: shouldExpand }
-    const result = await chrome.runtime.sendMessage({ type: 'render-xeet', post: input, options })
+    const result = await chrome.runtime.sendMessage({ type: 'render-xeet', post: input, options, badge })
     if (!result?.png) throw new Error(result?.error || 'Xeet could not render this post.')
     return new Blob([Uint8Array.from(atob(result.png), character => character.charCodeAt(0))], { type: 'image/png' })
   }

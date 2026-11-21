@@ -18,6 +18,8 @@ Open **better 𝕏** from the toolbar to change settings. After you change the e
 
 Xeet has the Chirp and Arial fonts built in. Other scripts, symbols, and emoji use font packs. A pack in `extension/vendor/xeet/fonts` is read from disk; when it is missing, the first image that needs it downloads the pack from the pinned `@xeet/core` build on jsDelivr, checks its SHA-256 against `packs.json`, and caches it. The packs range from 33 KB for Hebrew to 28 MB for CJK, and the emoji pack is 20 MB.
 
+A translated image carries a badge above the post body, aligned with the text, naming the language it came from and the translation it used. The badge draws the [Grok](https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/grok.svg) or [Google Translate](https://commons.wikimedia.org/wiki/File:Google_Translate_logo.svg) mark from `extension/icons`.
+
 **Language** under **Image Export** translates post text before it is rendered. It asks 𝕏's own translation first, using the session you are already signed in to, and falls back to the public Google Translate endpoint, which sends the post text to Google. Links, mentions, hashtags, and cashtags stay as written, posts already in that language are left alone, and a translation that fails renders the original. The setting is off by default.
 
 To update the pinned build, run `npm ci` and then `npm run update:xeet`. You need Node 20 or newer.
