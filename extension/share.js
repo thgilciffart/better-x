@@ -1,14 +1,19 @@
 (() => {
   const { settings, postLink, postSelector, copyPostImage, videoDownload, closeMenu, openMenu } = BetterX
-  const shareSelector = '[data-engagement-action="share"], [data-testid="share"], button[aria-label*="share" i], [role="button"][aria-label*="share" i]'
+  const shareSelector = '[data-engagement-action="share"], [data-testid="share"], :is(button, [role="button"]):is([aria-label="Share" i], [aria-label="Share post" i], [aria-label="Share Tweet" i])'
   const moreSelector = '[data-testid="caret"], [data-engagement-action="more"]'
 
   window.addEventListener('click', event => {
     const { target } = event
-    if (!event.isTrusted || event.shiftKey || event.ctrlKey || event.metaKey || event.altKey || !(target instanceof Element)) return
+    if (!event.isTrusted || !(target instanceof Element)) return
     const trigger = target.closest(`${shareSelector}, ${moreSelector}`)
-    const post = trigger?.closest(postSelector) ||
-      trigger?.closest('dialog, [role="dialog"]')?.querySelector('article')
+    if (!trigger) return
+    if (event.shiftKey || event.ctrlKey || event.metaKey || event.altKey) {
+      closeMenu()
+      return
+    }
+    const post = trigger.closest(postSelector) ||
+      trigger.closest('dialog, [role="dialog"]')?.querySelector('article')
     const link = post && postLink(post)
     if (!link) return
 
