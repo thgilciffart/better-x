@@ -152,6 +152,62 @@
     }
   }
 
+  const translateHost = 'https://translate.googleapis.com/translate_a/t'
+  const keepAsWritten = /(https?:\/\/\S+|@\w{1,15}|#[\p{L}\p{N}_]+|\$[\p{L}\p{N}_]+|[\w.+-]+@[\w-]+\.[\w.]+|\r?\n)/gu
+
+  async function translateMany(texts, language) {
+    const translated = []
+    for (let start = 0; start < texts.length; start += 24) {
+      const query = new URLSearchParams({ client: 'gtx', sl: 'auto', tl: language })
+      for (const text of texts.slice(start, start + 24)) query.append('q', text)
+      const response = await fetch(translateHost + '?' + query)
+      if (!response.ok) throw new Error('Translation is unavailable')
+      const body = await response.json()
+      if (!Array.isArray(body) || body.length !== Math.min(24, texts.length - start)) {
+        throw new Error('Translation returned an unexpected result')
+      }
+      for (const entry of body) translated.push(Array.isArray(entry) ? String(entry[0]) : '')
+    }
+    return translated
+  }
+
+  async function translate(text, language) {
+    const parts = []
+    let last = 0
+    for (const match of text.matchAll(keepAsWritten)) {
+      parts.push({ text: text.slice(last, match.index), prose: true })
+      parts.push({ text: match[0], prose: false })
+      last = match.index + match[0].length
+    }
+    parts.push({ text: text.slice(last), prose: true })
+    const pending = []
+    for (const part of parts) {
+      if (!part.prose) continue
+      const [, lead, core, trail] = part.text.match(/^(\s*)([\s\S]*?)(\s*)$/)
+      part.lead = lead
+      part.trail = trail
+      part.text = core
+      if (core) pending.push(part)
+    }
+    if (!pending.length) return text
+    const translated = await translateMany(pending.map(part => part.text), language)
+    pending.forEach((part, index) => { part.text = translated[index] })
+    return parts.map(part => (part.lead ?? '') + part.text + (part.trail ?? '')).join('')
+  }
+
+  async function localized(input, language) {
+    if (!language) return input
+    const translateText = async value => {
+      if (typeof value !== 'string' || !value.trim()) return value
+      return translate(value, language).catch(() => value)
+    }
+    return {
+      ...input,
+      text: await translateText(input.text),
+      quote: input.quote ? { ...input.quote, text: await translateText(input.quote.text) } : input.quote,
+    }
+  }
+
   function pageTheme(post) {
     for (let element = post; element; element = element.parentElement) {
       const color = getComputedStyle(element).backgroundColor.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)$/)
@@ -166,11 +222,11 @@
   }
 
   async function renderImage(post, link) {
-    const { surface, width, dpr, theme, expanded, autoExpand } = settings.imageExport
+    const { surface, width, dpr, theme, expanded, autoExpand, language } = settings.imageExport
     const shouldExpand = expanded || (autoExpand && Boolean(ownElements(post, showMore).length))
     const [, handle] = link.pathname.split('/')
     const id = link.pathname.split('/').at(-1)
-    const input = await xeetInput(post, id, handle, shouldExpand)
+    const input = await localized(await xeetInput(post, id, handle, shouldExpand), language)
     const options = { surface, width, dpr, theme: theme === 'auto' ? pageTheme(post) : theme, expanded: shouldExpand }
     const result = await chrome.runtime.sendMessage({ type: 'render-xeet', post: input, options })
     if (!result?.png) throw new Error(result?.error || 'Xeet could not render this post.')

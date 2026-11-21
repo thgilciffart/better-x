@@ -16,7 +16,9 @@ Open **better 𝕏** from the toolbar to change settings. After you change the e
 
 **Copy as image** renders posts locally with [Xeet](https://github.com/rauchg/xeet). The pinned Xeet build ships in `extension/vendor/xeet` under its [Apache 2.0 license](extension/vendor/xeet/LICENSE).
 
-Xeet has the Chirp and Arial fonts built in. Other scripts, symbols, and emoji use font packs, which are not in the repository. The first image that needs a pack downloads it from Xeet's site, checks its SHA-256 against `packs.json`, and caches it. The packs range from 36 KB for Hebrew to 29 MB for CJK, and the emoji pack is 20 MB.
+Xeet has the Chirp and Arial fonts built in. Other scripts, symbols, and emoji use font packs. A pack in `extension/vendor/xeet/fonts` is read from disk; when it is missing, the first image that needs it downloads the pack from the pinned `@xeet/core` build on jsDelivr, checks its SHA-256 against `packs.json`, and caches it. The packs range from 33 KB for Hebrew to 28 MB for CJK, and the emoji pack is 20 MB.
+
+**Language** under **Image Export** translates post text before it is rendered. Links, mentions, hashtags, and cashtags are sent as written, and a post whose translation fails is rendered unchanged. Translation uses the public Google Translate endpoint, so the post text leaves the browser; the setting is off by default.
 
 To update the pinned build, run `npm ci` and then `npm run update:xeet`. You need Node 20 or newer.
 

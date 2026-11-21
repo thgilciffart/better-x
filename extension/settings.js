@@ -1,8 +1,9 @@
 (() => {
   const imageDefaults = {
-    surface: 'ios-timeline', width: 430, dpr: 3, theme: 'auto', expanded: false,
+    surface: 'ios-timeline', width: 430, dpr: 3, theme: 'auto', expanded: false, language: '',
   }
   const surfaces = new Set(['web-timeline', 'web-detail', 'ios-timeline', 'ios-detail'])
+  const languages = new Set(['', 'ar', 'de', 'en', 'es', 'fr', 'hi', 'id', 'it', 'ja', 'ko', 'nl', 'pl', 'pt', 'ru', 'tr', 'uk', 'vi', 'zh-CN'])
   const ranges = { quietWidth: [480, 1000], quietSize: [12, 20], quietUiSize: [11, 18] }
   const themes = new Set(['x', 'dark', 'light'])
   const emojiFonts = {
@@ -58,6 +59,7 @@
       theme: ['light', 'dark'].includes(value?.theme) ? value.theme : imageDefaults.theme,
       expanded: value?.expanded === true,
       autoExpand: value?.autoExpand !== false,
+      language: languages.has(value?.language) ? value.language : '',
     }
   }
 
