@@ -7,12 +7,6 @@
   const viewer = /\/(?:photo|video)\/\d+$/
   const posts = new Map()
   const lookup = new Map()
-  const menuSelector = '[role="menu"], [data-testid="Dropdown"], [data-testid="sheetDialog"], [data-testid$="ContextMenu" i], [data-slot$="context-menu-content"], [data-slot="xds-menu-popup"]'
-  const itemSelector = '[role="menuitem"], button, [role="button"], [tabindex="0"]'
-  const photoActions = /^(?:copy (?:photo|image) (?:link|address)|post photo)$/i
-  const videoActions = /^(?:copy (?:video|gif) (?:link|address)|copy link at current time|post (?:video|gif))$/i
-  const replaced = /^(?:copy photo link|copy (?:video|gif) address)$/i
-  const hidden = 'data-better-x-hidden'
   let active
 
   function mediaUrl(value) {
@@ -76,7 +70,7 @@
   }
 
   function layerOf(el) {
-    return el.closest('article, [role="dialog"], [aria-modal="true"], #layers')
+    return el.closest('article, dialog[open], [role="dialog"], [aria-modal="true"], #layers')
   }
 
   function locate(el) {
@@ -161,16 +155,13 @@
     return { kind: 'video', ...media, video }
   }
 
-  function visible(element) {
-    return element.checkVisibility({ checkVisibilityCSS: true }) && !element.closest('[aria-hidden="true"]')
-  }
-
-  function clear() {
+  function clear(restoreFocus = false) {
     if (!active) return
-    active.observer.disconnect()
-    clearTimeout(active.timer)
-    active.addons?.remove()
-    active = null
+    const { menu, opener } = active
+    active = undefined
+    if (menu.matches(':popover-open')) menu.hidePopover()
+    menu.remove()
+    if (restoreFocus && opener?.isConnected) opener.focus({ preventScroll: true })
   }
 
   async function download({ kind, url, filename }) {
@@ -266,35 +257,25 @@
     return actions
   }
 
-  function text(item) {
-    return item.textContent.trim().replace(/\s+/g, ' ')
-  }
-
-  function placeActions(menu, items, last, addons) {
-    let row = last
-    while (row.parentElement !== menu && !items.some(item => item !== last && row.parentElement.contains(item))) {
-      row = row.parentElement
-    }
-    const reverse = getComputedStyle(row.parentElement).flexDirection === 'column-reverse'
-    if (reverse && row.previousElementSibling !== addons) row.before(addons)
-    if (!reverse && row.nextElementSibling !== addons) row.after(addons)
-  }
-
-  function actionButtons(request, close, native = new Set()) {
-    return mediaActions(request.media).filter(([title]) => !native.has(title.toLowerCase())).map(([title, run, success]) => {
+  function openMenu(actions, { clientX, clientY, target }) {
+    const menu = document.createElement('div')
+    menu.className = 'better-x-media-menu'
+    menu.setAttribute('role', 'menu')
+    menu.setAttribute('aria-label', 'Media actions')
+    menu.popover = 'manual'
+    menu.style.setProperty('--better-x-menu-x', `${clientX}px`)
+    menu.style.setProperty('--better-x-menu-y', `${clientY}px`)
+    for (const [title, run, success] of actions) {
       const button = document.createElement('button')
       button.type = 'button'
       button.setAttribute('role', 'menuitem')
       button.className = 'better-x-media-action'
       button.textContent = title
-      button.addEventListener('keydown', event => {
-        if (event.key === 'Enter' || event.key === ' ') event.stopPropagation()
-      })
       button.addEventListener('click', async event => {
         event.stopPropagation()
-        if (!event.isTrusted || active !== request) return
+        if (!event.isTrusted || active?.menu !== menu) return
         const pending = (async () => run())()
-        close()
+        clear(event.detail === 0)
         try {
           await pending
           if (success) BetterX.notice(success)
@@ -302,84 +283,31 @@
           BetterX.notice(title === 'Copy video frame' ? 'Could not copy the frame. Play the video and try again.' : `Could not ${title.toLowerCase()}`)
         }
       })
-      return button
+      menu.append(button)
+    }
+    menu.addEventListener('keydown', event => {
+      const item = event.target
+      const next = {
+        ArrowDown: item.nextElementSibling || menu.firstElementChild,
+        ArrowUp: item.previousElementSibling || menu.lastElementChild,
+        Home: menu.firstElementChild,
+        End: menu.lastElementChild,
+      }[event.key]
+      if (next instanceof HTMLElement) {
+        event.preventDefault()
+        next.focus()
+      }
+      if (next || event.key === 'Enter' || event.key === ' ') event.stopPropagation()
     })
-  }
-
-  function appendActions(rows, request, { item: last, height }) {
-    const label = Array.from(last.querySelectorAll('span, [dir]')).findLast(element => element.textContent.trim()) || last
-    const style = getComputedStyle(label)
-    const addons = document.createElement('div')
-    addons.className = 'better-x-media-actions'
-    addons.setAttribute('role', 'presentation')
-    const native = new Set(rows.filter(row => !row.replace).map(row => row.label.toLowerCase()))
-    for (const button of actionButtons(request, () => BetterX.closeMenu(request.menu), native)) {
-      button.style.font = `${style.fontWeight} ${style.fontSize}/${style.lineHeight} ${style.fontFamily}`
-      button.style.color = style.color
-      button.style.minHeight = `${height}px`
-      addons.append(button)
-    }
-    request.addons = addons
-    clearTimeout(request.timer)
-  }
-
-  function ownMenu(request, { clientX, clientY }) {
-    const menu = document.createElement('div')
-    menu.className = 'better-x-media-menu'
-    menu.setAttribute('role', 'menu')
-    menu.popover = 'manual'
-    menu.style.setProperty('--better-x-menu-x', `${clientX}px`)
-    menu.style.setProperty('--better-x-menu-y', `${clientY}px`)
-    menu.style.backgroundColor = getComputedStyle(document.body).backgroundColor
-    menu.append(...actionButtons(request, clear))
-    const host = document.fullscreenElement || document.body
+    menu.addEventListener('focusout', event => {
+      if (active?.menu === menu && !menu.contains(event.relatedTarget)) clear()
+    })
+    menu.firstElementChild.autofocus = true
+    const host = target.closest('dialog:modal') || document.fullscreenElement || document.body
     host.append(menu)
+    const opener = target.closest('a[href], button, video[controls], [tabindex]') || document.activeElement
+    active = { menu, opener }
     menu.showPopover()
-    request.observer.disconnect()
-    clearTimeout(request.timer)
-    Object.assign(request, { own: true, menu, addons: menu })
-  }
-
-  function scan(request) {
-    if (active !== request) return
-    if (request.event.eventPhase !== Event.NONE && !request.event.defaultPrevented) return
-    if (request.menu?.isConnected && request.last.isConnected && !visible(request.last)) {
-      clear()
-      return
-    }
-    const mounted = request.addons?.isConnected
-    if (!mounted) request.addons?.remove()
-
-    const labels = request.media.kind === 'photo' ? photoActions : videoActions
-    const menus = mounted ? [request.menu] : document.querySelectorAll(menuSelector)
-    for (const menu of menus) {
-      if (request.previous.has(menu)) continue
-      const items = [...new Set(Array.from(menu.querySelectorAll(itemSelector), item => item.closest('[role="menuitem"]') || item))]
-        .filter(item => menu.contains(item) && !request.addons?.contains(item) && (item.hasAttribute(hidden) || visible(item)))
-      const rows = items.map(item => {
-        const label = text(item)
-        return { item, label, replace: replaced.test(label) }
-      })
-      if (!rows.some(row => labels.test(row.label))) continue
-      let last
-      let remaining
-      for (const row of rows) {
-        if (row.item.hasAttribute(hidden)) continue
-        const { height, bottom } = row.item.getBoundingClientRect()
-        const measured = { item: row.item, height, bottom }
-        if (!last || bottom >= last.bottom) last = measured
-        if ((!row.replace || !request.media.url) && (!remaining || bottom >= remaining.bottom)) remaining = measured
-      }
-      const tail = remaining || last || { item: items.at(-1), height: 0 }
-      if (!mounted) appendActions(rows, request, last || tail)
-      Object.assign(request, { menu, last: remaining?.item || menu })
-      placeActions(menu, items, tail.item, request.addons)
-      for (const { item, replace } of rows) {
-        if (request.media.url && replace && !item.hasAttribute(hidden)) item.setAttribute(hidden, '')
-      }
-      return
-    }
-    if (request.menu && !request.menu.isConnected) clear()
   }
 
   BetterX.downloadVideo = link => {
@@ -395,47 +323,28 @@
   })
 
   addEventListener('contextmenu', event => {
-    const reused = active?.menu
     clear()
     if (!event.isTrusted || !BetterX.settings.downloads || event.shiftKey || !(event.target instanceof Element)) return
     const media = find(event)
     if (!media) return
-
-    const observer = new MutationObserver(records => {
-      if (BetterX.menuChanged(records, menuSelector, request.menu, request.addons)) scan(request)
-    })
-    const request = { event, media, observer, timer: setTimeout(clear, 1500) }
-    active = request
-    if (document.fullscreenElement?.contains(event.target)) {
-      event.preventDefault()
-      event.stopImmediatePropagation()
-      ownMenu(request, event)
-      return
-    }
-    request.previous = new Set(Array.from(document.querySelectorAll(menuSelector))
-      .filter(menu => menu !== reused && visible(menu)))
-    observer.observe(document, {
-      childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['style', 'hidden', 'class', 'aria-hidden', 'data-state'],
-    })
-    setTimeout(() => {
-      if (active === request && !request.menu) scan(request)
-    }, 0)
+    const actions = mediaActions(media)
+    if (!actions.length) return
+    event.preventDefault()
+    event.stopImmediatePropagation()
+    openMenu(actions, event)
   }, true)
 
-  addEventListener('contextmenu', event => {
-    if (active?.event !== event || active.own || event.defaultPrevented) return
-    event.preventDefault()
-    ownMenu(active, event)
-  })
-
-  document.addEventListener('fullscreenchange', clear)
+  document.addEventListener('fullscreenchange', () => clear())
 
   document.addEventListener('pointerdown', event => {
-    if (event.button !== 2 && !active?.menu?.contains(event.target)) clear()
+    if (event.button !== 2 && !active?.menu.contains(event.target)) clear()
   }, true)
 
-  document.addEventListener('keydown', event => {
-    if (event.key === 'Escape') clear()
+  window.addEventListener('keydown', event => {
+    if (event.key !== 'Escape' || !active?.menu.matches(':popover-open')) return
+    event.preventDefault()
+    event.stopImmediatePropagation()
+    clear(true)
   }, true)
 
   chrome.storage.onChanged.addListener(() => {
