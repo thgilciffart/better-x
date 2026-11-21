@@ -79,6 +79,13 @@
 
   let activeMenu
 
+  function dismissLayer() {
+    const mask = document.elementFromPoint(0, 0)
+    const box = mask?.getBoundingClientRect()
+    if (!mask?.closest('#layers') || box.width < innerWidth || box.height < innerHeight) return
+    mask.click()
+  }
+
   function closeMenu(restoreFocus = false) {
     if (!activeMenu) return
     const { menu, opener } = activeMenu
@@ -155,7 +162,7 @@
     closeMenu(true)
   }, true)
 
-  globalThis.BetterX = { settings, notice, postLink, postSelector, closeMenu, openMenu }
+  globalThis.BetterX = { settings, notice, postLink, postSelector, closeMenu, openMenu, dismissLayer }
 
   if (document.documentElement) {
     apply()

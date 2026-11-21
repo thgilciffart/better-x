@@ -1,5 +1,5 @@
 (() => {
-  const { settings, notice, postLink, postSelector, copyPostImage, downloadPostVideo } = BetterX
+  const { settings, notice, postLink, postSelector, copyPostImage, dismissLayer, downloadPostVideo } = BetterX
   const shareSelector = '[data-engagement-action="share"], [data-testid="share"], :is(button, [role="button"]):is([aria-label="Share" i], [aria-label="Share post" i], [aria-label="Share Tweet" i])'
   const menuSelector = '[role="menu"], [data-testid="Dropdown"], [data-testid="sheetDialog"]'
   const hidden = '[hidden], [aria-hidden="true"]'
@@ -38,6 +38,7 @@
         return
       }
       button.setAttribute('aria-busy', 'true')
+      dismissLayer()
       try {
         await copyPostImage(post, link)
         notice('Copied post image')
@@ -81,6 +82,7 @@
       notice('Could not locate post')
       return
     }
+    dismissLayer()
     downloadPostVideo(post, link)
   }
 
