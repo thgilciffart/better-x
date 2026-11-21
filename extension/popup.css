@@ -396,11 +396,3 @@ input[aria-invalid="true"] { border-bottom-color: #f39b83; }
   color: #ffc3af;
   font-size: 13px;
 }
-
-.image-export-note {
-  margin: 10px 0 0;
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.4;
-  text-transform: none;
-}
