@@ -77,40 +77,85 @@
     toastTimer = setTimeout(() => toast.remove(), 2600)
   }
 
-  function closeMenu(menu) {
-    const mask = document.elementFromPoint(0, 0)
-    const box = mask?.getBoundingClientRect()
-    const covers = mask?.closest('#layers') && !menu.contains(mask) && box.width >= innerWidth && box.height >= innerHeight
-    const target = covers ? mask : document.body
-    target.click()
+  let activeMenu
+
+  function closeMenu(restoreFocus = false) {
+    if (!activeMenu) return
+    const { menu, opener } = activeMenu
+    activeMenu = undefined
+    if (menu.matches(':popover-open')) menu.hidePopover()
+    menu.remove()
+    if (restoreFocus && opener?.isConnected) opener.focus({ preventScroll: true })
+    return opener
   }
 
-  function menuChanged(records, selector, menu, addon) {
-    for (const { type, target, addedNodes, removedNodes } of records) {
-      if (addon?.contains(target)) continue
-      const element = type === 'characterData' ? target.parentElement : target
-      const inside = menu ? menu.contains(target) : element?.closest?.(selector)
-      if (type === 'characterData') {
-        if (inside) return true
-        continue
-      }
-      if (type === 'attributes') {
-        if (inside || (menu ? target.contains(menu) : target.querySelector(selector))) return true
-        continue
-      }
-      for (const nodes of [addedNodes, removedNodes]) {
-        for (const node of nodes) {
-          if (node === addon) continue
-          if (inside) return true
-          if (node.nodeType !== Node.ELEMENT_NODE) continue
-          if (menu ? node.contains(menu) : node.matches(selector) || node.querySelector(selector)) return true
+  function openMenu(actions, { label, opener, x, y, alignEnd = false, above = false }) {
+    closeMenu()
+    const menu = document.createElement('div')
+    menu.className = 'better-x-menu'
+    menu.setAttribute('role', 'menu')
+    menu.setAttribute('aria-label', label)
+    menu.popover = 'manual'
+    menu.style.setProperty('--better-x-menu-x', `${x}px`)
+    menu.style.setProperty('--better-x-menu-y', `${y}px`)
+    if (alignEnd) menu.style.setProperty('--better-x-menu-offset-x', '-100%')
+    if (above) menu.style.setProperty('--better-x-menu-offset-y', '-100%')
+
+    for (const [title, run, success, failure] of actions) {
+      const button = document.createElement('button')
+      button.type = 'button'
+      button.setAttribute('role', 'menuitem')
+      button.className = 'better-x-menu-item'
+      button.textContent = title
+      button.addEventListener('click', async event => {
+        event.stopPropagation()
+        if (!event.isTrusted || activeMenu?.menu !== menu) return
+        closeMenu(event.detail === 0)
+        try {
+          await run()
+          if (success) notice(success)
+        } catch (error) {
+          notice(failure || error?.message || `Could not ${title.toLowerCase()}`)
         }
-      }
+      })
+      menu.append(button)
     }
-    return false
+    menu.addEventListener('keydown', event => {
+      const item = event.target
+      const next = {
+        ArrowDown: item.nextElementSibling || menu.firstElementChild,
+        ArrowUp: item.previousElementSibling || menu.lastElementChild,
+        Home: menu.firstElementChild,
+        End: menu.lastElementChild,
+      }[event.key]
+      if (next instanceof HTMLElement) {
+        event.preventDefault()
+        next.focus()
+      }
+      if (next || event.key === 'Enter' || event.key === ' ') event.stopPropagation()
+    })
+    menu.addEventListener('focusout', event => {
+      if (activeMenu?.menu === menu && event.relatedTarget !== opener && !menu.contains(event.relatedTarget)) closeMenu()
+    })
+    menu.firstElementChild.autofocus = true
+    const host = opener?.closest('dialog:modal') || document.fullscreenElement || document.body
+    host.append(menu)
+    activeMenu = { menu, opener }
+    menu.showPopover()
   }
 
-  globalThis.BetterX = { settings, notice, postLink, postSelector, closeMenu, menuChanged }
+  document.addEventListener('fullscreenchange', () => closeMenu())
+  document.addEventListener('pointerdown', event => {
+    if (activeMenu && !activeMenu.menu.contains(event.target) && !activeMenu.opener?.contains(event.target)) closeMenu()
+  }, true)
+  window.addEventListener('keydown', event => {
+    if (event.key !== 'Escape' || !activeMenu?.menu.matches(':popover-open')) return
+    event.preventDefault()
+    event.stopImmediatePropagation()
+    closeMenu(true)
+  }, true)
+
+  globalThis.BetterX = { settings, notice, postLink, postSelector, closeMenu, openMenu }
 
   if (document.documentElement) {
     apply()
@@ -131,6 +176,7 @@
       changed.add(key)
       settings[key] = normalize(key, newValue)
     }
+    if (Object.hasOwn(changes, 'downloads') || Object.hasOwn(changes, 'copyImage')) closeMenu()
     apply()
   })
 

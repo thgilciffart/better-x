@@ -34,12 +34,11 @@ Reload 𝕏 after you change **Block ads** or **Skip 18+ interstitials**. Posts 
 
 - **Link domain** sets the host of links that 𝕏's **Copy link** puts on the clipboard, for example `vxtwitter.com` or `fxtwitter.com`.
 - **Clean copied links** removes the query and fragment from those links, including the `a` and `s` tracking parameters. A link copied at a video's current time keeps `t` and stays on `x.com`.
-- **Copy posts as images** adds **Copy as image** to the share menu. The PNG uses post data that 𝕏 has already loaded.
-- **Direct downloads** adds media actions to 𝕏's right-click menu.
-  - A photo menu gets **Copy image**, **Copy image address**, **Open image in new tab**, and **Download photo**. 𝕏's **Copy photo link** is hidden.
-  - A video menu gets **Copy video address**, **Copy video frame**, **Open video in new tab**, and **Download video**. A GIF menu gets the same actions for the GIF. The address is the MP4 file, not a post link. 𝕏 serves GIFs as MP4.
-  - In 𝕏's photo viewer and in fullscreen, better 𝕏 shows its own menu with the same actions. Shift-right-click opens the browser menu, which has **Download photo**.
-  - **Download video** in 𝕏's share menu downloads the file. 𝕏's Premium prompt does not appear.
+- **Share** and **More** open better 𝕏 menus with link, image, and download actions as available. **Open 𝕏 menu** or Shift-click opens the site's original menu.
+- **Copy posts as images** adds **Copy as image**. The PNG uses post data that 𝕏 has already loaded.
+- **Direct downloads** enables better 𝕏's media menu in the timeline, viewer, and fullscreen. Shift-right-click opens the original menu.
+  - Photos offer **Copy image**, **Copy image address**, **Open image in new tab**, and **Download photo**.
+  - Videos and GIFs offer their MP4 address, frame copying, and direct download when available. The Share and More menus also offer direct downloads for available videos and GIFs.
 
 ### Appearance
 

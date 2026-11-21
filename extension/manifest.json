@@ -55,9 +55,8 @@
         "content.css",
         "navigation.css",
         "appearance.css",
-        "share.css",
         "ads.css",
-        "media.css"
+        "menu.css"
       ],
       "run_at": "document_start"
     }

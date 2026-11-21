@@ -877,7 +877,7 @@ html[data-better-x-quiet="true"] {
 
     & :is([role="menuitem"], a[role="link"]) > div:has(> [dir]) { min-height: 0; padding-block: 0; }
 
-    & :is(span, [dir], .better-x-copy-image, .better-x-media-action) {
+    & :is(span, [dir], .better-x-menu-item) {
       color: var(--quiet-soft) !important;
       font-size: var(--quiet-label) !important;
       font-weight: 400 !important;
@@ -885,18 +885,18 @@ html[data-better-x-quiet="true"] {
       text-transform: lowercase;
     }
 
-    & :is(.better-x-copy-image, .better-x-media-action) {
+    & .better-x-menu-item {
       min-height: 0 !important;
       padding-block: 8px;
     }
 
-    & :is([role="menuitem"], a[role="link"], .better-x-media-action):is(:hover, :focus-visible) {
+    & :is([role="menuitem"], a[role="link"], .better-x-menu-item):is(:hover, :focus-visible) {
       background-color: var(--quiet-hover) !important;
 
       & :is(span, [dir]) { color: var(--quiet-fg) !important; }
     }
 
-    & :is(.better-x-copy-image, .better-x-media-action):is(:hover, :focus-visible) { color: var(--quiet-fg) !important; }
+    & .better-x-menu-item:is(:hover, :focus-visible) { color: var(--quiet-fg) !important; }
 
     & [data-better-x-handle] :is(span, [dir]) { text-transform: none; }
     & [data-better-x-handle] [dir]::first-letter { text-transform: lowercase; }

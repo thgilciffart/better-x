@@ -1,4 +1,4 @@
-.better-x-media-action {
+.better-x-menu-item {
   display: block;
   box-sizing: border-box;
   width: 100%;
@@ -12,21 +12,23 @@
   cursor: pointer;
 }
 
-.better-x-media-action:hover,
-.better-x-media-action:focus-visible {
+.better-x-menu-item:hover,
+.better-x-menu-item:focus-visible {
   background: color-mix(in srgb, currentColor 8%, transparent);
 }
 
-.better-x-media-menu {
+.better-x-menu {
   position: fixed;
   inset: 8px auto auto 8px;
-  translate: clamp(0px, var(--better-x-menu-x) - 8px, 100vw - 100% - 16px)
-    clamp(0px, var(--better-x-menu-y) - 8px, 100vh - 100% - 16px);
-  min-width: 200px;
-  max-width: 384px;
+  translate: clamp(0px, var(--better-x-menu-x) + var(--better-x-menu-offset-x, 0px) - 8px, 100vw - 100% - 16px)
+    clamp(0px, var(--better-x-menu-y) + var(--better-x-menu-offset-y, 0px) - 8px, 100vh - 100% - 16px);
+  min-width: min(200px, calc(100vw - 16px));
+  max-width: min(384px, calc(100vw - 16px));
+  max-height: calc(100dvh - 16px);
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  overflow: hidden;
+  overflow: auto;
   border: 0;
   border-radius: 12px;
   background-color: #000;
@@ -35,7 +37,7 @@
   box-shadow: rgb(255 255 255 / 0.2) 0 0 15px, rgb(255 255 255 / 0.15) 0 0 3px 1px;
 }
 
-html[data-theme="light"] .better-x-media-menu {
+html[data-theme="light"] .better-x-menu {
   background-color: #fff;
   color: rgb(15 20 25);
   box-shadow: rgb(101 119 134 / 0.2) 0 0 15px, rgb(101 119 134 / 0.15) 0 0 3px 1px;

@@ -7,7 +7,6 @@
   const viewer = /\/(?:photo|video)\/\d+$/
   const posts = new Map()
   const lookup = new Map()
-  let active
 
   function mediaUrl(value) {
     if (!value) return null
@@ -155,15 +154,6 @@
     return { kind: 'video', ...media, video }
   }
 
-  function clear(restoreFocus = false) {
-    if (!active) return
-    const { menu, opener } = active
-    active = undefined
-    if (menu.matches(':popover-open')) menu.hidePopover()
-    menu.remove()
-    if (restoreFocus && opener?.isConnected) opener.focus({ preventScroll: true })
-  }
-
   async function download({ kind, url, filename }) {
     if (!BetterX.settings.downloads) return
     let reply
@@ -250,70 +240,19 @@
       )
     } else {
       if (media.url) actions.push([`Copy ${names[media.kind]} address`, () => navigator.clipboard.writeText(media.url), `Copied ${names[media.kind]} address`])
-      if (media.video) actions.push(['Copy video frame', () => copyPng(videoPng(media)), 'Copied video frame'])
+      if (media.video) actions.push(['Copy video frame', () => copyPng(videoPng(media)), 'Copied video frame', 'Could not copy the frame. Play the video and try again.'])
       if (media.url) actions.push(['Open video in new tab', () => window.open(media.url, '_blank', 'noopener,noreferrer')])
     }
     if (media.url) actions.push([`Download ${names[media.kind]}`, () => download(media)])
     return actions
   }
 
-  function openMenu(actions, { clientX, clientY, target }) {
-    const menu = document.createElement('div')
-    menu.className = 'better-x-media-menu'
-    menu.setAttribute('role', 'menu')
-    menu.setAttribute('aria-label', 'Media actions')
-    menu.popover = 'manual'
-    menu.style.setProperty('--better-x-menu-x', `${clientX}px`)
-    menu.style.setProperty('--better-x-menu-y', `${clientY}px`)
-    for (const [title, run, success] of actions) {
-      const button = document.createElement('button')
-      button.type = 'button'
-      button.setAttribute('role', 'menuitem')
-      button.className = 'better-x-media-action'
-      button.textContent = title
-      button.addEventListener('click', async event => {
-        event.stopPropagation()
-        if (!event.isTrusted || active?.menu !== menu) return
-        const pending = (async () => run())()
-        clear(event.detail === 0)
-        try {
-          await pending
-          if (success) BetterX.notice(success)
-        } catch {
-          BetterX.notice(title === 'Copy video frame' ? 'Could not copy the frame. Play the video and try again.' : `Could not ${title.toLowerCase()}`)
-        }
-      })
-      menu.append(button)
-    }
-    menu.addEventListener('keydown', event => {
-      const item = event.target
-      const next = {
-        ArrowDown: item.nextElementSibling || menu.firstElementChild,
-        ArrowUp: item.previousElementSibling || menu.lastElementChild,
-        Home: menu.firstElementChild,
-        End: menu.lastElementChild,
-      }[event.key]
-      if (next instanceof HTMLElement) {
-        event.preventDefault()
-        next.focus()
-      }
-      if (next || event.key === 'Enter' || event.key === ' ') event.stopPropagation()
-    })
-    menu.addEventListener('focusout', event => {
-      if (active?.menu === menu && !menu.contains(event.relatedTarget)) clear()
-    })
-    menu.firstElementChild.autofocus = true
-    const host = target.closest('dialog:modal') || document.fullscreenElement || document.body
-    host.append(menu)
-    const opener = target.closest('a[href], button, video[controls], [tabindex]') || document.activeElement
-    active = { menu, opener }
-    menu.showPopover()
-  }
-
-  BetterX.downloadVideo = link => {
+  BetterX.videoDownload = (post, link) => {
     const [, author, id] = link.pathname.match(route) || []
-    const entry = posts.get(id)?.find(entry => entry.kind !== 'photo')
-    return entry ? download(named(entry, author !== 'i' && author)) : BetterX.notice('Could not find this video')
+    const entry = posts.get(id)?.find(item => item.kind !== 'photo')
+    const video = entry ? null : Array.from(post.querySelectorAll('video')).find(item => item.closest(BetterX.postSelector) === post)
+    const media = entry ? named(entry, author !== 'i' && author) : video && resolve(video, sourcesOf(video))
+    if (media?.url && media.kind !== 'photo') return [`Download ${names[media.kind]}`, () => download(media)]
   }
 
   document.addEventListener('better-x:media', event => {
@@ -323,7 +262,7 @@
   })
 
   addEventListener('contextmenu', event => {
-    clear()
+    BetterX.closeMenu()
     if (!event.isTrusted || !BetterX.settings.downloads || event.shiftKey || !(event.target instanceof Element)) return
     const media = find(event)
     if (!media) return
@@ -331,23 +270,7 @@
     if (!actions.length) return
     event.preventDefault()
     event.stopImmediatePropagation()
-    openMenu(actions, event)
+    const opener = event.target.closest('a[href], button, video[controls], [tabindex], dialog:modal') || document.activeElement
+    BetterX.openMenu(actions, { label: 'Media actions', opener, x: event.clientX, y: event.clientY })
   }, true)
-
-  document.addEventListener('fullscreenchange', () => clear())
-
-  document.addEventListener('pointerdown', event => {
-    if (event.button !== 2 && !active?.menu.contains(event.target)) clear()
-  }, true)
-
-  window.addEventListener('keydown', event => {
-    if (event.key !== 'Escape' || !active?.menu.matches(':popover-open')) return
-    event.preventDefault()
-    event.stopImmediatePropagation()
-    clear(true)
-  }, true)
-
-  chrome.storage.onChanged.addListener(() => {
-    if (!BetterX.settings.downloads) clear()
-  })
 })()
