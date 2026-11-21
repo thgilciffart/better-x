@@ -4,13 +4,15 @@
   const counts = [['like', 'like', 'likes'], ['retweet', 'repost', 'reposts'], ['reply', 'reply', 'replies']]
   const groupSelector = 'article [role="group"]'
   const navigationSelector = 'header[role="banner"], [data-testid="BottomBar"]'
-  const menuSelector = '[role="menu"], [data-slot="xds-menu-popup"], [data-slot$="context-menu-content"]'
-  const menuHeadingSelector = `:is(${menuSelector}) div:has(> [role="menuitem"]) > div:not([role]):has(> [dir])`
+  const menuSelector = ':is([role="menu"], [data-slot="xds-menu-popup"], [data-slot$="context-menu-content"]):not(.better-x-menu)'
+  const menuHeadingSelector = `${menuSelector} div:has(> [role="menuitem"]) > div:not([role]):has(> [dir])`
   const modalSelector = 'dialog[open], [aria-modal="true"], [data-testid="confirmationSheetDialog"]'
   const userActions = '[data-testid="userActions"]'
   const profileActions = 'data-better-x-profile-actions'
   const socialIcon = 'data-better-x-social-icon'
   const socialIconSelector = 'article div:has(+ div [data-testid="socialContext"])'
+  const detailSelector = 'article[tabindex="-1"]'
+  const detailLayout = `${detailSelector} div:has(> div > [role="group"])`
   const observedSelector = `article, ${groupSelector}, ${navigationSelector}, ${menuSelector}, ${userActions}, [${profileActions}]`
   const searchButtons = new Map()
   let searchDialog
@@ -208,6 +210,12 @@
     }
   }
 
+  function styleDetailLayout(scope) {
+    markMatches(scope, detailLayout, 'data-better-x-post-layout')
+    markMatches(scope, `${detailLayout} > div:has(> [role="group"])`, 'data-better-x-actions-row')
+    markMatches(scope, `${detailLayout} > div:last-child:not(:has([role="group"]))`, 'data-better-x-post-tools')
+  }
+
   function isReplySortMenu(menu, firstItem) {
     for (let row = firstItem; row && row !== menu; row = row.parentElement) {
       for (let heading = row.previousElementSibling; heading; heading = heading.previousElementSibling) {
@@ -235,6 +243,7 @@
     if (!pending) {
       markMatches(root, `div:has(> ${userActions})`, profileActions)
       markMatches(root, socialIconSelector, socialIcon)
+      styleDetailLayout(root)
     }
     for (const group of pending || document.querySelectorAll(groupSelector)) {
       if (pending && (!root.contains(group) || !group.matches(groupSelector))) continue
@@ -260,8 +269,9 @@
     mountSearch('compact', document.querySelector('[data-testid="BottomBar"] nav'))
   }
 
-  function track(node, articles) {
+  function track(node, articles, detailPosts) {
     if (node.matches('article')) articles.add(node)
+    if (node.matches(detailSelector)) detailPosts.add(node)
     if (node.matches(groupSelector)) pending.add(node)
     if (node.matches(menuSelector)) menus.add(node)
     if (node.matches(navigationSelector)) navigationChanged = true
@@ -291,9 +301,14 @@
     if (nativeSearch && records.some(opensModal)) closeNativeSearch()
     if (!pending) return
     const articles = new Set()
+    const detailPosts = new Set()
     for (const record of records) {
       const target = record.target
       const element = target.nodeType === 1 ? target : target.parentElement
+      if (record.attributeName === 'tabindex') {
+        if (element.matches('article')) detailPosts.add(element)
+        continue
+      }
       const menu = element?.closest(menuSelector)
       if (menu) menus.add(menu)
       if (record.type !== 'characterData' && element?.closest(navigationSelector)) navigationChanged = true
@@ -308,21 +323,25 @@
       }
       if (record.type === 'childList' && element?.hasAttribute(profileActions)) styleProfileActions(element)
 
-      const structureChanged = record.attributeName === 'data-testid' ||
-        hasElements(record.addedNodes) || hasElements(record.removedNodes)
-      if (structureChanged) {
+      const changedChildren = hasElements(record.addedNodes) || hasElements(record.removedNodes)
+      if (changedChildren || record.attributeName === 'data-testid' || record.attributeName === 'role') {
         for (let article = element?.closest('article'); article; article = article.parentElement?.closest('article')) {
-          articles.add(article)
+          if (changedChildren || record.attributeName === 'data-testid') articles.add(article)
+          if ((changedChildren || record.attributeName === 'role') && article.matches(detailSelector)) detailPosts.add(article)
         }
       }
       for (const node of record.addedNodes) {
         if (node.nodeType !== 1) continue
-        track(node, articles)
-        for (const child of node.querySelectorAll(observedSelector)) track(child, articles)
+        track(node, articles, detailPosts)
+        for (const child of node.querySelectorAll(observedSelector)) track(child, articles, detailPosts)
       }
     }
     for (const article of articles) {
-      if (article.isConnected) markMatches(article, socialIconSelector, socialIcon)
+      if (!article.isConnected) continue
+      markMatches(article, socialIconSelector, socialIcon)
+    }
+    for (const article of detailPosts) {
+      if (article.isConnected) styleDetailLayout(article)
     }
     if (menus.size) {
       styleMenus()
@@ -365,7 +384,7 @@
       window.navigation?.addEventListener('currententrychange', queueUpdate)
       observer.observe(root, {
         childList: true, subtree: true, characterData: true,
-        attributeFilter: ['role', 'data-testid', 'dir', 'data-slot', 'aria-modal', 'open'],
+        attributeFilter: ['role', 'data-testid', 'dir', 'data-slot', 'aria-modal', 'open', 'tabindex'],
       })
       queueUpdate()
       return

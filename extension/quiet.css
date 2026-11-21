@@ -819,7 +819,7 @@ html[data-better-x-quiet="true"] {
       }
     }
 
-    &[tabindex="-1"] div:has(> div > [role="group"]) {
+    &[tabindex="-1"] div[data-better-x-post-layout] {
       display: flex;
       flex-flow: row wrap;
       align-items: center;
@@ -827,9 +827,9 @@ html[data-better-x-quiet="true"] {
       border-color: transparent;
 
       & [role="group"] { padding: 0; border-color: transparent; }
-      & > div:has(> [role="group"]) { flex: 1 1 auto; }
+      & > div[data-better-x-actions-row] { flex: 1 1 auto; }
 
-      & > div:last-child:not(:has([role="group"])) {
+      & > div[data-better-x-post-tools] {
         flex: none;
         margin: 0;
         flex-direction: row;
