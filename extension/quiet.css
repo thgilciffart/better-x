@@ -16,8 +16,7 @@ html[data-better-x-quiet="true"] {
   --quiet-label: var(--better-x-quiet-ui-size, 14px);
   --quiet-small: calc(var(--quiet-label) - 1px);
   --quiet-search-top: clamp(16px, 7vh, 64px);
-  --quiet-friction: cubic-bezier(0.6, 0, 0.2, 1);
-  --quiet-underline-in: color 320ms var(--quiet-friction) 60ms, text-decoration-color 320ms var(--quiet-friction) 60ms, text-underline-offset 320ms var(--quiet-friction) 60ms;
+  --quiet-underline-in: color 120ms ease-out, text-decoration-color 120ms ease-out, text-underline-offset 120ms ease-out;
   --quiet-underline-out: color 180ms ease-out, text-decoration-color 180ms ease-out, text-underline-offset 180ms ease-out;
   background: var(--quiet-bg);
 
