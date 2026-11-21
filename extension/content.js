@@ -146,7 +146,7 @@
 
   document.addEventListener('fullscreenchange', () => closeMenu())
   document.addEventListener('pointerdown', event => {
-    if (activeMenu && !activeMenu.menu.contains(event.target) && !activeMenu.opener?.contains(event.target)) closeMenu()
+    if (activeMenu && !activeMenu.menu.contains(event.target)) closeMenu()
   }, true)
   window.addEventListener('keydown', event => {
     if (event.key !== 'Escape' || !activeMenu?.menu.matches(':popover-open')) return
