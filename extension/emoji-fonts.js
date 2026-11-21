@@ -1,11 +1,14 @@
 (() => {
   const raw = 'https://raw.githubusercontent.com/'
   const cacheName = 'better-x-emoji-fonts'
+  const appleCacheKey = 'https://xeet-rs.vercel.app/wasm/d8cf89a6dde754d6/fonts/emoji.bin'
   const sources = {
     apple: [
-      'https://xeet-rs.vercel.app/wasm/d8cf89a6dde754d6/fonts/emoji.bin',
+      'https://cdn.jsdelivr.net/npm/@xeet/core@0.1.2/wasm/fonts/emoji.bin',
       'fe6d6552333cf4b078f557aeacc6995d45eec74b160a46489df4d4bb2f195ad1',
       20930352,
+      raw + 'rauchg/xeet/095ba15047fe5111bd93c64a726c027eb9794960/assets/vendor/fonts/AppleColorEmoji.ttf',
+      'https://unpkg.com/@xeet/core@0.1.2/wasm/fonts/emoji.bin',
     ],
     noto: [
       raw + 'googlefonts/noto-emoji/v2.051/fonts/Noto-COLRv1.ttf',
@@ -39,37 +42,49 @@
     ],
   }
 
+  function cacheKey(font) {
+    return font === 'apple' ? appleCacheKey : sources[font][0]
+  }
+
   function cached(font) {
-    return caches.match(sources[font][0], { cacheName })
+    return caches.match(cacheKey(font), { cacheName })
   }
 
   async function download(font) {
     if (await cached(font)) return
-    const [url, hash, size] = sources[font]
+    const [primary, hash, size, ...mirrors] = sources[font]
+    let invalid = false
 
-    let bytes
-    try {
-      const response = await fetch(url, {
-        credentials: 'omit', referrerPolicy: 'no-referrer', signal: AbortSignal.timeout(60000),
-      })
-      if (!response.ok) throw new Error()
-      bytes = new Uint8Array(await response.arrayBuffer())
-    } catch {
-      throw new Error('Could not download the emoji font. Try again.')
+    for (const url of [primary, ...mirrors]) {
+      let bytes
+      try {
+        const response = await fetch(url, {
+          credentials: 'omit', referrerPolicy: 'no-referrer', signal: AbortSignal.timeout(60000),
+        })
+        if (!response.ok) continue
+        bytes = await response.arrayBuffer()
+      } catch {
+        continue
+      }
+      if (bytes.byteLength === size) {
+        const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))
+        if ([...digest].map(byte => byte.toString(16).padStart(2, '0')).join('') === hash) {
+          const cache = await caches.open(cacheName)
+          await cache.put(cacheKey(font), new Response(bytes))
+          return
+        }
+      }
+      invalid = true
     }
-    const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))
-    if (bytes.length !== size || [...digest].map(byte => byte.toString(16).padStart(2, '0')).join('') !== hash) {
-      throw new Error('Could not verify the emoji font.')
-    }
-    const cache = await caches.open(cacheName)
-    await cache.put(url, new Response(bytes))
+    if (invalid) throw new Error('Could not verify the emoji font.')
+    throw new Error('Could not download the emoji font. Try again.')
   }
 
   async function list() {
     const requests = await (await caches.open(cacheName)).keys()
     const stored = new Set(requests.map(request => request.url))
-    return Object.fromEntries(Object.entries(sources).map(([font, [url, , size]]) => [
-      font, { size, downloaded: stored.has(url) },
+    return Object.fromEntries(Object.entries(sources).map(([font, [, , size]]) => [
+      font, { size, downloaded: stored.has(cacheKey(font)) },
     ]))
   }
 
