@@ -264,6 +264,14 @@
     } catch {}
   })
 
+  for (const type of ['pointerdown', 'pointerup', 'mousedown', 'mouseup']) {
+    addEventListener(type, event => {
+      if (event.button !== 2 || event.shiftKey || !BetterX.settings.downloads) return
+      if (!(event.target instanceof Element) || !find(event)?.video) return
+      event.stopImmediatePropagation()
+    }, true)
+  }
+
   addEventListener('contextmenu', event => {
     BetterX.closeMenu()
     if (!event.isTrusted || !BetterX.settings.downloads || event.shiftKey || !(event.target instanceof Element)) return
