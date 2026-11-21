@@ -24,6 +24,10 @@ A translated image carries a badge above the post body, aligned with the text, n
 
 To update the pinned build, run `npm ci` and then `npm run update:xeet`. You need Node 20 or newer.
 
+## Tests
+
+`npm test` loads `extension/` into Chromium through `playwright-core` and drives the parts that are easy to get wrong: X's native menus and our injected rows, the copy-as-image renderer and its font packs, translation, downloads, the toast states, the declarative ruleset, and Quiet Mode search. Runs headless and in parallel-free sequence; each file prints its own `PASS:` line. Pass a fragment to run a subset, for example `npm test -- xeet share`. Point `BETTER_X_EXTENSION` at another build to test that instead.
+
 ## Settings
 
 ### Privacy

@@ -2,9 +2,12 @@
   "name": "better-x",
   "private": true,
   "scripts": {
-    "update:xeet": "node scripts/update-xeet.mjs"
+    "update:xeet": "node scripts/update-xeet.mjs",
+    "test": "node test/run.mjs"
   },
   "devDependencies": {
-    "@xeet/core": "0.1.2"
+    "@xeet/core": "0.1.2",
+    "playwright-core": "^1.56.1",
+    "pngjs": "^7.0.0"
   }
 }
