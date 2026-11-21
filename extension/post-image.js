@@ -1,6 +1,7 @@
 (() => {
   const { postSelector, settings } = BetterX
   const postData = new Map()
+  const postId = Symbol('postId')
   const showMore = '[data-testid="tweet-text-show-more-link"], [data-testid="tweet-text-show-more"], [data-testid="showMore"]'
   const actionSelectors = [
     '[data-testid="reply"]',
@@ -135,6 +136,7 @@
       depth < 2 && (quoteId || quoted) ? xeetInput(quoted, quoteId, quoteHandle, false, depth + 1) : undefined,
     ])
     return {
+      [postId]: id,
       text: (expanded ? cached?.text || content(body) : content(body) || cached?.text || '').slice(0, 24000),
       author: {
         name: name || (handle === 'i' ? undefined : handle),
@@ -153,7 +155,43 @@
   }
 
   const translateHost = 'https://translate.googleapis.com/translate_a/t'
+  const grokHost = 'https://api.x.com/2/grok/translation.json'
+  const webBearer = 'Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA'
   const keepAsWritten = /(https?:\/\/\S+|@\w{1,15}|#[\p{L}\p{N}_]+|\$[\p{L}\p{N}_]+|[\w.+-]+@[\w-]+\.[\w.]+|\r?\n)/gu
+
+  function csrfToken() {
+    return document.cookie.match(/(?:^|;\s*)ct0=([^;]+)/)?.[1]
+  }
+
+  function grokText(body) {
+    let text = ''
+    for (const line of body.split('\n')) {
+      if (!line.trim()) continue
+      try {
+        const chunk = JSON.parse(line)?.result?.text
+        if (typeof chunk === 'string') text += chunk
+      } catch {}
+    }
+    return text.trim()
+  }
+
+  async function grokTranslation(id, language) {
+    const token = csrfToken()
+    if (!token || !/^\d+$/.test(id ?? '')) return null
+    const response = await fetch(grokHost, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'content-type': 'application/json', authorization: webBearer, 'x-csrf-token': token },
+      body: JSON.stringify({ content_type: 'POST', id, dst_lang: language, include_polls: true }),
+    })
+    if (!response.ok) return null
+    return grokText(await response.text()) || null
+  }
+
+  function sameLanguage(source, language) {
+    if (!source || !language) return false
+    return source.toLowerCase().split('-')[0] === language.toLowerCase().split('-')[0]
+  }
 
   async function translateMany(texts, language) {
     const translated = []
@@ -195,17 +233,19 @@
     return parts.map(part => (part.lead ?? '') + part.text + (part.trail ?? '')).join('')
   }
 
+  async function translatePost(input, language) {
+    if (!input || typeof input.text !== 'string' || !input.text.trim()) return input
+    const id = input[postId]
+    if (sameLanguage(postData.get(id)?.lang, language)) return input
+    const translated = await grokTranslation(id, language).catch(() => null) ||
+      await translate(input.text, language).catch(() => null)
+    return translated ? { ...input, text: translated } : input
+  }
+
   async function localized(input, language) {
     if (!language) return input
-    const translateText = async value => {
-      if (typeof value !== 'string' || !value.trim()) return value
-      return translate(value, language).catch(() => value)
-    }
-    return {
-      ...input,
-      text: await translateText(input.text),
-      quote: input.quote ? { ...input.quote, text: await translateText(input.quote.text) } : input.quote,
-    }
+    const translated = await translatePost(input, language)
+    return { ...translated, quote: await translatePost(translated.quote, language) }
   }
 
   function pageTheme(post) {

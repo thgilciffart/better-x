@@ -193,6 +193,7 @@
       media,
       quote: quote?.tweet?.rest_id ?? quote?.rest_id ?? legacy?.quoted_status_id_str,
       createdAt: legacy?.created_at,
+      lang: legacy?.lang,
       author: user && {
         name: user.core?.name ?? user.legacy?.name,
         handle: user.core?.screen_name ?? user.legacy?.screen_name,
