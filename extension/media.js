@@ -243,16 +243,17 @@
       if (media.video) actions.push(['Copy video frame', () => copyPng(videoPng(media)), 'Copied video frame', 'Could not copy the frame. Play the video and try again.'])
       if (media.url) actions.push(['Open video in new tab', () => window.open(media.url, '_blank', 'noopener,noreferrer')])
     }
-    if (media.url) actions.push([`Download ${names[media.kind]}`, () => download(media)])
+    if (media.url) actions.push([media.kind === 'photo' ? 'Download image' : `Download ${names[media.kind]}`, () => download(media)])
     return actions
   }
 
-  BetterX.videoDownload = (post, link) => {
+  BetterX.downloadPostVideo = (post, link) => {
     const [, author, id] = link.pathname.match(route) || []
     const entry = posts.get(id)?.find(item => item.kind !== 'photo')
     const video = entry ? null : Array.from(post.querySelectorAll('video')).find(item => item.closest(BetterX.postSelector) === post)
     const media = entry ? named(entry, author !== 'i' && author) : video && resolve(video, sourcesOf(video))
-    if (media?.url && media.kind !== 'photo') return [`Download ${names[media.kind]}`, () => download(media)]
+    if (media?.url && media.kind !== 'photo') return download(media)
+    BetterX.notice('Could not find this video')
   }
 
   document.addEventListener('better-x:media', event => {

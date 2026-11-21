@@ -45,10 +45,11 @@
       "js": [
         "settings.js",
         "content.js",
+        "media.js",
         "quiet.js",
         "emoji.js",
         "post-image.js",
-        "native-share.js"
+        "share.js"
       ],
       "css": [
         "content.css",

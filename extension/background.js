@@ -31,7 +31,7 @@ chrome.runtime.onInstalled.addListener(async () => {
   const { downloads } = await chrome.storage.local.get('downloads')
   chrome.contextMenus.removeAll(() => chrome.contextMenus.create({
     id: photoMenuId,
-    title: 'Download photo',
+    title: 'Download image',
     contexts: ['image'],
     documentUrlPatterns: ['https://x.com/*', 'https://twitter.com/*'],
     targetUrlPatterns: ['https://pbs.twimg.com/media/*'],
