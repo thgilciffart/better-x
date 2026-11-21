@@ -650,7 +650,7 @@ html[data-better-x-quiet="true"] {
     max-width: var(--quiet-width);
     border-color: transparent !important;
 
-    & div:has(> section[role="region"]) { max-width: none; }
+    & div:has(> section[role="region"]) { max-width: 100%; }
 
     & [data-testid="cellInnerDiv"] > div { border-color: var(--quiet-line); }
     & article div[role="link"]:has([data-testid="User-Name"]) { border-color: var(--quiet-edge); }
@@ -660,6 +660,25 @@ html[data-better-x-quiet="true"] {
       font-size: calc(var(--quiet-label) + 1px);
       font-weight: 400;
       text-transform: lowercase;
+    }
+  }
+
+  & :is([data-testid="twitterArticleReadView"], [data-testid="twitterArticleRichTextView"], .x-article-body) {
+    min-inline-size: 0;
+    max-inline-size: 100%;
+  }
+
+  & :is([data-testid="twitterArticleRichTextView"], .x-article-body) {
+    overflow-wrap: anywhere;
+
+    & :is(.DraftEditor-root, .DraftEditor-editorContainer, .public-DraftEditor-content, figure, [data-testid="tweetPhoto"], [data-testid="videoPlayer"], iframe) {
+      min-inline-size: 0;
+      max-inline-size: 100%;
+    }
+
+    & img[src^="https://pbs.twimg.com/media/"] {
+      max-inline-size: 100%;
+      block-size: auto;
     }
   }
 
