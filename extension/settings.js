@@ -47,6 +47,7 @@
     quietFont: '',
     quietTheme: 'x',
     quietAccent: '',
+    quietCustomAccent: null,
     emojiFont: '',
     ...Object.fromEntries(Object.keys(navigation).map(key => [`nav:${key}`, true])),
   }
@@ -86,7 +87,12 @@
       return typeof font === 'string' ? font.replace(/["\\;{}<>\p{Cc}]/gu, '').trim().slice(0, 100) : defaults[key]
     }
     if (key === 'quietTheme') return themes.has(value) ? value : defaults[key]
-    if (key === 'quietAccent') return /^#[\da-f]{6}$/i.test(value) ? value.toLowerCase() : defaults[key]
+    if (key === 'quietAccent') return typeof value === 'string' && /^#[\da-f]{6}$/i.test(value) ? value.toLowerCase() : defaults[key]
+    if (key === 'quietCustomAccent') {
+      if (!value || typeof value !== 'object') return defaults[key]
+      const color = normalize('quietAccent', value.color)
+      return { color, selected: color !== '' && value.selected === true }
+    }
     if (ranges[key]) {
       const [min, max] = ranges[key]
       return Number.isInteger(value) && value >= min && value <= max ? value : defaults[key]

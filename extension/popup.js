@@ -19,7 +19,13 @@ chrome.fontSettings.getFontList().then(installed => {
 const accent = form.elements.quietAccent
 const custom = accent.closest('.custom')
 const resetAccent = document.querySelector('#reset-accent')
-resetAccent.addEventListener('click', () => save(accent, ''))
+let pendingAccent
+resetAccent.addEventListener('click', () => saveAccent('', { color: '', selected: false }))
+accent.addEventListener('input', () => chooseCustomAccent(accent.value))
+accent.addEventListener('click', () => {
+  const { color } = (pendingAccent ?? saved).quietCustomAccent
+  if (color) chooseCustomAccent(color)
+})
 for (const [label, color] of Object.entries(accents)) {
   const swatch = document.createElement('button')
   swatch.type = 'button'
@@ -28,10 +34,7 @@ for (const [label, color] of Object.entries(accents)) {
   swatch.title = label
   swatch.setAttribute('aria-label', label)
   swatch.style.setProperty('--swatch', color)
-  swatch.addEventListener('click', () => {
-    accent.value = color
-    accent.dispatchEvent(new Event('change', { bubbles: true }))
-  })
+  swatch.addEventListener('click', () => saveAccent(color))
   custom.before(swatch)
 }
 
@@ -60,12 +63,12 @@ function syncControls() {
   for (const revert of document.querySelectorAll('.field .revert')) {
     revert.toggleAttribute('data-default', revert.previousElementSibling.value === fallback(revert.previousElementSibling))
   }
-  const color = saved.quietAccent
-  for (const swatch of document.querySelectorAll('.swatch')) {
-    const selected = color && (swatch === custom ? !Object.values(accents).includes(color) : swatch.value === color)
-    swatch.toggleAttribute('data-selected', Boolean(selected))
+  const { color, selected } = saved.quietCustomAccent
+  for (const swatch of document.querySelectorAll('button.swatch')) {
+    swatch.toggleAttribute('data-selected', !selected && swatch.value === saved.quietAccent)
   }
-  resetAccent.toggleAttribute('data-default', !color)
+  custom.toggleAttribute('data-selected', selected)
+  resetAccent.toggleAttribute('data-default', !selected)
   custom.style.setProperty('--swatch', color)
   for (const [key, size] of Object.entries({ quietWidth: 600, quietUiSize: 14, quietSize: 15 })) {
     form.elements[key].placeholder = saved.quiet ? String(size) : 'Default'
@@ -174,15 +177,20 @@ function report(message) {
 
 function setValue(control, value) {
   if (control.type === 'checkbox') control.checked = value
-  else if (control === accent) control.value = value || accents.Blue
   else control.value = value
 }
 
 async function hydrate() {
   saved = await load()
-  for (const [key, value] of Object.entries(saved)) {
-    if (key !== 'emojiFont' && form.elements[key]) setValue(form.elements[key], value)
+  if (!saved.quietCustomAccent) {
+    const color = Object.values(accents).includes(saved.quietAccent) ? '' : saved.quietAccent
+    saved.quietCustomAccent = { color, selected: color !== '' }
   }
+  for (const [key, value] of Object.entries(saved)) {
+    const control = form.elements[key]
+    if (key !== 'emojiFont' && control && control !== accent) setValue(control, value)
+  }
+  accent.value = saved.quietCustomAccent.color || accents.Blue
 }
 
 hydrate().then(() => {
@@ -193,6 +201,7 @@ hydrate().then(() => {
 form.addEventListener('change', ({ target }) => {
   const { name } = target
   if (name === 'emojiFont') return
+  if (target === accent) return chooseCustomAccent(accent.value)
   if (!target.checkValidity()) {
     target.reportValidity()
     setValue(target, saved[name])
@@ -209,6 +218,38 @@ form.addEventListener('change', ({ target }) => {
   target.removeAttribute('aria-invalid')
   save(target, value)
 })
+
+function chooseCustomAccent(color) {
+  return saveAccent(color, { color, selected: true })
+}
+
+async function saveAccent(color, customAccent) {
+  const current = pendingAccent ?? saved
+  customAccent ??= { color: current.quietCustomAccent.color, selected: false }
+  if (color === current.quietAccent && customAccent.color === current.quietCustomAccent.color &&
+      customAccent.selected === current.quietCustomAccent.selected) return
+
+  const saving = pendingAccent !== undefined
+  pendingAccent = { quietAccent: color, quietCustomAccent: customAccent }
+  if (saving) return
+
+  let next
+  do {
+    next = pendingAccent
+    try {
+      await chrome.storage.local.set(next)
+      Object.assign(saved, next)
+      report('')
+    } catch {
+      report('That change could not be saved.')
+    }
+  } while (pendingAccent !== next)
+
+  pendingAccent = undefined
+  const displayed = saved.quietCustomAccent.color || accents.Blue
+  if (accent.value !== displayed) accent.value = displayed
+  syncControls()
+}
 
 async function save(target, value) {
   const { name } = target
