@@ -59,6 +59,7 @@ html[data-better-x-quiet="true"] {
   }
 
   & [data-testid="sidebarColumn"]:has(.better-x-native-search:popover-open) {
+    position: absolute !important;
     visibility: hidden;
     pointer-events: none;
   }
