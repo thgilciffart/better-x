@@ -18,11 +18,13 @@ A chrome web extension aimed to making [𝕏](https://x.com) a more pleasant exp
 
 # Installation
 
-1. Clone or download this repository. If you downloaded a ZIP, extract it.
+1. Download and extract the `better-x-v*.zip` file from the [latest release](https://github.com/thgilciffart/better-x/releases/latest).
 2. Open `chrome://extensions`.
 3. Turn on **Developer mode**.
-4. Click **Load unpacked** and select the [`extension`](extension/) folder.
+4. Click **Load unpacked** and select the folder containing `manifest.json`.
 5. Refresh any open 𝕏 tabs.
+
+If you cloned this repository, select the [`extension`](extension/) folder in step 4.
 
 # Credits
 
