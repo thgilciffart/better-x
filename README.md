@@ -1,87 +1,35 @@
 # better 𝕏
 
-better 𝕏 is a Manifest V3 extension for 𝕏. It runs on Chrome 120 or newer and on other Chromium browsers.
+A chrome web extension aimed to making [𝕏](https://x.com) a more pleasant experience.
 
-## Install
+# Features
 
-1. Open `chrome://extensions`.
-2. Turn on **Developer mode**.
-3. Select **Load unpacked**.
-4. Choose the [`extension`](extension/) folder.
-5. Refresh your 𝕏 tabs.
+- Disabling ads, telemetry[^telemetry] and the 18+ warning
+- Removing tracking identifiers in shared links and having a default base url instead (like vxtwitter)
+- Directly downloading media
+- Adjusting appearance (font, font size, feed width, etc)
+- Quiet mode (a debloated theme)
+- Disabling navigation tabs
+- Exporting posts as images via [xeet](https://github.com/rauchg/xeet)
 
-Open **better 𝕏** from the toolbar to change settings. After you change the extension files, reload better 𝕏 at `chrome://extensions` and refresh 𝕏.
+# Requirements
 
-## Copy as image
+- Chrome 120 or newer, or a Chromium-based browser with equivalent extension support
 
-**Copy as image** renders posts locally with [Xeet](https://github.com/rauchg/xeet). The pinned Xeet build ships in `extension/vendor/xeet` under its [Apache 2.0 license](extension/vendor/xeet/LICENSE).
+# Installation
 
-Xeet has the Chirp and Arial fonts built in. Other scripts, symbols, and emoji use font packs. A pack in `extension/vendor/xeet/fonts` is read from disk; when it is missing, the first image that needs it downloads the pack from the pinned `@xeet/core` build on jsDelivr, checks its SHA-256 against `packs.json`, and caches it. The packs range from 33 KB for Hebrew to 28 MB for CJK, and the emoji pack is 20 MB.
+1. Clone or download this repository. If you downloaded a ZIP, extract it.
+2. Open `chrome://extensions`.
+3. Turn on **Developer mode**.
+4. Click **Load unpacked** and select the [`extension`](extension/) folder.
+5. Refresh any open 𝕏 tabs.
 
-A translated image carries a badge above the post body, aligned with the text, naming the language it came from and the translation it used. The badge draws the [Grok](https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/grok.svg) or [Google Translate](https://commons.wikimedia.org/wiki/File:Google_Translate_logo.svg) mark from `extension/icons`.
+# Credits
 
-**Language** under **Image Export** translates post text before it is rendered. It asks 𝕏's own translation first, using the session you are already signed in to, and falls back to the public Google Translate endpoint, which sends the post text to Google. Links, mentions, hashtags, and cashtags stay as written, posts already in that language are left alone, and a translation that fails renders the original. The setting is off by default.
+- Privacy rules draw on [uBlock Origin's filters](https://github.com/uBlockOrigin/uAssets/blob/master/filters/filters.txt) and its [𝕏 telemetry investigation](https://github.com/uBlockOrigin/uAssets/issues/33072).
+- Media selection follows [Cobalt's 𝕏 extractor](https://github.com/imputnet/cobalt/blob/main/api/src/processing/services/twitter.js).
+- Quiet Mode takes inspiration from [Cody Collier's video](https://x.com/codycollier/status/2119780776095121848).
+- The extension bundles [xeet](https://github.com/rauchg/xeet) under the [Apache 2.0 licence](extension/vendor/xeet/LICENSE).
+- Translation badges use the [Grok icon from Dashboard Icons](https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/grok.svg) and the [Google Translate logo from Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Google_Translate_logo.svg).
 
-To update the pinned build, run `npm ci` and then `npm run update:xeet`. You need Node 20 or newer.
-
-## Tests
-
-Run `npx playwright-core install chromium` once, then `npm test`. The suite loads `extension/` into Chromium through `playwright-core` and drives the parts that are easy to get wrong: X's native menus and our injected rows, the copy-as-image renderer and its font packs, translation, downloads, the toast states, the declarative ruleset, and Quiet Mode search. Runs headless and in parallel-free sequence; each file prints its own `PASS:` line. Pass a fragment to run a subset, for example `npm test -- xeet share`. Point `BETTER_X_EXTENSION` at another build to test that instead.
-
-## Settings
-
-### Privacy
-
-- **Block ads** removes promoted posts from timelines.
-- **Block telemetry** blocks requests to `jot/client_event.json`, `graphql/user_flow.json`, and `graphql/error_log.json` on 𝕏 and Twitter API hosts.
-- **Skip 18+ interstitials** removes 𝕏's age prompt in timelines and post views. 𝕏's server-side rules still apply.
-
-Reload 𝕏 after you change **Block ads** or **Skip 18+ interstitials**. Posts that are already loaded keep the old setting.
-
-### Sharing
-
-- **Link domain** sets the host of links that 𝕏's **Copy link** puts on the clipboard, for example `vxtwitter.com` or `fxtwitter.com`.
-- **Clean copied links** removes the query and fragment from those links, including the `a` and `s` tracking parameters. A link copied at a video's current time keeps `t` and stays on `x.com`.
-- **Copy current page link** is an optional keyboard shortcut in `chrome://extensions/shortcuts`. It uses the same link settings for supported 𝕏 post URLs and copies other page addresses as shown.
-- **Share** and **More** open 𝕏's native menus. With **Direct downloads** enabled, Share downloads videos through Better 𝕏.
-- **Copy posts as images** adds **Copy as image** at the end of Share. A toast shows **Copying** with animated ellipsis while the post renders and the clipboard fills, then **Copied post image**. The PNG uses post data that 𝕏 has already loaded.
-- **Direct downloads** enables better 𝕏's media menu in the timeline, viewer, and fullscreen. Shift-right-click opens the original menu.
-  - Photos offer **Copy image**, **Copy image address**, **Open image in new tab**, and **Download image**.
-  - Videos and GIFs offer their MP4 address, frame copying, and direct download when available.
-  - A download reports **Downloading** while it starts and **Downloaded** or **Download failed** once Chrome finishes.
-
-### Appearance
-
-**Quiet Mode** shows 𝕏 as lowercase text without icons. It hides the right sidebar, the account switcher, and the floating Grok and Chat buttons. Unread badges become numbers. Posts show a summary of likes, reposts, and replies, and the actions appear on hover. 𝕏's columns stay in place.
-
-Select **search** in Quiet Mode or press **/**. Explore and search results use 𝕏's inline search field. On other pages, the shortcut can open a search panel. Press **Enter** to view results.
-
-These settings work with Quiet Mode on or off. Reset a field to let 𝕏 choose its default, or to use the Quiet Mode default when Quiet Mode is on.
-
-- **Theme** forces 𝕏's dark or light theme. 𝕏's own setting does not change. Reload 𝕏 after you change it.
-- **Accent colour** sets the underline and link color.
-- **Feed width (px)** sets the width of the feed.
-- **UI font size (px)** sets the size of navigation, tabs, labels, and menus.
-- **Text font size (px)** sets the size of post text and names.
-- **Font** accepts any installed font. Leave it empty to use 𝕏's font.
-- **Emoji Font** changes the artwork for emoji images on 𝕏. Expand **Emoji Downloads** in Appearance to download individual fonts, then choose a downloaded font in the dropdown. **𝕏 default** restores 𝕏's original emoji.
-
-### Navigation
-
-**Navigation** shows or hides each item in 𝕏's left menu. It works with Quiet Mode on or off.
-
-### Image Export
-
-**Image Export** sets the layout, width, pixel density, and theme of **Copy as image**. The **Auto** theme follows the 𝕏 page. **Expanded Text** uses the full post text. **Auto-expand "Show more"** uses the full text for posts that show a **Show more** link.
-
-### About
-
-**About** shows the version, source repository, and storage used by settings and downloaded fonts. **Clear Font Caches** removes downloaded emoji and image export fonts and resets the emoji font to **𝕏 default**. Image export downloads the packs it needs on demand.
-
-## Limits
-
-𝕏 changes its menus and feed data often. Menu detection uses 𝕏's English labels, so some features may not work in other languages.
-
-## Credits
-
-The privacy rules use [uBlock Origin's filters](https://github.com/uBlockOrigin/uAssets/blob/master/filters/filters.txt) and its [𝕏 telemetry investigation](https://github.com/uBlockOrigin/uAssets/issues/33072). Media selection follows [Cobalt's 𝕏 extractor](https://github.com/imputnet/cobalt/blob/main/api/src/processing/services/twitter.js). Quiet Mode follows [Cody Collier's video](https://x.com/codycollier/status/2119780776095121848).
+[^telemetry]: The block list covers endpoints for client events, error logs, attribution, and ad measurement. See the [full telemetry rules](extension/telemetry.json).
