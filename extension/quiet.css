@@ -689,14 +689,54 @@ html[data-better-x-quiet="true"] {
     gap: 24px;
     padding-inline: 16px;
 
+    &, & * {
+      background-color: transparent !important;
+      background-image: none !important;
+      box-shadow: none !important;
+    }
+
     & > [role="presentation"] { flex: none; }
+
+    & :is([role="tab"], [role="presentation"])::before,
+    & :is([role="tab"], [role="presentation"])::after {
+      background-color: transparent !important;
+      background-image: none !important;
+      box-shadow: none !important;
+    }
+  }
+
+  & :is([aria-label="Manage timelines"], [aria-label*="timelines" i], [aria-label="Settings"][role="button"]) {
+    &, & * {
+      background-color: transparent !important;
+      background-image: none !important;
+      box-shadow: none !important;
+    }
+
+    &:is(:hover, :focus-visible) { color: var(--quiet-fg) !important; }
   }
 
   & [role="tab"] {
     & > div { padding-inline: 0; }
-    & [dir] { color: var(--quiet-muted) !important; font-size: var(--quiet-label); font-weight: 400; text-transform: lowercase; }
+
+    & [dir] {
+      color: var(--quiet-muted) !important;
+      font-size: var(--quiet-label);
+      font-weight: 400;
+      text-transform: lowercase;
+      text-decoration: underline 2px transparent;
+      text-underline-offset: 7px;
+      transition: var(--quiet-underline-out);
+    }
+
     &[aria-selected="true"] [dir] { color: var(--quiet-fg) !important; }
-    &:hover [dir] { color: var(--quiet-soft) !important; }
+
+    &:is(:hover, :focus-visible) [dir] {
+      color: var(--quiet-fg) !important;
+      text-decoration-color: var(--quiet-accent);
+      text-underline-offset: 4px;
+      transition: var(--quiet-underline-in);
+    }
+
     & svg { width: 0; margin: 0; visibility: hidden; }
     & [dir] div:empty { display: none; }
   }
