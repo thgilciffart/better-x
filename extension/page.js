@@ -23,6 +23,8 @@
   ])
   const promotedEntryId = /^promoted(?:-tweet|Tweet)-/
   const promotedKeys = ['promotedMetadata', 'promoted_metadata']
+  const promptEntryId = /(?:^|[-_])(?:prompt|upsell)(?:[-_]|$)/i
+  const promptTypes = new Set(['TimelinePrompt', 'TimelineMessagePrompt', 'TimelineUpsell', 'TimelineArticlesPrompt'])
   const entryLists = ['entries', 'moduleItems']
   const mediaKinds = { photo: 'photo', video: 'video', animated_gif: 'gif' }
   const { cleanCopiedLink: rewriteLink } = BetterXLinks
@@ -115,13 +117,19 @@
     return contents.some(content => promotedKeys.some(key => content?.[key]))
   }
 
+  function isPrompt(entry) {
+    if (promptEntryId.test(entry?.entryId ?? '')) return true
+    const contents = [entry?.content?.itemContent, entry?.content?.content, entry?.item?.itemContent, entry?.item?.content]
+    return contents.some(content => promptTypes.has(content?.__typename))
+  }
+
   function prunePromoted(list) {
     let removed = 0
     for (let index = list.length - 1; index >= 0; index--) {
       const items = list[index]?.content?.items
       const nested = Array.isArray(items) && items.length ? prunePromoted(items) : 0
       removed += nested
-      if (isPromoted(list[index]) || (nested && !items.length)) {
+      if (isPromoted(list[index]) || isPrompt(list[index]) || (nested && !items.length)) {
         list.splice(index, 1)
         removed++
       }
