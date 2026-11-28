@@ -26,6 +26,8 @@
   const entryLists = ['entries', 'moduleItems']
   const mediaKinds = { photo: 'photo', video: 'video', animated_gif: 'gif' }
   const { cleanCopiedLink: rewriteLink } = BetterXLinks
+  const shortLinks = new Map()
+  const shortHref = 'a[href^="https://t.co/"], a[href^="http://t.co/"]'
 
   function enabled(attribute, fallback) {
     const value = document.documentElement?.getAttribute(attribute)
@@ -34,10 +36,44 @@
     return fallback
   }
 
+  function expandShortLink(anchor) {
+    const expanded = shortLinks.get(anchor.href)
+    if (expanded && anchor.href !== expanded) anchor.href = expanded
+    return expanded
+  }
+
+  function expandShortLinks() {
+    for (const anchor of document.querySelectorAll(shortHref)) expandShortLink(anchor)
+  }
+
+  function rememberShortLinks(node) {
+    if (!Array.isArray(node.urls)) return false
+    let changed = false
+    for (const entry of node.urls) {
+      const short = entry?.url
+      const expanded = entry?.expanded_url
+      if (typeof short !== 'string' || typeof expanded !== 'string') continue
+      if (!/^https?:\/\/t\.co\/\w+$/.test(short) || !/^https?:\/\/[^\s]+$/.test(expanded)) continue
+      if (shortLinks.get(short) === expanded) continue
+      shortLinks.set(short, expanded)
+      if (shortLinks.size > 400) shortLinks.delete(shortLinks.keys().next().value)
+      changed = true
+    }
+    return changed
+  }
+
   function cleanCopiedLink(text) {
+    if (typeof text !== 'string') return text
+    const expanded = shortLinks.get(text.trim())
+    if (expanded) return expanded
     const host = document.documentElement?.getAttribute('data-better-x-link-host') || 'x.com'
     return rewriteLink(text, host, enabled('data-better-x-clean-links', true))
   }
+
+  window.addEventListener('contextmenu', event => {
+    const anchor = event.target instanceof Element ? event.target.closest(shortHref) : null
+    if (anchor) expandShortLink(anchor)
+  }, true)
 
   const writeText = globalThis.Clipboard?.prototype.writeText
   if (writeText) {
@@ -216,13 +252,16 @@
     const records = new Map()
     const posts = new Map()
     let changed = false
+    let links = false
     if (!data || typeof data !== 'object') return false
     walk(data, node => {
+      if (rememberShortLinks(node)) links = true
       if (ads && node.instructions && pruneInstructions(node)) changed = true
       if (age && clearAgePrompt(node)) changed = true
       if (node.legacy || node.extended_entities) collectMedia(node, records)
       if (node.rest_id) collectPost(node, posts)
     })
+    if (links) expandShortLinks()
     announceMedia(records)
     if (posts.size) {
       document.dispatchEvent(new CustomEvent('better-x:post-data', { detail: JSON.stringify([...posts]) }))
